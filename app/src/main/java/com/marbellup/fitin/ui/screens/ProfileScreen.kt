@@ -25,7 +25,6 @@ import com.marbellup.fitin.Tab
 import com.marbellup.fitin.data.Need
 import com.marbellup.fitin.data.NeedGroup
 import com.marbellup.fitin.ui.Avatar
-import com.marbellup.fitin.ui.EngineTag
 import com.marbellup.fitin.ui.ExampleNote
 import com.marbellup.fitin.ui.GlassCard
 import com.marbellup.fitin.ui.GradientBackground
@@ -39,7 +38,6 @@ import com.marbellup.fitin.ui.theme.LocalExtra
 fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     val x = LocalExtra.current
     var showNeeds by rememberSaveable { mutableStateOf(false) }
-    var url by rememberSaveable { mutableStateOf(state.serverUrl) }
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
@@ -78,7 +76,8 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 GlassCard(Modifier.padding(horizontal = 16.dp)) {
                     MenuRow(Icons.Outlined.EventNote, "Mis actividades", "${state.joined.size} con plaza") { state.tab = Tab.Calendario }
-                    MenuRow(Icons.Outlined.AutoAwesome, "Mis preferencias", "Cuéntaselas a la IA con tus palabras") { state.open(Step.AiSearch) }
+                    MenuRow(Icons.Outlined.AutoAwesome, "Mis características", "Lo que necesitas, deportes, horario, nivel y zona") { state.open(Step.AiSearch) }
+                    MenuRow(Icons.Outlined.Psychology, "Cómo aprende tu IA", "${state.history.size} acciones aprendidas · todo en tu móvil") { state.open(Step.Model) }
                     MenuRow(Icons.Outlined.Accessibility, "Mis necesidades", "${state.needs.size} elegidas · se usan para recomendarte") {
                         showNeeds = !showNeeds
                     }
@@ -101,7 +100,7 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                         }
                     }
                     MenuRow(Icons.Outlined.EmojiEvents, "Mis logros", "${state.joined.size + 2} actividades completadas") { }
-                    MenuRow(Icons.Outlined.Notifications, "Notificaciones", badge = state.unread) { state.open(Step.Notifications) }
+                    MenuRow(Icons.Outlined.Notifications, "Avisos de la IA", badge = state.unread) { state.open(Step.Notifications) }
                     MenuRow(Icons.Outlined.AccountBalance, "Panel del Ayuntamiento", "Impacto y demanda no atendida") { state.open(Step.Council) }
                 }
 
@@ -109,29 +108,14 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 GlassCard(Modifier.padding(16.dp)) {
                     SettingSwitch("Texto más grande", state.bigText) { state.bigText = it }
                     SettingSwitch("Lectura fácil", state.easyRead) { state.easyRead = it }
+                    SettingSwitch("Avisarme de actividades que encajan", state.alertsOn) { state.setAlerts(it) }
                 }
 
-                // Servidor de IA (para la demo en un móvil real)
-                GlassCard(Modifier.padding(horizontal = 16.dp)) {
-                    Column(Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Servidor de IA", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                            EngineTag(state.engine)
-                        }
-                        Text("Emulador: http://10.0.2.2:8000 · Móvil: http://IP-del-portátil:8000",
-                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        OutlinedTextField(
-                            value = url, onValueChange = { url = it }, singleLine = true,
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp), shape = RoundedCornerShape(16.dp),
-                        )
-                        Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { state.updateServer(url.trim()) }, shape = RoundedCornerShape(50),
-                                modifier = Modifier.heightIn(min = 48.dp)) { Text("Conectar") }
-                            OutlinedButton(onClick = { state.simulateIncoming() }, shape = RoundedCornerShape(50),
-                                modifier = Modifier.heightIn(min = 48.dp)) { Text("Simular invitación") }
-                        }
-                    }
-                }
+                OutlinedButton(
+                    onClick = { state.publishNext(); state.open(Step.Notifications) },
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth().heightIn(min = 52.dp),
+                ) { Text("Demo: el Ayuntamiento publica una actividad") }
                 ExampleNote("Perfil de ejemplo para la demo")
             }
         }

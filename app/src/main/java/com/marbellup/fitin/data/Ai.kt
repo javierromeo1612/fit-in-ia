@@ -1,8 +1,8 @@
 package com.marbellup.fitin.data
 
 /*
- * Modelos de la capa de IA. Reflejan las respuestas JSON del backend (carpeta backend/)
- * y los usa también el motor local sin conexión (LocalAi.kt).
+ * Tipos auxiliares de la IA del móvil: lo que el procesamiento de lenguaje local entiende
+ * de un texto, los avisos y los mensajes del asistente.
  */
 
 /** Lo que la IA ha entendido del texto libre. */
@@ -39,73 +39,22 @@ data class ParsedNeeds(
         }
 }
 
-data class Recommendation(
-    val activity: Activity,
-    /** Encaje 0-100 que muestra la tarjeta. */
-    val match: Int,
-    /** Justificación breve generada por la IA. */
-    val reason: String,
-    val covered: List<Need>,
-    val missing: List<Need>,
-    val distanceKm: Double?,
-    val ideal: Boolean,
-    val shortOfPeople: Int,
-    /** Grupo nuevo propuesto por la IA (no existía ningún evento ideal). */
-    val proposed: Boolean = false,
-)
-
-/** Persona compatible encontrada por el smart grouping. Solo nombre de pila y lo que tenéis en común. */
-data class Candidate(
-    val id: String,
-    val name: String,
-    val compat: Int,
-    val distanceKm: Double,
-    val shared: List<String>,
-    val invited: Boolean,
-)
-
-data class Grouping(
-    /** completar | nuevo_grupo | sin_instalacion */
-    val mode: String,
-    val eventId: String?,
-    val needed: Int,
-    val candidates: List<Candidate>,
-    val message: String,
-) {
-    val invitedCount: Int get() = candidates.count { it.invited }
-}
-
-data class AiResult(
-    val needs: ParsedNeeds,
-    val needLabels: List<String>,
-    val message: String,
-    val recommendations: List<Recommendation>,
-    val grouping: Grouping?,
-    /** «Claude», «Motor local del servidor» o «Sin conexión». */
-    val engine: String,
-)
-
 data class AppNotification(
     val id: String,
-    /** invite | group_complete | info */
+    /** match (actividad que encaja) | info */
     val kind: String,
     val title: String,
     val body: String,
     val eventId: String?,
     val fromName: String?,
-    /** pending | accepted | declined | info */
+    /** pending | opened | dismissed | info */
     val status: String,
+    /** Probabilidad de encaje que calculó el modelo. */
     val compat: Double?,
 )
 
 data class ChatMessage(
     val fromUser: Boolean,
     val text: String,
-    val recommendations: List<Recommendation> = emptyList(),
-    val grouping: Grouping? = null,
+    val recommendations: List<Scored> = emptyList(),
 )
-
-data class ChatReply(val text: String, val recommendations: List<Recommendation>, val grouping: Grouping?)
-
-/** Resultado de «Crear actividad»: la IA elige sitio y hora e invita a gente compatible. */
-data class CreateResult(val activity: Activity?, val grouping: Grouping, val reason: String)

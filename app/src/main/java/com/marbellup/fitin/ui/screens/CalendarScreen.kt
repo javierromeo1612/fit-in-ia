@@ -129,6 +129,22 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     if (booked) {
                                         Text("✓ Apuntada", style = MaterialTheme.typography.labelLarge, color = x.ok)
+                                        // Valorar enseña al modelo qué le gusta de verdad (la señal más fuerte).
+                                        val rating = state.ratingOf(a.id)
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                when (rating) { true -> "Te gustó"; false -> "No te gustó"; null -> "¿Te ha gustado?" },
+                                                style = MaterialTheme.typography.bodySmall,
+                                            )
+                                            IconButton(onClick = { state.rate(a.id, true) }) {
+                                                Icon(Icons.Filled.ThumbUp, contentDescription = "Me ha gustado",
+                                                    tint = if (rating == true) x.ok else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                            IconButton(onClick = { state.rate(a.id, false) }) {
+                                                Icon(Icons.Filled.ThumbDown, contentDescription = "No me ha gustado",
+                                                    tint = if (rating == false) x.barrier else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
                                     }
                                 }
                                 Box(Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),

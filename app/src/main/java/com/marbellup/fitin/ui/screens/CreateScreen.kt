@@ -28,11 +28,9 @@ import com.marbellup.fitin.AppState
 import com.marbellup.fitin.Step
 import com.marbellup.fitin.data.Need
 import com.marbellup.fitin.data.Sport
-import com.marbellup.fitin.ui.ActivityPhotoCard
 import com.marbellup.fitin.ui.AiReason
 import com.marbellup.fitin.ui.GradientBackground
 import com.marbellup.fitin.ui.GradientButton
-import com.marbellup.fitin.ui.GroupingCard
 import com.marbellup.fitin.ui.Mascot
 import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.icon
@@ -65,21 +63,22 @@ fun CreateScreen(state: AppState) {
     var chosen by remember { mutableStateOf(needOptions.filter { o -> o.needs.all { it in state.needs } }.map { it.label }.toSet()) }
     var whenText by remember { mutableStateOf(whenOptions[0]) }
     var level by remember { mutableStateOf<String?>(null) }
-    val done = state.createResult
+    // Paso 2: instalaciones ordenadas por el modelo para lo que has marcado.
+    var showPlaces by remember { mutableStateOf(false) }
     val pastel = listOf(x.peach, x.sky, x.pink, x.mint, x.lilac, x.peach, x.sky)
 
     GradientBackground {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "Volver") { state.createResult = null; state.back() }
+                RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "Volver") { if (showPlaces) showPlaces = false else state.back() }
                 Text("Crear actividad", style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f).padding(end = 50.dp))
             }
 
-            if (done == null) {
+            if (!showPlaces) {
                 Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
                     Mascot(56.dp)
-                    Text("¡Hola, ${state.userName}! Te busco sitio y gente.", style = MaterialTheme.typography.bodyLarge,
+                    Text("¡Hola, ${state.userName}! Te busco el sitio que mejor encaja.", style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(start = 10.dp).clip(RoundedCornerShape(18.dp)).background(x.card).padding(12.dp))
                 }
                 Text("¿Qué actividad quieres organizar?", style = MaterialTheme.typography.headlineSmall,
@@ -162,38 +161,64 @@ fun CreateScreen(state: AppState) {
                 }
 
                 GradientButton(
-                    if (state.creating) "Buscando sitio y gente…" else "Siguiente",
+                    "Siguiente",
                     Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
-                    loading = state.creating,
                     enabled = sport != null,
-                ) {
-                    val s = sport ?: return@GradientButton
-                    val needs = needOptions.filter { it.label in chosen }.flatMap { it.needs }.toSet()
-                    state.createWithAi(s, needs, whenText.lowercase(), level)
-                }
+                ) { showPlaces = true }
                 if (sport == null) {
                     Text("Elige un deporte para seguir.", style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
                 }
             } else {
-                // Resultado: sitio elegido por la IA + personas avisadas
+                // Instalaciones recomendadas por el modelo para este deporte y estas necesidades
+                val s = sport ?: Sport.Padel
+                val extra = needOptions.filter { it.label in chosen }.flatMap { it.needs }.toSet()
+                val places = state.facilitiesFor(s, extra)
+                val (offset, time) = when (whenText) {
+                    "Hoy por la tarde" -> 0 to "18:00"
+                    "Mañana por la tarde" -> 1 to "18:00"
+                    "Mañana por la mañana" -> 1 to "10:00"
+                    else -> com.marbellup.fitin.data.Dates.sat to "10:00"
+                }
                 Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
                     Mascot(64.dp, happy = true)
-                    Text(
-                        if (done.activity != null) "¡Listo! Te propongo esto:" else "Uy, no he encontrado sitio",
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(start = 12.dp).semantics { heading() },
-                    )
+                    Text("Dónde organizarlo", style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(start = 12.dp).semantics { heading() })
                 }
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (done.reason.isNotBlank()) AiReason(done.reason)
-                    done.activity?.let { ActivityPhotoCard(it, state, null, showReason = false) }
-                    GroupingCard(done.grouping)
-                    done.activity?.let { a ->
-                        GradientButton("Ver la actividad") { state.createResult = null; state.back(); state.open(Step.Detail(a.id)) }
+                Text(
+                    "La IA ordena las instalaciones de ${s.label.lowercase()} según lo que necesitas, lo cerca que te pillan y si están verificadas.",
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(20.dp),
+                )
+                Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (places.isEmpty()) {
+                        AiReason("No hay instalaciones de ${s.label.lowercase()} en los datos de ejemplo.")
                     }
-                    TextButton(onClick = { state.createResult = null }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                        Text("Organizar otra", style = MaterialTheme.typography.titleMedium)
+                    places.forEachIndexed { i, f ->
+                        com.marbellup.fitin.ui.GlassCard {
+                            Column(Modifier.padding(16.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("${f.match}%", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                                        Text(f.facility.name, style = MaterialTheme.typography.titleMedium)
+                                        Text("${f.facility.zone} · ${f.facility.seal.label}", style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    if (i == 0) com.marbellup.fitin.ui.NeedPill("Mejor opción", true)
+                                }
+                                FlowRow(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    f.covered.forEach { com.marbellup.fitin.ui.NeedPill(it.label, true) }
+                                    f.missing.forEach { com.marbellup.fitin.ui.NeedPill(it.label, false) }
+                                }
+                                Spacer(Modifier.height(10.dp))
+                                GradientButton("Crear aquí · $whenText") {
+                                    val a = state.createGroup(s, f, offset, time, level)
+                                    state.back()
+                                    state.open(Step.Detail(a.id))
+                                }
+                            }
+                        }
                     }
                 }
             }

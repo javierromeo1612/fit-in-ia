@@ -387,15 +387,75 @@ object SampleData {
         ),
     )
 
+    /** Instalaciones de ejemplo (nombres genéricos). Lo que cubre cada una es lo comprobado del SITIO. */
+    val facilities = listOf(
+        Facility("Piscina cubierta municipal", "Zona centro",
+            setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Grua, Need.Cubierta), setOf(Sport.Natacion), Seal.Ayuntamiento),
+        Facility("Pabellón polideportivo", "Zona oeste",
+            setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Cubierta, Need.Bucle), setOf(Sport.Baloncesto, Sport.Padel), Seal.Asociacion),
+        Facility("Club de pádel cubierto", "Zona este",
+            setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Cubierta), setOf(Sport.Padel), Seal.Asociacion),
+        Facility("Pistas de pádel del parque", "Zona norte", setOf(Need.SinEscalones), setOf(Sport.Padel), Seal.Ninguno),
+        Facility("Pistas de tenis municipales", "Zona centro",
+            setOf(Need.SinEscalones, Need.Aparcamiento), setOf(Sport.Tenis), Seal.Asociacion),
+        Facility("Campo de golf de par 3", "Zona norte", setOf(Need.SinEscalones, Need.Tranquilo), setOf(Sport.Golf), Seal.Ninguno),
+        Facility("Carril bici del paseo marítimo", "Zona este",
+            setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario), setOf(Sport.Ciclismo), Seal.Ayuntamiento),
+        Facility("Sendero de la sierra", "Salida en autobús", emptySet(), setOf(Sport.Senderismo), Seal.Asociacion),
+    )
+
+    /**
+     * Actividades que «publica el Ayuntamiento» durante la demo (botón en Perfil). Sirven para
+     * enseñar que la IA avisa solo de las que encajan contigo.
+     */
+    val upcoming = listOf(
+        Activity(
+            id = "nueva_natacion_tarde", sport = Sport.Natacion,
+            shortDate = Dates.short(3, "18:00"), startDate = Dates.date(3),
+            description = "Nuevo grupo de natación por la tarde, con monitor y calle reservada.",
+            title = "Natación de tarde, grupo nuevo", place = "Piscina cubierta municipal", zone = "Zona centro",
+            schedule = Dates.weekdayName(3) + ", 18:00", nextSession = Dates.long(3, "18:00"),
+            features = setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Grua, Need.Cubierta, Need.Monitor, Need.GrupoReducido),
+            seal = Seal.Ayuntamiento, verifiedOn = "20 de noviembre de 2026", confirmations = 5,
+            reviews = emptyList(), group = listOf(GroupMember("Elena", "Vecina del barrio")), volunteers = listOf(rocio),
+            spotsLeft = 6, offPeak = false, howToArrive = "Puerta lateral, a nivel de calle.",
+            meetingNote = "El grupo queda en la entrada diez minutos antes.", minParticipants = 3,
+        ),
+        Activity(
+            id = "nueva_padel_viernes", sport = Sport.Padel,
+            shortDate = Dates.short(4, "19:00"), startDate = Dates.date(4),
+            description = "Pádel mixto en pista cubierta para jugar de pie o en silla.",
+            title = "Pádel cubierto de los viernes", place = "Pabellón polideportivo", zone = "Zona oeste",
+            schedule = Dates.weekdayName(4) + ", 19:00", nextSession = Dates.long(4, "19:00"),
+            features = setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Cubierta, Need.Material, Need.Monitor),
+            seal = Seal.Asociacion, verifiedOn = "18 de noviembre de 2026", confirmations = 4,
+            reviews = emptyList(), group = listOf(GroupMember("Raúl", "Nivel intermedio")), volunteers = listOf(samir),
+            spotsLeft = 3, offPeak = false, howToArrive = "Rampa en la entrada principal.",
+            meetingNote = "Se queda en la pista 1.", level = "intermedio", minParticipants = 4,
+        ),
+        Activity(
+            id = "nueva_senderismo_costa", sport = Sport.Senderismo,
+            shortDate = Dates.short(5, "9:30"), startDate = Dates.date(5),
+            description = "Ruta por la costa con tramos de tierra y escaleras. Sin adaptar todavía.",
+            title = "Ruta costera a pie", place = "Sendero de la sierra", zone = "Salida en autobús",
+            schedule = Dates.weekdayName(5) + ", 9:30", nextSession = Dates.long(5, "9:30"),
+            features = setOf(Need.Guia),
+            seal = Seal.Ninguno, verifiedOn = "", confirmations = 1,
+            reviews = emptyList(), group = listOf(GroupMember("Pilar", "Camina con guía")), volunteers = emptyList(),
+            spotsLeft = 10, offPeak = false, howToArrive = "Autobús desde el centro.",
+            meetingNote = "Salida a las 9:30.", level = "intermedio",
+        ),
+    )
+
     /** Actividades que crea la persona usuaria durante la demo (solo en memoria). */
     val created = androidx.compose.runtime.mutableStateListOf<Activity>()
 
-    /** Actividades que llegan del backend de IA (recomendaciones, grupos propuestos). */
-    val remote = androidx.compose.runtime.mutableStateMapOf<String, Activity>()
-
-    /** Las creadas primero, luego las del servidor y luego las de ejemplo (sin duplicar ids). */
+    /** Las creadas o publicadas primero, luego las de ejemplo (sin duplicar ids). */
     val all: List<Activity>
-        get() = (created + remote.values + activities).distinctBy { it.id }
+        get() = (created + activities).distinctBy { it.id }
+
+    /** Todo lo que la app conoce, publicado o no (para interpretar el historial). */
+    val allKnown: List<Activity> get() = (all + upcoming).distinctBy { it.id }
 
     fun activity(id: String): Activity = all.first { it.id == id }
 

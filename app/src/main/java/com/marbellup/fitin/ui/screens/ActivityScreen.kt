@@ -48,7 +48,9 @@ fun ActivityScreen(state: AppState, activityId: String) {
         return
     }
     val x = LocalExtra.current
-    val rec = state.reasons[a.id]
+    val rec = state.scoreFor(a.id)
+    // Abrir la ficha es una señal débil de interés: el modelo aprende de ella (una vez por actividad).
+    LaunchedEffect(a.id) { state.viewed(a.id) }
     val booked = a.id in state.joined
     val fav = a.id in state.favorites
     val proposed = a.status == "propuesta"
@@ -69,6 +71,9 @@ fun ActivityScreen(state: AppState, activityId: String) {
                     } else {
                         GradientButton(if (a.spotsLeft > 0) "Apuntarme" else "Sin plazas", enabled = a.spotsLeft > 0) {
                             state.open(Step.Company(a.id))
+                        }
+                        TextButton(onClick = { state.dismiss(a.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                            Text("No me interesa (la IA aprenderá de ello)", style = MaterialTheme.typography.titleSmall)
                         }
                     }
                 }
@@ -122,7 +127,15 @@ fun ActivityScreen(state: AppState, activityId: String) {
                     }
 
                     if (rec != null) {
-                        AiReason(rec.reason, Modifier.padding(top = 12.dp))
+                        AiReason("${rec.match} % de encaje contigo. ${rec.explanation}", Modifier.padding(top = 12.dp))
+                        // Contribución de cada característica del modelo (explicabilidad)
+                        Text("Lo que ha tenido en cuenta la IA", style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 6.dp))
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            for (r in rec.reasons.filter { kotlin.math.abs(it.contribution) >= 0.1 }.take(6)) {
+                                NeedPill((if (r.contribution > 0) "+ " else "− ") + r.feature.label, r.contribution > 0)
+                            }
+                        }
                     }
 
                     // Verificación visible: quién lo comprobó y cuándo

@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.marbellup.fitin.AppState
 import com.marbellup.fitin.Step
 import com.marbellup.fitin.ui.ActivityMiniRow
-import com.marbellup.fitin.ui.EngineTag
 import com.marbellup.fitin.ui.GradientBackground
 import com.marbellup.fitin.ui.Mascot
 import com.marbellup.fitin.ui.RoundIconButton
@@ -44,9 +43,8 @@ fun ChatScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     val x = LocalExtra.current
     var input by rememberSaveable { mutableStateOf("") }
     val list = rememberLazyListState()
-    LaunchedEffect(state.chat.size, state.chatLoading) {
-        val total = state.chat.size + (if (state.chatLoading) 1 else 0)
-        if (total > 0) list.animateScrollToItem(total - 1)
+    LaunchedEffect(state.chat.size) {
+        if (state.chat.isNotEmpty()) list.animateScrollToItem(state.chat.size - 1)
     }
 
     Scaffold(
@@ -76,7 +74,7 @@ fun ChatScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     Spacer(Modifier.width(8.dp))
                     Surface(
                         onClick = { state.sendChat(input); input = "" },
-                        enabled = input.isNotBlank() && !state.chatLoading,
+                        enabled = input.isNotBlank(),
                         shape = CircleShape,
                         color = Color.Transparent,
                         modifier = Modifier.size(54.dp),
@@ -96,12 +94,10 @@ fun ChatScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     Mascot(52.dp)
                     Column(Modifier.weight(1f).padding(start = 10.dp)) {
                         Text("Fit-In", style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-                        Text("Tu asistente deportivo", style = MaterialTheme.typography.bodyMedium,
+                        Text("Tu asistente deportivo · funciona sin Internet", style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    EngineTag(state.engine)
-                    Spacer(Modifier.width(8.dp))
-                    RoundIconButton(Icons.Filled.Tune, "Mis preferencias") { state.open(Step.AiSearch) }
+                    RoundIconButton(Icons.Filled.Tune, "Mis características") { state.open(Step.AiSearch) }
                 }
                 LazyColumn(
                     state = list,
@@ -139,12 +135,8 @@ fun ChatScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                     for (rec in m.recommendations) {
                                         ActivityMiniRow(
                                             rec.activity,
-                                            subtitle = "${rec.match}% · ${rec.activity.shortDate} · ${rec.activity.place}",
+                                            subtitle = "${rec.match} % · ${rec.activity.shortDate} · ${rec.activity.place}",
                                         ) { state.open(Step.Detail(rec.activity.id)) }
-                                    }
-                                    m.grouping?.takeIf { it.invitedCount > 0 }?.let {
-                                        Text("👥 ${it.message}", style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.primary)
                                     }
                                 }
                             }
@@ -160,16 +152,6 @@ fun ChatScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                         )
                                     }
                                 }
-                            }
-                        }
-                    }
-                    if (state.chatLoading) {
-                        item {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Mascot(36.dp)
-                                Spacer(Modifier.width(8.dp))
-                                Text("Fit-In está pensando…", style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }

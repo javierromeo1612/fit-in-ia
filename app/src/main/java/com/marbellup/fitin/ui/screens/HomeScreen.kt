@@ -25,9 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.marbellup.fitin.AppState
 import com.marbellup.fitin.Step
 import com.marbellup.fitin.Tab
-import com.marbellup.fitin.data.SampleData
 import com.marbellup.fitin.data.Sport
-import com.marbellup.fitin.data.matchActivities
 import com.marbellup.fitin.ui.ActivityPhotoCard
 import com.marbellup.fitin.ui.CategoryTile
 import com.marbellup.fitin.ui.ExampleNote
@@ -43,10 +41,10 @@ import com.marbellup.fitin.ui.tint
 @Composable
 fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     val x = LocalExtra.current
-    val recs = state.result?.recommendations.orEmpty()
-    val nearby = matchActivities(state.needs)
-        .filter { state.sport == null || it.activity.sport == state.sport }
-        .filter { it.activity.status != "propuesta" || it.activity.id in state.joined }
+    // Todo lo ordena el modelo de IA del móvil.
+    val ranked = state.ranked()
+    val recs = ranked.filter { it.activity.id !in state.joined }
+    val nearby = ranked.filter { state.sport == null || it.activity.sport == state.sport }
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
@@ -60,7 +58,6 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     RoundIconButton(Icons.Outlined.Notifications, "Notificaciones", badge = state.unread) {
-                        state.refreshNotifications()
                         state.open(Step.Notifications)
                     }
                 }
@@ -76,9 +73,9 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     Row(Modifier.padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(10.dp))
-                        Text("Dime qué buscas y qué necesitas…", style = MaterialTheme.typography.bodyLarge,
+                        Text("Dime qué necesitas y te recomiendo…", style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                        Icon(Icons.Filled.AutoAwesome, contentDescription = "Búsqueda con IA", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Filled.AutoAwesome, contentDescription = "Recomendaciones con IA", tint = MaterialTheme.colorScheme.primary)
                     }
                 }
 
@@ -99,7 +96,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 // Recomendado por la IA
                 if (recs.isNotEmpty()) {
-                    SectionTitle("Elegido para ti", "Ver todo") { state.open(Step.AiSearch) }
+                    SectionTitle("Elegido para ti", "Mis características") { state.open(Step.AiSearch) }
                     LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(recs.take(4)) { rec ->
                             ActivityPhotoCard(rec.activity, state, rec, Modifier.width(300.dp), showReason = true)
@@ -113,8 +110,8 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                         Text("No hay actividades de este deporte. Pídeselo a la IA y crea un grupo.",
                             style = MaterialTheme.typography.bodyLarge)
                     }
-                    for (m in nearby.take(6)) {
-                        ActivityPhotoCard(m.activity, state, state.reasons[m.activity.id], showReason = false)
+                    for (m in nearby.take(8)) {
+                        ActivityPhotoCard(m.activity, state, m, showReason = false)
                     }
                 }
 

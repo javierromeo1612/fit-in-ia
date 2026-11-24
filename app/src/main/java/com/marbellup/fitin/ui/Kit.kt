@@ -40,9 +40,8 @@ import com.marbellup.fitin.Step
 import com.marbellup.fitin.Tab
 import com.marbellup.fitin.data.Activity
 import com.marbellup.fitin.data.AppNotification
-import com.marbellup.fitin.data.Grouping
 import com.marbellup.fitin.data.Need
-import com.marbellup.fitin.data.Recommendation
+import com.marbellup.fitin.data.Scored
 import com.marbellup.fitin.ui.theme.LocalExtra
 
 /*
@@ -233,7 +232,7 @@ fun NeedPill(text: String, ok: Boolean? = null) {
 fun ActivityPhotoCard(
     a: Activity,
     state: AppState,
-    rec: Recommendation? = null,
+    rec: Scored? = null,
     modifier: Modifier = Modifier,
     showReason: Boolean = true,
 ) {
@@ -257,7 +256,7 @@ fun ActivityPhotoCard(
                         Text("${rec.match}% para ti", color = Color.White, style = MaterialTheme.typography.labelMedium)
                     }
                 }
-                if (a.status == "propuesta" || rec?.proposed == true) {
+                if (a.status == "propuesta") {
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "Grupo nuevo",
@@ -295,8 +294,7 @@ fun ActivityPhotoCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(4.dp))
-                    val dist = rec?.distanceKm?.let { " · a " + "%.1f".format(it).replace('.', ',') + " km" } ?: ""
-                    Text(a.place + dist, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Text("${a.place} · ${a.zone}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -306,7 +304,7 @@ fun ActivityPhotoCard(
             ) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF1B5E3F)) }
         }
         if (rec != null && showReason) {
-            AiReason(rec.reason, Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
+            AiReason(rec.explanation, Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
             if (rec.covered.isNotEmpty() || rec.missing.isNotEmpty()) {
                 FlowRow(
                     Modifier.padding(start = 12.dp, end = 12.dp, bottom = 14.dp),
@@ -317,58 +315,6 @@ fun ActivityPhotoCard(
                     rec.missing.forEach { NeedPill(it.label, false) }
                 }
             }
-        }
-    }
-}
-
-/** Tarjeta del smart grouping: a quién ha avisado la IA para completar el grupo. */
-@Composable
-fun GroupingCard(g: Grouping, modifier: Modifier = Modifier) {
-    val x = LocalExtra.current
-    GlassCard(modifier) {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(44.dp).clip(CircleShape).background(x.peach), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.Groups, contentDescription = null, tint = Color(0xFF8A3D0E))
-                }
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        when (g.mode) {
-                            "completar" -> "Completando tu grupo"
-                            "nuevo_grupo" -> "He creado un grupo para ti"
-                            else -> "Sin sitio libre todavía"
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (g.invitedCount > 0) {
-                        Text("${g.invitedCount} invitaciones enviadas", style = MaterialTheme.typography.bodySmall, color = x.ok)
-                    }
-                }
-            }
-            Text(g.message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
-            for (c in g.candidates.take(4)) {
-                Row(
-                    Modifier.fillMaxWidth().padding(top = 12.dp).semantics(mergeDescendants = true) { },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Avatar(c.name, size = 42.dp)
-                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                        Text("${c.name} · ${c.compat}% compatible", style = MaterialTheme.typography.titleSmall)
-                        Text(c.shared.joinToString(" · "), style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    }
-                    if (c.invited) {
-                        Icon(Icons.Filled.NotificationsActive, contentDescription = "Avisado", tint = MaterialTheme.colorScheme.primary)
-                    }
-                }
-            }
-            Text(
-                "Solo compartimos tu nombre de pila. Nunca tus necesidades.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 12.dp),
-            )
         }
     }
 }
@@ -390,7 +336,7 @@ fun FitInBottomBar(state: AppState) {
             TabItem(state, Tab.Calendario, Icons.Filled.CalendarMonth, Icons.Outlined.CalendarMonth)
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 Surface(
-                    onClick = { state.createResult = null; state.open(Step.Create) },
+                    onClick = { state.open(Step.Create) },
                     shape = CircleShape,
                     color = Color.Transparent,
                     shadowElevation = 6.dp,
@@ -524,17 +470,12 @@ fun MenuRow(icon: ImageVector, title: String, detail: String? = null, badge: Int
     }
 }
 
-/** Etiqueta pequeña que indica qué motor ha respondido (transparencia para el jurado). */
+/** Etiqueta que recuerda que la IA funciona en el móvil y cuánto ha aprendido ya. */
 @Composable
-fun EngineTag(engine: String?) {
-    if (engine == null) return
-    val text = when (engine) {
-        "Claude" -> "IA: Claude"
-        "Sin conexión" -> "IA sin conexión · modo local"
-        else -> "IA: motor local del servidor"
-    }
+fun AiTag(state: AppState) {
+    state.modelVersion
     Text(
-        text,
+        "IA en tu móvil · ${state.history.size} acciones aprendidas",
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.clip(RoundedCornerShape(50)).background(LocalExtra.current.chip).padding(horizontal = 10.dp, vertical = 4.dp),

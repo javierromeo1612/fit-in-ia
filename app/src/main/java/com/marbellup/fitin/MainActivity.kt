@@ -1,9 +1,14 @@
 package com.marbellup.fitin
 
+import android.Manifest
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -36,9 +41,11 @@ import com.marbellup.fitin.ui.screens.CompanyScreen
 import com.marbellup.fitin.ui.screens.CouncilScreen
 import com.marbellup.fitin.ui.screens.CreateScreen
 import com.marbellup.fitin.ui.screens.HomeScreen
+import com.marbellup.fitin.ui.screens.ModelScreen
 import com.marbellup.fitin.ui.screens.NotificationsScreen
 import com.marbellup.fitin.ui.screens.ProfileScreen
 import com.marbellup.fitin.ui.screens.WelcomeScreen
+import com.marbellup.fitin.notify.Alerts
 import com.marbellup.fitin.ui.theme.FitInTheme
 import kotlinx.coroutines.delay
 
@@ -52,6 +59,9 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
         )
+        // La IA revisa actividades nuevas cada 6 h aunque la app esté cerrada.
+        Alerts.schedule(this)
+        handleIntent(intent)
         setContent {
             FitInTheme {
                 val density = LocalDensity.current
@@ -63,18 +73,31 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    /** Al tocar una notificación se abre la ficha de esa actividad. */
+    private fun handleIntent(intent: Intent?) {
+        val id = intent?.getStringExtra(Alerts.EXTRA_ACTIVITY) ?: return
+        intent.removeExtra(Alerts.EXTRA_ACTIVITY)
+        state.openFromNotification(id)
+    }
 }
 
 @Composable
 private fun App(state: AppState) {
     BackHandler(enabled = state.steps.isNotEmpty()) { state.back() }
 
-    // Comprueba el servidor al arrancar y consulta avisos cada 20 s (invitaciones del smart grouping).
-    LaunchedEffect(Unit) {
-        state.checkServer()
-        while (true) {
-            delay(20_000)
-            if (state.engine != null && state.engine != "Sin conexión") state.refreshNotifications()
+    // Permiso de notificaciones (Android 13+) y primera revisión de actividades que encajan.
+    val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(state.onboarded) {
+        if (state.onboarded) {
+            if (Build.VERSION.SDK_INT >= 33) askPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            delay(1_500)
+            state.checkForMatches()
         }
     }
     // El aviso flotante se oculta solo.
@@ -98,6 +121,7 @@ private fun App(state: AppState) {
             step is Step.Create -> CreateScreen(state)
             step is Step.Notifications -> NotificationsScreen(state)
             step is Step.Council -> CouncilScreen(state, onBack = { state.back() })
+            step is Step.Model -> ModelScreen(state)
             state.tab == Tab.Inicio -> HomeScreen(state, tabs)
             state.tab == Tab.Calendario -> CalendarScreen(state, tabs)
             state.tab == Tab.Chat -> ChatScreen(state, tabs)
@@ -114,7 +138,7 @@ private fun App(state: AppState) {
             if (n != null) {
                 NotificationBanner(
                     n,
-                    onOpen = { state.banner = null; state.open(Step.Notifications) },
+                    onOpen = { state.openNotification(n) },
                     onDismiss = { state.banner = null },
                 )
             }

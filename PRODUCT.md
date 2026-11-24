@@ -8,7 +8,7 @@ android
 
 ## Stack
 
-delegated: Kotlin + Jetpack Compose + Material 3, igual que los otros proyectos Android del equipo (AGP 9.4.1, Compose BOM 2026.02.01). Versión 2: backend FastAPI con Claude (carpeta `backend/`, ver ARQUITECTURA-IA.md). Datos de ejemplo en memoria; si no hay servidor, la app usa un motor local para que la demo funcione sin conexión.
+delegated: Kotlin + Jetpack Compose + Material 3, igual que los otros proyectos Android del equipo (AGP 9.4.1, Compose BOM 2026.02.01). Versión 2: recomendador con aprendizaje automático dentro del móvil (regresión logística en línea, sin APIs ni Internet; ver ARQUITECTURA-IA.md) y avisos con WorkManager. Datos de ejemplo.
 
 ## Users
 

@@ -39,15 +39,17 @@ Fit-In empieza preguntándote **qué necesitas, nunca qué tienes**. Con eso te 
 | 🖼️&nbsp;**[`shots/`](shots)** | Capturas de la app durante su desarrollo. |
 | 📄&nbsp;**[`PRODUCT.md`](PRODUCT.md)** | Usuarios, principios y alcance del producto. |
 
-## Novedad: IA como motor de la experiencia
+## Novedad: IA que aprende dentro del móvil
 
-La versión 2 añade un rediseño completo (lila, cristal y mascota) y un **motor de IA** con backend propio:
+La versión 2 trae un rediseño completo (lila, cristal y mascota) y un **recomendador con aprendizaje automático que funciona entero en el móvil**, sin APIs ni Internet:
 
-- Escribes lo que quieres y lo que necesitas **con tus palabras**; Claude lo convierte en necesidades estructuradas.
-- La IA recomienda **evento + instalación** que cubren esas necesidades y explica por qué.
-- Si no hay grupo ideal o falta gente, **busca personas compatibles cerca y les envía una invitación personalizada**.
+- La persona marca sus **características** (lo que necesita, deportes, horario, nivel y zona) o las escribe con sus palabras.
+- Un modelo de **regresión logística con aprendizaje en línea** ordena **actividades e instalaciones** según esas características y explica por qué.
+- **Aprende** de cada acción: apuntarse, «me gusta», valorar, «no me interesa».
+- **Avisa** (notificaciones de Android) cuando aparece algo que encaja al menos un 70 %.
+- En una simulación con 300 personas, el acierto pasa del **58 % al 84 %** en 12 semanas.
 
-Arquitectura, prompts, esquemas JSON, cómo arrancarlo y guion de demo: **[`ARQUITECTURA-IA.md`](ARQUITECTURA-IA.md)**. Código del servidor: [`backend/`](backend). Las pantallas anteriores están en [`legacy-ui/`](legacy-ui).
+Cómo funciona, fórmulas, simulación y guion de demo: **[`ARQUITECTURA-IA.md`](ARQUITECTURA-IA.md)**. Las pantallas anteriores están en [`legacy-ui/`](legacy-ui).
 
 ## Lo que es (y lo que no)
 
@@ -55,7 +57,7 @@ Fit-In es un **prototipo para la demo de la hackathon**, no una app terminada:
 
 - ✅ El flujo principal se puede recorrer de principio a fin en el móvil.
 - ✅ Diseño cuidado y pensado para la accesibilidad: tipografía Atkinson Hyperlegible, botones grandes y modo oscuro.
-- ⚠️ **Todos los datos son de ejemplo**: las actividades, las personas y las cifras del panel municipal son inventadas y están en memoria (también en el backend de IA).
+- ⚠️ **Todos los datos son de ejemplo**: las actividades, las instalaciones, las personas y las cifras del panel municipal son inventadas. Lo que aprende la IA se guarda solo en el móvil.
 - ⚠️ Faltan piezas de una app real: registro, chat, pagos, mapa completo e instalaciones reales del piloto.
 - ⚠️ Algunas pantallas son solo maqueta y quedan detalles visuales sin pulir.
 

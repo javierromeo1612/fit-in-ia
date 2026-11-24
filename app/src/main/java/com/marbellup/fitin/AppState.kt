@@ -1,28 +1,32 @@
 package com.marbellup.fitin
 
+import android.app.Application
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import com.marbellup.fitin.data.AiResult
+import androidx.lifecycle.AndroidViewModel
+import com.marbellup.fitin.data.Activity
 import com.marbellup.fitin.data.AppNotification
 import com.marbellup.fitin.data.Barrier
 import com.marbellup.fitin.data.BarrierStatus
 import com.marbellup.fitin.data.ChatMessage
-import com.marbellup.fitin.data.CreateResult
-import com.marbellup.fitin.data.FitInApi
+import com.marbellup.fitin.data.Dates
+import com.marbellup.fitin.data.GroupMember
+import com.marbellup.fitin.data.Interaction
 import com.marbellup.fitin.data.LocalAi
 import com.marbellup.fitin.data.Need
-import com.marbellup.fitin.data.Recommendation
+import com.marbellup.fitin.data.Profile
+import com.marbellup.fitin.data.Recommender
 import com.marbellup.fitin.data.SampleData
+import com.marbellup.fitin.data.Scored
+import com.marbellup.fitin.data.ScoredFacility
+import com.marbellup.fitin.data.Signal
+import com.marbellup.fitin.data.Slot
 import com.marbellup.fitin.data.Sport
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import com.marbellup.fitin.data.Store
+import com.marbellup.fitin.notify.Alerts
 
 enum class Tab(val label: String) {
     Inicio("Inicio"),
@@ -36,35 +40,45 @@ sealed interface Step {
     data class Company(val activityId: String) : Step
     data class Confirmed(val activityId: String) : Step
     data object Create : Step
-    /** Necesidades en lenguaje natural + recomendaciones de la IA. */
+    /** Características de la persona + recomendaciones del modelo. */
     data object AiSearch : Step
     data object Notifications : Step
     data object Council : Step
+    /** «Cómo aprende tu IA»: pesos del modelo e historial. */
+    data object Model : Step
 }
 
 data class Booking(val activityId: String, val companion: String)
 
 /**
- * Estado de la app. La IA vive en el backend; si no responde, se usa [LocalAi]
- * para que la demo funcione igual sin conexión.
+ * Estado de la app. Toda la IA corre en el móvil (ver data/Recommender.kt):
+ * no hay servidor ni APIs. Cada acción de la persona entrena el modelo al momento.
  */
-class AppState : ViewModel() {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+class AppState(app: Application) : AndroidViewModel(app) {
+    private val store = Store(app)
 
-    val userId = "lucia"
     val userName = SampleData.USER_NAME
 
-    // ---- Perfil y accesibilidad
-    var needs by mutableStateOf(setOf(Need.SinEscalones, Need.Vestuario))
-        private set
-    var bigText by mutableStateOf(false)
-    var easyRead by mutableStateOf(false)
-    var points by mutableStateOf(48)
+    // ---- Modelo de IA
+    val model = store.loadModel()
+    val history = mutableStateListOf<Interaction>().apply { addAll(store.loadHistory()) }
+    /** Cambia cada vez que el modelo aprende, para que las pantallas se recalculen. */
+    var modelVersion by mutableIntStateOf(0)
         private set
 
+    // ---- Perfil (características que pone la persona)
+    var profile by mutableStateOf(store.loadProfile())
+        private set
+    val needs: Set<Need> get() = profile.needs
+
+    var bigText by mutableStateOf(false)
+    var easyRead by mutableStateOf(false)
+    var alertsOn by mutableStateOf(store.getBool("alerts", true))
+        private set
+    val points: Int get() = 48 + 10 * joined.size + 2 * history.size.coerceAtMost(30)
+
     // ---- Navegación
-    /** La app abre en la bienvenida; «Comenzar» lleva al onboarding con IA. */
-    var onboarded by mutableStateOf(false)
+    var onboarded by mutableStateOf(store.getBool("onboarded", false))
         private set
     var tab by mutableStateOf(Tab.Inicio)
     var sport by mutableStateOf<Sport?>(null)
@@ -73,56 +87,103 @@ class AppState : ViewModel() {
     // ---- Reservas y favoritos
     var booking by mutableStateOf<Booking?>(null)
         private set
-    val joined = mutableStateListOf<String>()
-    val favorites = mutableStateListOf<String>()
+    val joined = mutableStateListOf<String>().apply { addAll(store.loadSet("joined")) }
+    val favorites = mutableStateListOf<String>().apply { addAll(store.loadSet("favorites")) }
     val reported = mutableStateListOf<Barrier>()
 
-    // ---- IA: búsqueda
+    // ---- Búsqueda en lenguaje natural (procesada en el móvil)
     var prompt by mutableStateOf("")
-    var searching by mutableStateOf(false)
-        private set
-    var result by mutableStateOf<AiResult?>(null)
-        private set
-    /** Justificación de la IA por actividad, para mostrarla también en la ficha. */
-    val reasons = mutableStateMapOf<String, Recommendation>()
 
-    /** «Claude», «Motor local del servidor», «Sin conexión» o null si aún no se sabe. */
-    var engine by mutableStateOf<String?>(null)
-        private set
-    var serverUrl by mutableStateOf(FitInApi.baseUrl)
-        private set
-
-    // ---- IA: chat
+    // ---- Asistente
     val chat = mutableStateListOf(
-        ChatMessage(false, "¡Hola, $userName! ¿En qué puedo ayudarte hoy? Cuéntame qué te apetece y lo que necesitas."),
+        ChatMessage(false, "¡Hola, $userName! Soy la IA de Fit-In y funciono dentro de tu móvil. Cuéntame qué te apetece y lo que necesitas."),
     )
-    var chatLoading by mutableStateOf(false)
-        private set
 
-    // ---- IA: crear actividad
-    var creating by mutableStateOf(false)
-        private set
-    var createResult by mutableStateOf<CreateResult?>(null)
-
-    // ---- Notificaciones
-    val notifications = mutableStateListOf<AppNotification>()
+    // ---- Avisos
+    val notifications = mutableStateListOf<AppNotification>().apply { addAll(store.loadInbox()) }
     var banner by mutableStateOf<AppNotification?>(null)
-    private var localCounter = 0
-
     val unread: Int get() = notifications.count { it.status == "pending" }
+
+    init {
+        // Actividades «publicadas» en demos anteriores vuelven al catálogo.
+        val published = store.loadSet("published")
+        SampleData.upcoming.filter { it.id in published && SampleData.created.none { c -> c.id == it.id } }
+            .forEach { SampleData.created.add(0, it) }
+    }
+
+    // ================================================================ IA
+
+    /** Actividades ordenadas por el modelo para esta persona. */
+    fun ranked(): List<Scored> {
+        modelVersion // lectura para recomponer cuando aprende
+        return Recommender.rank(profile, SampleData.all, model, history.toList(), known = SampleData.allKnown)
+    }
+
+    fun scoreFor(id: String): Scored? = ranked().firstOrNull { it.activity.id == id }
+
+    fun facilitiesFor(sport: Sport?, extra: Set<Need> = emptySet()): List<ScoredFacility> {
+        modelVersion
+        return Recommender.rankFacilities(profile.copy(needs = profile.needs + extra), sport, model, SampleData.facilities)
+    }
+
+    /** Registra una acción, entrena el modelo con ella y comprueba si hay algo nuevo que avisar. */
+    fun record(activityId: String, signal: Signal) {
+        val e = Interaction(activityId, signal, System.currentTimeMillis())
+        Recommender.learn(model, profile, SampleData.allKnown, history.toList(), e)
+        history.add(e)
+        store.saveModel(model)
+        store.saveHistory(history)
+        modelVersion++
+        if (signal.target > 0.5 && signal.weight >= 0.5) {
+            val a = SampleData.activityOrNull(activityId)
+            checkForMatches(if (a != null) "Como te interesó ${a.sport.label.lowercase()}" else null)
+        }
+    }
+
+    fun updateProfile(p: Profile) {
+        profile = p
+        store.saveProfile(p)
+        modelVersion++
+    }
+
+    fun toggle(need: Need) = updateProfile(profile.copy(needs = if (need in needs) needs - need else needs + need))
+    fun toggleSport(s: Sport) = updateProfile(profile.copy(sports = if (s in profile.sports) profile.sports - s else profile.sports + s))
+    fun toggleSlot(s: Slot) = updateProfile(profile.copy(slots = if (s in profile.slots) profile.slots - s else profile.slots + s))
+    fun setLevel(level: String?) = updateProfile(profile.copy(level = level))
+    fun setZone(zone: String?) = updateProfile(profile.copy(zone = zone))
+
+    /** «Dímelo con tus palabras»: el procesamiento de lenguaje local rellena las características. */
+    fun applyText(text: String = prompt) {
+        if (text.isBlank()) return
+        updateProfile(LocalAi.applyTo(profile, LocalAi.extract(text)))
+    }
+
+    /** Vuelve al estado inicial de la demo: la IA olvida lo aprendido, los avisos y las reservas de prueba. */
+    fun resetLearning() {
+        model.reset()
+        history.clear()
+        store.clearLearning()
+        notifications.clear(); store.saveInbox(emptyList())
+        joined.clear(); store.saveSet("joined", emptyList())
+        favorites.clear(); store.saveSet("favorites", emptyList())
+        store.saveSet("notified", emptyList())
+        SampleData.created.removeAll { a -> SampleData.upcoming.any { it.id == a.id } }
+        store.saveSet("published", emptyList())
+        banner = null
+        modelVersion++
+    }
 
     // ================================================================ navegación
 
     fun startOnboarding() {
-        onboarded = true
-        tab = Tab.Inicio
+        finishOnboarding()
         steps.clear()
         steps.add(Step.AiSearch)
-        checkServer()
     }
 
     fun finishOnboarding() {
         onboarded = true
+        store.putBool("onboarded", true)
         tab = Tab.Inicio
     }
 
@@ -141,96 +202,51 @@ class AppState : ViewModel() {
         tab = Tab.Calendario
     }
 
-    fun toggle(need: Need) {
-        needs = if (need in needs) needs - need else needs + need
+    fun openFromNotification(activityId: String) {
+        if (SampleData.activityOrNull(activityId) == null) return
+        onboarded = true
+        val i = notifications.indexOfFirst { it.eventId == activityId && it.status == "pending" }
+        if (i >= 0) notifications[i] = notifications[i].copy(status = "opened")
+        store.saveInbox(notifications)
+        record(activityId, Signal.NotifOpen)
+        steps.clear()
+        steps.add(Step.Detail(activityId))
     }
+
+    // ================================================================ acciones que enseñan al modelo
 
     fun toggleFavorite(id: String) {
-        if (id in favorites) favorites.remove(id) else favorites.add(id)
-    }
-
-    fun updateServer(url: String) {
-        serverUrl = url
-        FitInApi.baseUrl = url
-        checkServer()
-    }
-
-    fun checkServer() {
-        scope.launch {
-            engine = try {
-                FitInApi.health()
-            } catch (e: Exception) {
-                "Sin conexión"
-            }
-            if (engine != "Sin conexión") refreshNotifications()
+        if (id in favorites) {
+            favorites.remove(id); record(id, Signal.Unlike)
+        } else {
+            favorites.add(id); record(id, Signal.Like)
         }
+        store.saveSet("favorites", favorites)
     }
 
-    // ================================================================ IA
-
-    /** Paso 1 + 2 del flujo: lenguaje natural → necesidades → evento e instalación recomendados. */
-    fun search(text: String = prompt) {
-        if (text.isBlank() || searching) return
-        prompt = text
-        searching = true
-        scope.launch {
-            val r = try {
-                FitInApi.recommend(userId, text)
-            } catch (e: Exception) {
-                LocalAi.recommend(text, needs)
-            }
-            engine = r.engine
-            result = r
-            needs = needs + r.needs.needs
-            r.recommendations.forEach { reasons[it.activity.id] = it }
-            searching = false
-            if (r.engine != "Sin conexión") refreshNotifications()
-        }
+    fun viewed(id: String) {
+        // Solo cuenta la primera vez que abre cada ficha.
+        if (history.none { it.activityId == id && it.signal == Signal.View }) record(id, Signal.View)
     }
 
-    fun sendChat(text: String) {
-        if (text.isBlank() || chatLoading) return
-        chat.add(ChatMessage(true, text.trim()))
-        chatLoading = true
-        scope.launch {
-            val reply = try {
-                FitInApi.chat(userId, chat.toList()).also { engine = engine ?: "Claude" }
-            } catch (e: Exception) {
-                engine = "Sin conexión"
-                LocalAi.chat(chat.filter { it.fromUser }.takeLast(3).joinToString(" ") { it.text }, needs)
-            }
-            reply.recommendations.forEach { reasons[it.activity.id] = it }
-            chat.add(ChatMessage(false, reply.text, reply.recommendations, reply.grouping))
-            chatLoading = false
-        }
+    fun dismiss(id: String) {
+        record(id, Signal.Dismiss)
+        back()
     }
 
-    /** «Crear actividad»: la IA elige instalación y hora, y avisa a personas compatibles. */
-    fun createWithAi(sport: Sport, chosen: Set<Need>, whenText: String, level: String?) {
-        creating = true
-        createResult = null
-        scope.launch {
-            createResult = try {
-                FitInApi.create(userId, sport, chosen + needs, whenText, level)
-            } catch (e: Exception) {
-                val r = LocalAi.recommend("${sport.label} $whenText", chosen + needs)
-                val g = r.grouping ?: com.marbellup.fitin.data.Grouping("nuevo_grupo", null, 3, emptyList(), r.message)
-                com.marbellup.fitin.data.CreateResult(r.recommendations.firstOrNull { it.activity.sport == sport }?.activity, g,
-                    "Sin conexión: te enseño la opción más parecida que ya existe.")
-            }
-            creating = false
-        }
-    }
+    fun rate(id: String, liked: Boolean) = record(id, if (liked) Signal.RateUp else Signal.RateDown)
 
-    // ================================================================ reservas
+    fun ratingOf(id: String): Boolean? =
+        history.lastOrNull { it.activityId == id && (it.signal == Signal.RateUp || it.signal == Signal.RateDown) }
+            ?.let { it.signal == Signal.RateUp }
 
     fun book(activityId: String, companion: String) {
-        booking = com.marbellup.fitin.Booking(activityId, companion)
+        booking = Booking(activityId, companion)
         if (activityId !in joined) joined.add(activityId)
-        points += 10
+        store.saveSet("joined", joined)
         steps.clear()
         steps.add(Step.Confirmed(activityId))
-        scope.launch { runCatching { FitInApi.join(activityId, userId, companion) } }
+        record(activityId, Signal.Join)
     }
 
     fun reportBarrier(activityId: String, what: String) {
@@ -238,59 +254,125 @@ class AppState : ViewModel() {
         reported.add(0, Barrier(place, what, 1, BarrierStatus.SinResolver))
     }
 
-    // ================================================================ notificaciones
+    // ================================================================ asistente (sin API)
 
-    fun refreshNotifications() {
-        scope.launch {
-            val list = try {
-                FitInApi.notifications(userId)
-            } catch (e: Exception) {
-                return@launch
-            }
-            val known = notifications.map { it.id }.toSet()
-            val fresh = list.firstOrNull { it.id !in known && it.kind != "info" }
-            val locals = notifications.filter { it.id.startsWith("local_") }
-            notifications.clear()
-            notifications.addAll(locals + list)
-            if (fresh != null && known.isNotEmpty()) banner = fresh
+    fun sendChat(text: String) {
+        if (text.isBlank()) return
+        chat.add(ChatMessage(true, text.trim()))
+        val parsed = LocalAi.extract(text)
+        val temp = LocalAi.applyTo(profile, parsed)
+        val top = Recommender.rank(temp, SampleData.all, model, history.toList(), known = SampleData.allKnown)
+            .filter { parsed.sport == null || it.activity.sport == parsed.sport }
+            .take(3)
+        val understood = buildList {
+            parsed.sport?.let { add(it.label.lowercase()) }
+            parsed.levelLabel?.let { add("nivel ${it.lowercase()}") }
+            if (parsed.slot != "cualquiera" || parsed.day != "cualquiera") add(parsed.whenLabel.lowercase())
+            addAll(parsed.needs.map { it.label.lowercase() })
         }
-    }
-
-    /** Demo: alguien compatible busca lo mismo y la IA te invita (lado receptor del smart grouping). */
-    fun simulateIncoming() {
-        scope.launch {
-            try {
-                FitInApi.simulateIncoming(userId)
-                val before = notifications.map { it.id }.toSet()
-                val list = FitInApi.notifications(userId)
-                notifications.clear()
-                notifications.addAll(list)
-                banner = list.firstOrNull { it.id !in before } ?: list.firstOrNull()
-            } catch (e: Exception) {
-                val n = LocalAi.incomingInvite(++localCounter)
-                notifications.add(0, n)
-                banner = n
+        val reply = when {
+            understood.isEmpty() && top.isEmpty() -> "Cuéntame qué deporte te apetece, cuándo y qué necesitas, y te busco actividad y sitio."
+            top.isEmpty() -> "He entendido: ${understood.joinToString()}. Ahora mismo no hay plazas en nada parecido. Te avisaré cuando salga algo."
+            else -> {
+                val b = top.first()
+                (if (understood.isNotEmpty()) "He entendido: ${understood.joinToString()}. " else "") +
+                    "Te propongo ${b.activity.title.lowercase()} (${b.activity.shortDate.lowercase()}), con un ${b.match} % de encaje. ${b.explanation}"
             }
         }
+        chat.add(ChatMessage(false, reply, top))
     }
 
-    fun respond(n: AppNotification, accept: Boolean) {
+    // ================================================================ crear actividad
+
+    /** Crea un grupo en la instalación que el modelo considera mejor para lo que necesitas. */
+    fun createGroup(sport: Sport, place: ScoredFacility, dayOffset: Int, time: String, level: String?): Activity {
+        val id = "grupo_${System.currentTimeMillis()}"
+        val a = Activity(
+            id = id, sport = sport, shortDate = Dates.short(dayOffset, time), startDate = Dates.date(dayOffset),
+            description = "Grupo creado por $userName. La IA eligió esta instalación porque cubre lo que necesitas.",
+            title = "${sport.label} en grupo" + (level?.let { " · nivel ${if (it == "iniciacion") "iniciación" else it}" } ?: ""),
+            place = place.facility.name, zone = place.facility.zone,
+            schedule = Dates.weekdayName(dayOffset) + ", $time", nextSession = Dates.long(dayOffset, time),
+            features = place.facility.features + needs.filter { it !in Recommender.FACILITY_NEEDS },
+            seal = place.facility.seal, verifiedOn = "", confirmations = 0, reviews = emptyList(),
+            group = listOf(GroupMember(userName, "Organiza")), volunteers = emptyList(),
+            spotsLeft = if (sport == Sport.Padel || sport == Sport.Tenis) 3 else 7, offPeak = false,
+            howToArrive = "Consulta la ficha de la instalación.", meetingNote = "Se queda en la entrada diez minutos antes.",
+            level = level ?: "todos", minParticipants = if (sport == Sport.Padel) 4 else 2, status = "propuesta",
+        )
+        SampleData.created.add(0, a)
+        if (id !in joined) joined.add(id)
+        modelVersion++
+        return a
+    }
+
+    // ================================================================ avisos
+
+    /** Busca la mejor actividad aún no avisada; si supera el umbral, avisa (bandeja + sistema). */
+    fun checkForMatches(prefix: String? = null): Scored? {
+        if (!alertsOn) return null
+        val s = Alerts.candidate(store, model, profile, history.toList()) ?: return null
+        notifyAbout(s, prefix?.let { "$it, te puede encajar" } ?: "✨ Te puede encajar")
+        return s
+    }
+
+    private fun notifyAbout(s: Scored, title: String) {
+        val n = Alerts.toInbox(s, title)
+        notifications.add(0, n)
+        store.saveInbox(notifications)
+        store.saveSet("notified", store.loadSet("notified") + s.activity.id)
+        banner = n
+        Alerts.post(getApplication<Application>(), n)
+    }
+
+    /**
+     * Demo: el Ayuntamiento publica una actividad nueva. La IA la puntúa y SOLO avisa si encaja
+     * (≥ 70 %). Si no, lo deja en la bandeja como información, con el porqué.
+     */
+    fun publishNext(): Scored? {
+        val published = store.loadSet("published")
+        val next = SampleData.upcoming.firstOrNull { it.id !in published } ?: return null
+        store.saveSet("published", published + next.id)
+        if (SampleData.created.none { it.id == next.id }) SampleData.created.add(0, next)
+        modelVersion++
+        val s = scoreFor(next.id) ?: return null
+        if (alertsOn && s.probability >= Alerts.THRESHOLD) {
+            notifyAbout(s, "✨ Nueva actividad que encaja contigo")
+        } else {
+            val info = AppNotification(
+                id = "info_${next.id}", kind = "info",
+                title = "Publicada: ${next.title}",
+                body = "La IA le da un ${s.match} % de encaje contigo, así que no te ha avisado. ${s.explanation}",
+                eventId = next.id, fromName = null, status = "info", compat = s.probability,
+            )
+            notifications.add(0, info)
+            store.saveInbox(notifications)
+            banner = info
+        }
+        return s
+    }
+
+    fun openNotification(n: AppNotification) {
         val i = notifications.indexOfFirst { it.id == n.id }
-        if (i >= 0) notifications[i] = n.copy(status = if (accept) "accepted" else "declined")
-        if (accept && n.eventId != null) {
-            if (n.eventId !in joined) joined.add(n.eventId)
-            points += 10
+        if (i >= 0 && n.status == "pending") notifications[i] = n.copy(status = "opened")
+        store.saveInbox(notifications)
+        if (n.eventId != null) {
+            if (n.kind == "match" && n.status == "pending") record(n.eventId, Signal.NotifOpen)
+            open(Step.Detail(n.eventId))
         }
         if (banner?.id == n.id) banner = null
-        if (!n.id.startsWith("local_")) {
-            scope.launch {
-                runCatching { FitInApi.respond(n.id, accept) }
-                refreshNotifications()
-            }
-        }
     }
 
-    override fun onCleared() {
-        scope.cancel()
+    fun dismissNotification(n: AppNotification) {
+        val i = notifications.indexOfFirst { it.id == n.id }
+        if (i >= 0) notifications[i] = n.copy(status = "dismissed")
+        store.saveInbox(notifications)
+        if (n.eventId != null && n.kind == "match") record(n.eventId, Signal.NotifDismiss)
+        if (banner?.id == n.id) banner = null
+    }
+
+    fun setAlerts(on: Boolean) {
+        alertsOn = on
+        store.putBool("alerts", on)
     }
 }
