@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.marbellup.fitin.ui.FitInBottomBar
 import com.marbellup.fitin.ui.LocalEasyRead
 import com.marbellup.fitin.ui.NotificationBanner
+import com.marbellup.fitin.ui.screens.AchievementsScreen
 import com.marbellup.fitin.ui.screens.ActivityScreen
+import com.marbellup.fitin.ui.screens.SearchScreen
 import com.marbellup.fitin.ui.screens.AiSearchScreen
 import com.marbellup.fitin.ui.screens.CalendarScreen
 import com.marbellup.fitin.ui.screens.CelebrationScreen
@@ -122,6 +124,8 @@ private fun App(state: AppState) {
             step is Step.Notifications -> NotificationsScreen(state)
             step is Step.Council -> CouncilScreen(state, onBack = { state.back() })
             step is Step.Model -> ModelScreen(state)
+            step is Step.Search -> SearchScreen(state)
+            step is Step.Achievements -> AchievementsScreen(state)
             state.tab == Tab.Inicio -> HomeScreen(state, tabs)
             state.tab == Tab.Calendario -> CalendarScreen(state, tabs)
             state.tab == Tab.ParaTi -> ForYouScreen(state, tabs)

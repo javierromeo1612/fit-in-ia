@@ -20,6 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -158,7 +169,7 @@ fun GradientButton(
     }
 }
 
-/** Tarjeta blanca tipo cristal, muy redondeada. */
+/** Tarjeta blanca tipo cristal, muy redondeada. Al pulsarla se encoge un poco (sensación dinámica). */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -167,11 +178,16 @@ fun GlassCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(26.dp)
-    val m = modifier.fillMaxWidth()
     if (onClick != null) {
-        Surface(onClick = onClick, modifier = m, shape = shape, color = color, shadowElevation = 3.dp) { Column(content = content) }
+        val source = remember { MutableInteractionSource() }
+        val pressed by source.collectIsPressedAsState()
+        val scale by animateFloatAsState(if (pressed) 0.97f else 1f, label = "pulsar")
+        Surface(
+            onClick = onClick, modifier = modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale },
+            shape = shape, color = color, shadowElevation = 4.dp, interactionSource = source,
+        ) { Column(content = content) }
     } else {
-        Surface(modifier = m, shape = shape, color = color, shadowElevation = 3.dp) { Column(content = content) }
+        Surface(modifier = modifier.fillMaxWidth(), shape = shape, color = color, shadowElevation = 4.dp) { Column(content = content) }
     }
 }
 
@@ -253,12 +269,7 @@ fun ActivityPhotoCard(
     GlassCard(modifier, onClick = { state.open(Step.Detail(a.id)) }) {
         // Como en la referencia: foto grande y un panel blanco encima, abajo, con los datos y la flecha.
         Box(Modifier.fillMaxWidth().height(236.dp).padding(8.dp)) {
-            Image(
-                painter = painterResource(a.sport.photo),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)),
-            )
+            ActivityCover(a, Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)))
             Row(Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (rec != null) {
                     Row(
@@ -438,12 +449,7 @@ fun ActivityMiniRow(a: Activity, subtitle: String? = null, onClick: () -> Unit) 
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            painter = painterResource(a.sport.photo),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)),
-        )
+        ActivityCover(a, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)), small = true)
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(a.title, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(subtitle ?: "${a.shortDate} · ${a.place}", style = MaterialTheme.typography.bodySmall,
@@ -554,15 +560,21 @@ fun SelectTile(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
     bg: Color = LocalExtra.current.card,
+    emoji: String? = null,
     onClick: () -> Unit,
 ) {
     val shape = RoundedCornerShape(20.dp)
+    val source = remember { MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.93f else if (selected) 1.03f else 1f, label = "mosaico")
     Surface(
         onClick = onClick,
+        interactionSource = source,
         shape = shape,
         color = if (selected) LocalExtra.current.lilac else bg,
         shadowElevation = if (selected) 0.dp else 1.dp,
         modifier = modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .heightIn(min = 92.dp)
             .then(if (selected) Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .semantics { role = Role.Checkbox; this.selected = selected },
@@ -573,7 +585,7 @@ fun SelectTile(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
+                if (emoji != null) Text(emoji, fontSize = 30.sp) else Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
                 Text(
                     label,
                     style = MaterialTheme.typography.labelLarge,
@@ -590,5 +602,107 @@ fun SelectTile(
                 ) { Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp)) }
             }
         }
+    }
+}
+
+val Need.emoji: String
+    get() = when (this) {
+        Need.SinEscalones -> "♿"
+        Need.Aparcamiento -> "🅿️"
+        Need.Vestuario -> "🚻"
+        Need.Grua -> "🏗️"
+        Need.Transporte -> "🚌"
+        Need.Cubierta -> "🏠"
+        Need.Signos -> "🤟"
+        Need.Bucle -> "👂"
+        Need.Guia -> "🦯"
+        Need.Tranquilo -> "🤫"
+        Need.LecturaFacil -> "📘"
+        Need.Pictogramas -> "🖼️"
+        Need.GrupoReducido -> "👥"
+        Need.Material -> "🧰"
+        Need.Monitor -> "🧑‍🏫"
+        Need.Acompanante -> "🤝"
+    }
+
+val Slot.emoji: String
+    get() = when (this) {
+        Slot.Manana -> "🌅"
+        Slot.Mediodia -> "☀️"
+        Slot.Tarde -> "🌇"
+        Slot.Noche -> "🌙"
+    }
+
+/** Paletas de portada por deporte (dos tonos), inspiradas en los pasteles saturados de la referencia. */
+private fun coverColors(sport: com.marbellup.fitin.data.Sport, variant: Int): List<Color> {
+    val base = sport.tint
+    val palettes = listOf(
+        listOf(Color(0xFF8B6CFF), base),
+        listOf(base, Color(0xFFFFB86B)),
+        listOf(Color(0xFF5ED3C4), base),
+        listOf(Color(0xFFFF8FB8), Color(0xFF8B6CFF)),
+    )
+    return palettes[variant % palettes.size]
+}
+
+/**
+ * Portada de una actividad: la foto del deporte si es la principal; si no, una ilustración
+ * de colores con el emoji del deporte, círculos y líneas de pista (distinta en cada variante).
+ */
+@Composable
+fun ActivityCover(a: Activity, modifier: Modifier = Modifier, small: Boolean = false) {
+    val photo = when {
+        a.photoKey == "playa" -> com.marbellup.fitin.R.drawable.foto_playa
+        a.cover == 0 -> a.sport.photo
+        else -> null
+    }
+    if (photo != null) {
+        Image(painterResource(photo), contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier)
+        return
+    }
+    val colors = coverColors(a.sport, a.cover)
+    Box(modifier.background(Brush.linearGradient(colors)), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height
+            drawCircle(Color.White.copy(alpha = 0.18f), radius = h * 0.55f, center = Offset(w * 0.85f, h * 0.15f))
+            drawCircle(Color.White.copy(alpha = 0.12f), radius = h * 0.35f, center = Offset(w * 0.1f, h * 0.95f))
+            // Líneas de «pista»
+            val stroke = Stroke(width = h * 0.02f)
+            if (a.cover % 2 == 1) {
+                drawLine(Color.White.copy(alpha = 0.25f), Offset(0f, h * 0.7f), Offset(w, h * 0.45f), strokeWidth = h * 0.025f)
+                drawLine(Color.White.copy(alpha = 0.18f), Offset(0f, h * 0.85f), Offset(w, h * 0.6f), strokeWidth = h * 0.025f)
+            } else {
+                drawCircle(Color.White.copy(alpha = 0.25f), radius = h * 0.28f, center = Offset(w * 0.5f, h * 0.5f), style = stroke)
+                drawLine(Color.White.copy(alpha = 0.22f), Offset(w * 0.5f, 0f), Offset(w * 0.5f, h), strokeWidth = h * 0.02f)
+            }
+            // Confeti
+            val dots = listOf(0.15f to 0.2f, 0.3f to 0.75f, 0.7f to 0.8f, 0.9f to 0.55f, 0.55f to 0.12f)
+            dots.forEachIndexed { i, (fx, fy) ->
+                drawCircle(if (i % 2 == 0) Color(0xFFFFE27A) else Color.White, radius = h * 0.025f, center = Offset(w * fx, h * fy))
+            }
+        }
+        Text(a.sport.emoji, fontSize = if (small) 26.sp else 84.sp)
+    }
+}
+
+/** Mascota que flota suavemente arriba y abajo (da vida a las pantallas). */
+@Composable
+fun FloatingMascot(size: Dp, modifier: Modifier = Modifier, happy: Boolean = false) {
+    val t = rememberInfiniteTransition(label = "mascota")
+    val dy by t.animateFloat(
+        initialValue = 0f, targetValue = -8f,
+        animationSpec = infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "flotar",
+    )
+    Mascot(size, modifier.graphicsLayer { translationY = dy * density }, happy = happy)
+}
+
+/** Barra de progreso que se rellena con animación. */
+@Composable
+fun AnimatedBar(progress: Float, color: Color, modifier: Modifier = Modifier) {
+    var started by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { started = true }
+    val p by animateFloatAsState(if (started) progress.coerceIn(0f, 1f) else 0f, tween(900, easing = FastOutSlowInEasing), label = "barra")
+    Box(modifier.height(10.dp).clip(RoundedCornerShape(5.dp)).background(LocalExtra.current.tile)) {
+        Box(Modifier.fillMaxHeight().fillMaxWidth(p).clip(RoundedCornerShape(5.dp)).background(color))
     }
 }

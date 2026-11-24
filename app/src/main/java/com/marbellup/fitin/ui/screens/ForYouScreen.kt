@@ -30,6 +30,7 @@ import com.marbellup.fitin.ui.NeedPill
 import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.SelectTile
 import com.marbellup.fitin.ui.icon
+import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.ui.shortLabel
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
@@ -58,7 +59,7 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 GlassCard(Modifier.padding(16.dp), color = x.lilac) {
                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Mascot(56.dp)
+                        com.marbellup.fitin.ui.FloatingMascot(60.dp)
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                             Text("Elegido por la IA para ti", style = MaterialTheme.typography.titleMedium)
                             Text("Según lo que necesitas, tus gustos y lo que vas eligiendo.", style = MaterialTheme.typography.bodySmall)
@@ -68,11 +69,17 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     }
                 }
 
-                // Filtro por deporte con mosaicos
-                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SelectTile("Todo", Icons.Filled.Apps, sport == null, Modifier.weight(1f)) { sport = null }
-                    for (s in listOf(Sport.Padel, Sport.Natacion, Sport.Baloncesto)) {
-                        SelectTile(s.label, s.icon, sport == s, Modifier.weight(1f), tint = s.tint) { sport = if (sport == s) null else s }
+                // Filtro por deporte con mosaicos de colores (desliza para ver todos)
+                androidx.compose.foundation.lazy.LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    item { SelectTile("Todo", Icons.Filled.Apps, sport == null, Modifier.width(84.dp), emoji = "✨") { sport = null } }
+                    items(Sport.entries.size) { i ->
+                        val s = Sport.entries[i]
+                        SelectTile(s.label, s.icon, sport == s, Modifier.width(84.dp), tint = s.tint, emoji = s.emoji) {
+                            sport = if (sport == s) null else s
+                        }
                     }
                 }
 

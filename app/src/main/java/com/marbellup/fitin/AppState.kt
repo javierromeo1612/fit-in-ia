@@ -44,6 +44,9 @@ sealed interface Step {
     data object Council : Step
     /** «Cómo aprende tu IA»: pesos del modelo e historial. */
     data object Model : Step
+    /** Buscador por palabras clave. */
+    data object Search : Step
+    data object Achievements : Step
 }
 
 data class Booking(val activityId: String, val companion: String)
@@ -73,7 +76,7 @@ class AppState(app: Application) : AndroidViewModel(app) {
     var easyRead by mutableStateOf(false)
     var alertsOn by mutableStateOf(store.getBool("alerts", true))
         private set
-    val points: Int get() = 48 + 10 * joined.size + 2 * history.size.coerceAtMost(30)
+    val points: Int get() = 48 + 10 * joined.size + 2 * history.size.coerceAtMost(30) + 5 * stats().medals.count { it.unlocked }
 
     // ---- Navegación
     var onboarded by mutableStateOf(store.getBool("onboarded", false))
@@ -88,6 +91,9 @@ class AppState(app: Application) : AndroidViewModel(app) {
     val joined = mutableStateListOf<String>().apply { addAll(store.loadSet("joined")) }
     val favorites = mutableStateListOf<String>().apply { addAll(store.loadSet("favorites")) }
     val reported = mutableStateListOf<Barrier>()
+
+    // ---- Buscador
+    var query by mutableStateOf("")
 
     // ---- Avisos
     val notifications = mutableStateListOf<AppNotification>().apply { addAll(store.loadInbox()) }
@@ -110,6 +116,29 @@ class AppState(app: Application) : AndroidViewModel(app) {
     }
 
     fun scoreFor(id: String): Scored? = ranked().firstOrNull { it.activity.id == id }
+
+    /**
+     * Buscador por palabras clave: busca en título, deporte, descripción, sitio, zona, nivel y
+     * accesibilidad (sin tildes ni mayúsculas). Los resultados salen ordenados por la IA.
+     */
+    fun search(q: String = query): List<Scored> {
+        val words = normalize(q).split(" ").filter { it.length >= 2 }
+        if (words.isEmpty()) return emptyList()
+        return ranked().filter { s ->
+            val a = s.activity
+            val text = normalize(
+                listOf(a.title, a.sport.label, a.description, a.place, a.zone, a.level, a.shortDate,
+                    a.features.joinToString(" ") { it.label }).joinToString(" "),
+            )
+            words.all { it in text }
+        }
+    }
+
+    private fun normalize(t: String): String =
+        java.text.Normalizer.normalize(t.lowercase(), java.text.Normalizer.Form.NFD)
+            .replace(Regex("\\p{Mn}+"), "").replace(Regex("[^a-z0-9ñ ]"), " ")
+
+    fun stats() = com.marbellup.fitin.data.Achievements.compute(joined.toList(), history.toList(), favorites.toList())
 
     fun facilitiesFor(sport: Sport?, extra: Set<Need> = emptySet()): List<ScoredFacility> {
         modelVersion

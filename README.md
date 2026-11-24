@@ -47,7 +47,9 @@ La versión 2 trae un rediseño completo (lila, cristal y mascota) y un **recome
 - Un modelo de **regresión logística con aprendizaje en línea** ordena **actividades e instalaciones** según esas características y explica por qué.
 - **Aprende** de cada acción: apuntarse, «me gusta», valorar, «no me interesa».
 - **Avisa** (notificaciones de Android) cuando aparece algo que encaja al menos un 70 %.
-- En una simulación con 300 personas, el acierto pasa del **58 % al 84 %** en 12 semanas.
+- En una simulación con 300 personas, el acierto pasa del **64 % al 80 %** en 12 semanas.
+
+Además: 14 deportes y más de 20 actividades de ejemplo con portadas distintas, buscador por palabras clave, calendario por semana o mes y «Mis logros» con estadísticas y medallas.
 
 Cómo funciona, fórmulas, simulación y guion de demo: **[`ARQUITECTURA-IA.md`](ARQUITECTURA-IA.md)**. Las pantallas anteriores están en [`legacy-ui/`](legacy-ui).
 

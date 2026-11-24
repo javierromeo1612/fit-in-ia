@@ -34,7 +34,6 @@ import com.marbellup.fitin.ui.GradientButton
 import com.marbellup.fitin.ui.IconLine
 import com.marbellup.fitin.ui.NeedPill
 import com.marbellup.fitin.ui.RoundIconButton
-import com.marbellup.fitin.ui.photo
 import com.marbellup.fitin.ui.shortLabel
 import com.marbellup.fitin.ui.theme.LocalExtra
 
@@ -82,12 +81,7 @@ fun ActivityScreen(state: AppState, activityId: String) {
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
             Box {
-                Image(
-                    painter = painterResource(a.sport.photo),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth().height(290.dp),
-                )
+                com.marbellup.fitin.ui.ActivityCover(a, Modifier.fillMaxWidth().height(290.dp))
                 Row(Modifier.statusBarsPadding().padding(16.dp).fillMaxWidth()) {
                     RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "Volver") { state.back() }
                     Spacer(Modifier.weight(1f))

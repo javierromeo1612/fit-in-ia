@@ -24,6 +24,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.AppState
 import com.marbellup.fitin.Step
 import com.marbellup.fitin.data.Need
@@ -77,7 +79,7 @@ fun CreateScreen(state: AppState) {
 
             if (!showPlaces) {
                 Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Mascot(56.dp)
+                    com.marbellup.fitin.ui.FloatingMascot(60.dp)
                     Text("¡Hola, ${state.userName}! Te busco el sitio que mejor encaja.", style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(start = 10.dp).clip(RoundedCornerShape(18.dp)).background(x.card).padding(12.dp))
                 }
@@ -104,7 +106,7 @@ fun CreateScreen(state: AppState) {
                         ) {
                             Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center) {
-                                Icon(s.icon, contentDescription = null, tint = s.tint, modifier = Modifier.size(34.dp))
+                                Text(s.emoji, fontSize = 34.sp)
                                 Text(s.label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 6.dp))
                             }
                         }
@@ -131,7 +133,7 @@ fun CreateScreen(state: AppState) {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             for (o in row) {
                                 val sel = o.label in chosen
-                                com.marbellup.fitin.ui.SelectTile(o.label, o.icon, sel, Modifier.weight(1f)) {
+                                com.marbellup.fitin.ui.SelectTile(o.label, o.icon, sel, Modifier.weight(1f), emoji = o.needs.first().emoji) {
                                     chosen = if (sel) chosen - o.label else chosen + o.label
                                 }
                             }

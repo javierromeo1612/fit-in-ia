@@ -143,8 +143,8 @@ fun ModelScreen(state: AppState) {
                     Text("¿Funciona? Lo hemos medido", style = MaterialTheme.typography.titleMedium)
                     Text(
                         "En una simulación con 300 personas con gustos ocultos, la actividad que mejor les iba estaba entre " +
-                            "las 3 primeras recomendadas el 58 % de las veces la primera semana y el 84 % a las 12 semanas. " +
-                            "Sin aprender se queda en el 58 %, y al azar en el 12 %. Código: SimulacionAprendizajeTest.",
+                            "las 3 primeras recomendadas el 64 % de las veces la primera semana y el 80 % a las 12 semanas. " +
+                            "Sin aprender se queda en torno al 63 %, y al azar en el 12 %. Código: SimulacionAprendizajeTest.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

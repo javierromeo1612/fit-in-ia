@@ -1,6 +1,12 @@
 package com.marbellup.fitin.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,15 +43,21 @@ fun CelebrationScreen(state: AppState, activityId: String) {
     val companion = state.booking?.companion ?: "Con el grupo"
     val confetti = remember {
         val r = Random(7)
-        List(40) { Triple(r.nextFloat(), r.nextFloat() * 0.45f, r.nextInt(4)) }
+        List(46) { Triple(r.nextFloat(), r.nextFloat(), r.nextInt(4)) }
     }
     val colors = listOf(Color(0xFFFFC83D), Color(0xFF7C5CFF), Color(0xFFFF6FA5), Color(0xFF3CC7A0))
+    // Confeti que cae sin parar
+    val t = rememberInfiniteTransition(label = "confeti")
+    val fall by t.animateFloat(0f, 1f, infiniteRepeatable(tween(6000, easing = LinearEasing)), label = "caída")
 
     GradientBackground {
-        Canvas(Modifier.fillMaxSize().graphicsLayer { alpha = 0.9f }) {
+        Canvas(Modifier.fillMaxSize()) {
             for ((fx, fy, c) in confetti) {
-                drawRoundRect(colors[c], Offset(fx * size.width, fy * size.height), Size(14f, 26f),
-                    androidx.compose.ui.geometry.CornerRadius(6f))
+                val y = ((fy + fall) % 1f) * size.height
+                val x0 = fx * size.width + kotlin.math.sin((fall * 6.28f) + fx * 10f) * 18f
+                rotate(degrees = (fall * 360f + fx * 200f), pivot = Offset(x0, y)) {
+                    drawRoundRect(colors[c], Offset(x0, y), Size(16f, 30f), androidx.compose.ui.geometry.CornerRadius(6f))
+                }
             }
         }
         Column(
@@ -57,7 +69,7 @@ fun CelebrationScreen(state: AppState, activityId: String) {
                 color = MaterialTheme.colorScheme.primary, modifier = Modifier.semantics { heading() })
             Text("Juntos construimos una comunidad más inclusiva", style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
-            Mascot(180.dp, Modifier.padding(vertical = 20.dp), happy = true)
+            com.marbellup.fitin.ui.FloatingMascot(180.dp, Modifier.padding(vertical = 20.dp), happy = true)
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Stat("+${(a?.group?.size ?: 0) + 1}", "personas", x.lilac, Modifier.weight(1f))

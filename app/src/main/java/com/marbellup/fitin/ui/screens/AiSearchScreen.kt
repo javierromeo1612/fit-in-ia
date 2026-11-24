@@ -36,6 +36,7 @@ import com.marbellup.fitin.ui.NeedPill
 import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.SelectTile
 import com.marbellup.fitin.ui.icon
+import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.ui.say
 import com.marbellup.fitin.ui.shortLabel
 import com.marbellup.fitin.ui.theme.LocalExtra
@@ -43,10 +44,10 @@ import com.marbellup.fitin.ui.tint
 
 private val zones = listOf("Zona centro", "Zona oeste", "Zona este", "Zona norte")
 private val levels = listOf(
-    Triple("iniciacion", "Iniciación", Icons.Filled.EmojiPeople),
-    Triple("intermedio", "Intermedio", Icons.Filled.DirectionsRun),
-    Triple("avanzado", "Avanzado", Icons.Filled.EmojiEvents),
-    Triple(null, "Da igual", Icons.Filled.AllInclusive),
+    Triple("iniciacion", "Iniciación", "🌱"),
+    Triple("intermedio", "Intermedio", "🔥"),
+    Triple("avanzado", "Avanzado", "🏆"),
+    Triple(null, "Da igual", "🤷"),
 )
 
 /**
@@ -73,7 +74,7 @@ fun AiSearchScreen(state: AppState) {
             }
 
             Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Mascot(60.dp)
+                com.marbellup.fitin.ui.FloatingMascot(64.dp)
                 Text(
                     say("¡Hola, ${state.userName}! Marca lo que necesitas y lo que te gusta. Con eso te recomiendo actividades y sitios.",
                         "Marca lo que necesitas. Yo te digo qué hacer y dónde."),
@@ -89,28 +90,28 @@ fun AiSearchScreen(state: AppState) {
                 Text(g.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 6.dp))
                 TileGrid(Need.entries.filter { it.group == g }) { n, m ->
-                    SelectTile(n.shortLabel, n.icon, n in p.needs, m) { state.toggle(n) }
+                    SelectTile(n.shortLabel, n.icon, n in p.needs, m, emoji = n.emoji) { state.toggle(n) }
                 }
             }
 
             Title("¿Qué deportes te gustan?")
             TileGrid(Sport.entries.toList()) { s, m ->
-                SelectTile(s.label, s.icon, s in p.sports, m, tint = s.tint, bg = pastel[s.ordinal % pastel.size]) { state.toggleSport(s) }
+                SelectTile(s.label, s.icon, s in p.sports, m, tint = s.tint, bg = pastel[s.ordinal % pastel.size], emoji = s.emoji) { state.toggleSport(s) }
             }
 
             Title("¿Cuándo te viene bien?")
             TileGrid(Slot.entries.toList(), perRow = 4) { s, m ->
-                SelectTile(s.label, s.icon, s in p.slots, m) { state.toggleSlot(s) }
+                SelectTile(s.label, s.icon, s in p.slots, m, emoji = s.emoji) { state.toggleSlot(s) }
             }
 
             Title("¿Qué nivel tienes?")
-            TileGrid(levels, perRow = 4) { (code, label, icon), m ->
-                SelectTile(label, icon, p.level == code, m) { state.setLevel(code) }
+            TileGrid(levels, perRow = 4) { (code, label, e), m ->
+                SelectTile(label, Icons.Filled.Star, p.level == code, m, emoji = e) { state.setLevel(code) }
             }
 
             Title("¿Por dónde te mueves?")
             TileGrid(zones, perRow = 4) { z, m ->
-                SelectTile(z.removePrefix("Zona ").replaceFirstChar { it.uppercase() }, Icons.Filled.Place, p.zone == z, m) {
+                SelectTile(z.removePrefix("Zona ").replaceFirstChar { it.uppercase() }, Icons.Filled.Place, p.zone == z, m, emoji = "📍") {
                     state.setZone(if (p.zone == z) null else z)
                 }
             }

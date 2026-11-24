@@ -72,7 +72,7 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             }
                         }
                         Spacer(Modifier.width(10.dp))
-                        Mascot(72.dp, happy = true)
+                        com.marbellup.fitin.ui.FloatingMascot(76.dp, happy = true)
                     }
                 }
 
@@ -101,7 +101,7 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             }
                         }
                     }
-                    MenuRow(Icons.Outlined.EmojiEvents, "Mis logros", "${state.joined.size + 2} actividades completadas") { }
+                    MenuRow(Icons.Outlined.EmojiEvents, "Mis logros", "${state.stats().unlocked} medallas · ${state.stats().sports} deportes probados") { state.open(Step.Achievements) }
                     MenuRow(Icons.Outlined.Notifications, "Avisos de la IA", badge = state.unread) { state.open(Step.Notifications) }
                     MenuRow(Icons.Outlined.AccountBalance, "Panel del Ayuntamiento", "Impacto y demanda no atendida") { state.open(Step.Council) }
                 }

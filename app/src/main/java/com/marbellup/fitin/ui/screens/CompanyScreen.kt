@@ -56,7 +56,6 @@ import com.marbellup.fitin.ui.BottomAction
 import com.marbellup.fitin.ui.ExampleNote
 import com.marbellup.fitin.ui.IconLine
 import com.marbellup.fitin.ui.SectionHeader
-import com.marbellup.fitin.ui.photo
 import com.marbellup.fitin.ui.say
 import com.marbellup.fitin.ui.theme.LocalExtra
 
@@ -199,12 +198,7 @@ fun ConfirmedScreen(state: AppState, activityId: String) {
         Spacer(Modifier.height(20.dp))
         AppCard(Modifier.padding(horizontal = 16.dp)) {
             Box {
-                Image(
-                    painter = painterResource(a.sport.photo),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth().height(170.dp),
-                )
+                com.marbellup.fitin.ui.ActivityCover(a, Modifier.fillMaxWidth().height(170.dp))
                 Box(
                     Modifier
                         .padding(14.dp)

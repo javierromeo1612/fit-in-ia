@@ -137,12 +137,12 @@ Cada factor aporta **wᵢ·xᵢ** a la puntuación. La app muestra:
 
 | Semana | Modelo que aprende | Mismo modelo sin aprender | Al azar |
 |---|---|---|---|
-| 1 | 58 % | 58 % | 13 % |
-| 4 | 73 % | 62 % | 10 % |
-| 8 | 82 % | 59 % | 13 % |
-| 12 | **84 %** | 58 % | 12 % |
+| 1 | 64 % | 64 % | 12 % |
+| 4 | 75 % | 60 % | 15 % |
+| 8 | 81 % | 65 % | 13 % |
+| 12 | **80 %** | 63 % | 14 % |
 
-Además, de lo que recomienda en el top-3, el **79 %** cubre todas las necesidades de la persona, cuando entre todas las actividades disponibles solo las cubre el 40 %.
+Además, de lo que recomienda en el top-3, el **69 %** cubre todas las necesidades de la persona, cuando entre todas las actividades disponibles solo las cubre el 38 %.
 
 ---
 
@@ -150,7 +150,7 @@ Además, de lo que recomienda en el top-3, el **79 %** cubre todas las necesidad
 
 - **¿Por qué no una API de IA generativa?** Sin conexión no hay errores de red, costes ni datos personales fuera del móvil, y además es predecible. Para datos de necesidades de personas con discapacidad, la privacidad pesa mucho.
 - **¿Por qué regresión logística y no una red neuronal?** Con pocos datos por persona aprende rápido y es **explicable**: cada recomendación se justifica factor a factor. Puede entrenarse en el móvil en microsegundos.
-- **¿Y el arranque en frío?** Los pesos expertos dan buenas recomendaciones desde el primer día (58 % frente a 13 % al azar), y el aprendizaje las mejora.
+- **¿Y el arranque en frío?** Los pesos expertos dan buenas recomendaciones desde el primer día (64 % frente a 12 % al azar), y el aprendizaje las mejora.
 - **¿Cómo escalaría?**
   - Añadir factores colaborativos («a personas con necesidades parecidas les gustó…») agregando datos anónimos.
   - Ajustar w₀ con datos reales del piloto.
@@ -170,6 +170,6 @@ Además, de lo que recomienda en el top-3, el **79 %** cubre todas las necesidad
 6. **Avisos › Demo: el Ayuntamiento publica una actividad** (2 o 3 veces):
    - La natación de tarde llega como notificación del móvil.
    - La ruta costera no adaptada no avisa, y se ve por qué.
-7. Cierre con la **tabla de la simulación**: del 58 % al 84 % de acierto.
+7. Cierre con la **tabla de la simulación**: del 64 % al 80 % de acierto.
 
 *Para repetir la demo desde cero:* Perfil › Cómo aprende tu IA › **Reiniciar lo aprendido**. También vale desinstalar y reinstalar la app.

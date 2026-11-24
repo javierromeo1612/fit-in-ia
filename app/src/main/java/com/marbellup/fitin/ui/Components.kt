@@ -1,6 +1,5 @@
 package com.marbellup.fitin.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
@@ -39,6 +38,13 @@ import androidx.compose.material.icons.filled.Pool
 import androidx.compose.material.icons.filled.SportsBasketball
 import androidx.compose.material.icons.filled.SportsGolf
 import androidx.compose.material.icons.filled.SportsTennis
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Sailing
+import androidx.compose.material.icons.filled.SportsBaseball
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -84,6 +90,13 @@ val Sport.icon: ImageVector
         Sport.Golf -> Icons.Filled.SportsGolf
         Sport.Senderismo -> Icons.Filled.Hiking
         Sport.Ciclismo -> Icons.Filled.PedalBike
+        Sport.Yoga -> Icons.Filled.SelfImprovement
+        Sport.Futbol -> Icons.Filled.SportsSoccer
+        Sport.Atletismo -> Icons.Filled.DirectionsRun
+        Sport.Vela -> Icons.Filled.Sailing
+        Sport.Boccia -> Icons.Filled.SportsBaseball
+        Sport.Danza -> Icons.Filled.MusicNote
+        Sport.Fitness -> Icons.Filled.FitnessCenter
     }
 
 val Sport.tint: Color
@@ -95,10 +108,17 @@ val Sport.tint: Color
         Sport.Golf -> Color(0xFF5D6B92)
         Sport.Senderismo -> Color(0xFF6AA334)
         Sport.Ciclismo -> Color(0xFF14A0A0)
+        Sport.Yoga -> Color(0xFF9B59D0)
+        Sport.Futbol -> Color(0xFF2E9D4F)
+        Sport.Atletismo -> Color(0xFFE2553F)
+        Sport.Vela -> Color(0xFF1E88E5)
+        Sport.Boccia -> Color(0xFFD94C8A)
+        Sport.Danza -> Color(0xFFE0458B)
+        Sport.Fitness -> Color(0xFFF08A24)
     }
 
-@get:DrawableRes
-val Sport.photo: Int
+/** Foto del deporte, si la hay. Los deportes sin foto usan portadas ilustradas (ver ActivityCover). */
+val Sport.photo: Int?
     get() = when (this) {
         Sport.Baloncesto -> R.drawable.foto_baloncesto
         Sport.Natacion -> R.drawable.foto_natacion
@@ -107,6 +127,26 @@ val Sport.photo: Int
         Sport.Golf -> R.drawable.foto_golf
         Sport.Senderismo -> R.drawable.foto_senderismo
         Sport.Ciclismo -> R.drawable.foto_ciclismo
+        else -> null
+    }
+
+/** Emoji de color de cada deporte: da el toque visual de los iconos 3D de la referencia. */
+val Sport.emoji: String
+    get() = when (this) {
+        Sport.Baloncesto -> "🏀"
+        Sport.Natacion -> "🏊"
+        Sport.Tenis -> "🎾"
+        Sport.Padel -> "🏓"
+        Sport.Golf -> "⛳"
+        Sport.Senderismo -> "🥾"
+        Sport.Ciclismo -> "🚴"
+        Sport.Yoga -> "🧘"
+        Sport.Futbol -> "⚽"
+        Sport.Atletismo -> "🏃"
+        Sport.Vela -> "⛵"
+        Sport.Boccia -> "🎯"
+        Sport.Danza -> "💃"
+        Sport.Fitness -> "💪"
     }
 
 /* ---------- Superficies ---------- */

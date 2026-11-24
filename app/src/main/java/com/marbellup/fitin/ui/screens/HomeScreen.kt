@@ -3,6 +3,13 @@ package com.marbellup.fitin.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,7 +38,8 @@ import com.marbellup.fitin.ui.ActivityPhotoCard
 import com.marbellup.fitin.ui.ExampleNote
 import com.marbellup.fitin.ui.GlassCard
 import com.marbellup.fitin.ui.GradientBackground
-import com.marbellup.fitin.ui.Mascot
+import com.marbellup.fitin.ui.FloatingMascot
+import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.icon
 import com.marbellup.fitin.ui.theme.LocalExtra
@@ -63,7 +71,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 // Buscador en píldora
                 Surface(
-                    onClick = { state.tab = Tab.ParaTi },
+                    onClick = { state.open(Step.Search) },
                     shape = RoundedCornerShape(50),
                     color = x.card,
                     shadowElevation = 2.dp,
@@ -77,19 +85,18 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     }
                 }
 
-                // Cuatro accesos rápidos en mosaicos blancos, como en la referencia
-                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickTile("Cerca", Icons.Filled.NearMe, MaterialTheme.colorScheme.primary, state.sport == null, Modifier.weight(1f)) {
-                        state.sport = null
+                // Accesos rápidos en mosaicos blancos con iconos de color, como en la referencia (desliza para ver todos)
+                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    item {
+                        QuickTile("Cerca", "📍", state.sport == null, Modifier.width(78.dp)) { state.sport = null }
                     }
-                    QuickTile("Piscina", Sport.Natacion.icon, Sport.Natacion.tint, state.sport == Sport.Natacion, Modifier.weight(1f)) {
-                        state.sport = if (state.sport == Sport.Natacion) null else Sport.Natacion
+                    items(Sport.entries.toList()) { s ->
+                        QuickTile(if (s == Sport.Natacion) "Piscina" else s.label, s.emoji, state.sport == s, Modifier.width(78.dp)) {
+                            state.sport = if (state.sport == s) null else s
+                        }
                     }
-                    QuickTile("Baloncesto", Sport.Baloncesto.icon, Sport.Baloncesto.tint, state.sport == Sport.Baloncesto, Modifier.weight(1f)) {
-                        state.sport = if (state.sport == Sport.Baloncesto) null else Sport.Baloncesto
-                    }
-                    QuickTile("Más", Icons.Filled.MoreHoriz, MaterialTheme.colorScheme.onSurfaceVariant, false, Modifier.weight(1f)) {
-                        state.tab = Tab.ParaTi
+                    item {
+                        QuickTile("Más", "⋯", false, Modifier.width(78.dp)) { state.open(Step.AiSearch) }
                     }
                 }
 
@@ -128,7 +135,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                     tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp).padding(start = 4.dp))
                             }
                         }
-                        Mascot(64.dp)
+                        FloatingMascot(70.dp)
                     }
                 }
                 ExampleNote("Actividades de ejemplo para la demo · Fotos: Unsplash")
@@ -137,19 +144,24 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     }
 }
 
-/** Acceso rápido: mosaico blanco con icono y texto debajo (dentro del mosaico), como en la referencia. */
+/** Acceso rápido: mosaico blanco con icono de color y texto debajo, como en la referencia. */
 @Composable
-private fun QuickTile(label: String, icon: ImageVector, tint: Color, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun QuickTile(label: String, emoji: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.9f else if (selected) 1.06f else 1f, label = "acceso")
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
+        interactionSource = source,
+        shape = RoundedCornerShape(22.dp),
         color = if (selected) LocalExtra.current.lilac else LocalExtra.current.card,
-        shadowElevation = 2.dp,
-        modifier = modifier.heightIn(min = 76.dp).semantics { role = Role.Tab; this.selected = selected },
+        shadowElevation = if (selected) 6.dp else 2.dp,
+        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale }.heightIn(min = 84.dp)
+            .semantics { role = Role.Tab; this.selected = selected },
     ) {
         Column(Modifier.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
+            Text(emoji, fontSize = 30.sp)
             Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.padding(top = 4.dp))
         }
     }
