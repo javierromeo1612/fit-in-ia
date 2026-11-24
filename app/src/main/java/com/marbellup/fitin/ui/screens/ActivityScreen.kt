@@ -1,5 +1,6 @@
 package com.marbellup.fitin.ui.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -98,12 +99,27 @@ fun ActivityScreen(state: AppState, activityId: String) {
                         Line(Icons.Outlined.CalendarMonth, a.nextSession.replaceFirstChar { it.uppercase() }, color = funColor(0))
                         Line(Icons.Filled.Place, a.place, color = funColor(2))
                         Line(Icons.AutoMirrored.Filled.Accessible, "Accesibilidad", color = funColor(1))
+                        // Primero lo que tú necesitas; el resto, plegado tras «Mostrar más».
+                        val todas = a.features.sortedWith(compareByDescending<com.marbellup.fitin.data.Need> { it in state.needs }.thenBy { it.ordinal })
+                        var verTodas by remember(a.id) { mutableStateOf(false) }
+                        val visibles = if (verTodas) todas else todas.take(6)
                         FlowRow(
-                            Modifier.padding(start = 46.dp, top = 2.dp, bottom = 4.dp),
+                            Modifier.padding(start = 46.dp, top = 2.dp, bottom = 4.dp).animateContentSize(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            a.features.sortedBy { it.ordinal }.forEachIndexed { i, n -> Chip(n.shortLabel, n in state.needs, funColor(i + 1)) }
+                            visibles.forEachIndexed { i, n -> Chip(n.shortLabel, n in state.needs, funColor(i + 1)) }
+                        }
+                        if (todas.size > 6) {
+                            TextButton(
+                                onClick = { verTodas = !verTodas },
+                                modifier = Modifier.padding(start = 34.dp).heightIn(min = 44.dp),
+                            ) {
+                                Text(
+                                    if (verTodas) "Mostrar menos" else "Mostrar más (${todas.size - 6})",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
                         }
                         Spacer(Modifier.height(6.dp))
                         Line(Icons.Filled.Groups, if (a.spotsLeft == 1) "Queda 1 plaza" else "Quedan ${a.spotsLeft} plazas", bold = true, color = funColor(3))
