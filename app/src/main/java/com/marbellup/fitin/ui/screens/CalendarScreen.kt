@@ -170,7 +170,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     if (dayItems.isEmpty()) {
                         GlassCard {
                             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                FloatingMascot(52.dp)
+                                FloatingMascot(52.dp, pose = com.marbellup.fitin.ui.Cuac.Duerme)
                                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                                     Text("Este día está libre", style = MaterialTheme.typography.titleMedium)
                                     Text("Elige un día con punto o mira las actividades en Inicio.", style = MaterialTheme.typography.bodyMedium)

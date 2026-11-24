@@ -47,7 +47,7 @@ fun ModelScreen(state: AppState) {
 
             GlassCard(Modifier.padding(horizontal = 16.dp), color = x.lilac) {
                 Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Mascot(64.dp, happy = true)
+                    Mascot(64.dp, pose = com.marbellup.fitin.ui.Cuac.Piensa)
                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
                         Text("Funciono dentro de tu móvil", style = MaterialTheme.typography.titleMedium)
                         Text(

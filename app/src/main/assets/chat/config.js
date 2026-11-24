@@ -38,6 +38,7 @@ window.botpress.init({
     "color": "#6C4CF0",
     "themeMode": "light",
     "botName": "Cuac",
+    "botAvatar": "https://appassets.androidplatform.net/assets/chat/cuac.png",
     "botDescription": "Resuelve dudas sobre cómo usar Fit-In con amabilidad y lenguaje sencillo.",
     "website": {},
     "email": {},

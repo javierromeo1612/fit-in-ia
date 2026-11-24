@@ -141,45 +141,28 @@ fun IconBadge(icon: ImageVector, color: Color, size: Dp = 36.dp, filled: Boolean
     ) { Icon(icon, contentDescription = null, tint = if (filled) Color.White else color, modifier = Modifier.size(size * 0.58f)) }
 }
 
+/** Poses de Cuac, el patito mascota de Fit-In (fotos en res/drawable-nodpi/cuac_*.png). */
+enum class Cuac(val image: Int) {
+    Saluda(com.marbellup.fitin.R.drawable.cuac_saluda),     // hablando, el de siempre
+    Feliz(com.marbellup.fitin.R.drawable.cuac_feliz),       // saltando con las alas abiertas
+    Piensa(com.marbellup.fitin.R.drawable.cuac_piensa),     // con el ala en la barbilla
+    Duerme(com.marbellup.fitin.R.drawable.cuac_duerme),     // ojos cerrados: nada que hacer
+    Enfadado(com.marbellup.fitin.R.drawable.cuac_enfadado), // ceño fruncido: algo ha ido mal
+}
+
 /**
- * Mascota de Fit-In: un robot amable dibujado en vectores (sin imágenes externas).
- * [waving] levanta un brazo; [happy] le cierra los ojos en sonrisa.
+ * Mascota de Fit-In: Cuac, un patito amarillo. [happy] lo pone saltando de alegría;
+ * [pose] elige cualquier otra postura.
  */
 @Composable
-fun Mascot(size: Dp = 64.dp, modifier: Modifier = Modifier, happy: Boolean = false) {
-    val violet = MaterialTheme.colorScheme.primary
-    val light = LocalExtra.current.hero
-    val navy = Color(0xFF231B4D)
-    val eye = Color(0xFF7CE7FF)
-    Canvas(modifier.size(size).semantics { contentDescription = "Mascota de Fit-In" }) {
-        val w = this.size.width
-        val h = this.size.height
-        // Antena
-        drawLine(violet, Offset(w * 0.5f, h * 0.18f), Offset(w * 0.5f, h * 0.06f), strokeWidth = w * 0.04f)
-        drawCircle(light, radius = w * 0.06f, center = Offset(w * 0.5f, h * 0.06f))
-        // Orejas
-        drawRoundRect(violet, Offset(w * 0.06f, h * 0.36f), Size(w * 0.1f, h * 0.22f), CornerRadius(w * 0.05f))
-        drawRoundRect(violet, Offset(w * 0.84f, h * 0.36f), Size(w * 0.1f, h * 0.22f), CornerRadius(w * 0.05f))
-        // Cabeza
-        drawRoundRect(Color.White, Offset(w * 0.14f, h * 0.18f), Size(w * 0.72f, h * 0.58f), CornerRadius(w * 0.22f))
-        drawRoundRect(light, Offset(w * 0.14f, h * 0.18f), Size(w * 0.72f, h * 0.58f), CornerRadius(w * 0.22f),
-            style = Stroke(width = w * 0.035f))
-        // Visor
-        drawRoundRect(navy, Offset(w * 0.24f, h * 0.30f), Size(w * 0.52f, h * 0.32f), CornerRadius(w * 0.14f))
-        if (happy) {
-            drawArc(eye, 200f, 140f, false, Offset(w * 0.32f, h * 0.38f), Size(w * 0.12f, h * 0.12f), style = Stroke(w * 0.035f))
-            drawArc(eye, 200f, 140f, false, Offset(w * 0.56f, h * 0.38f), Size(w * 0.12f, h * 0.12f), style = Stroke(w * 0.035f))
-        } else {
-            drawOval(eye, Offset(w * 0.34f, h * 0.38f), Size(w * 0.09f, h * 0.13f))
-            drawOval(eye, Offset(w * 0.57f, h * 0.38f), Size(w * 0.09f, h * 0.13f))
-        }
-        // Mofletes
-        drawCircle(Color(0xFFFFB3C7), radius = w * 0.035f, center = Offset(w * 0.27f, h * 0.66f))
-        drawCircle(Color(0xFFFFB3C7), radius = w * 0.035f, center = Offset(w * 0.73f, h * 0.66f))
-        // Cuerpo
-        drawRoundRect(violet, Offset(w * 0.3f, h * 0.78f), Size(w * 0.4f, h * 0.2f), CornerRadius(w * 0.1f))
-        drawCircle(Color.White, radius = w * 0.04f, center = Offset(w * 0.5f, h * 0.88f))
-    }
+fun Mascot(size: Dp = 64.dp, modifier: Modifier = Modifier, happy: Boolean = false, pose: Cuac? = null) {
+    val p = pose ?: if (happy) Cuac.Feliz else Cuac.Saluda
+    Image(
+        painterResource(p.image),
+        contentDescription = "Cuac, la mascota de Fit-In",
+        contentScale = ContentScale.Fit,
+        modifier = modifier.size(size),
+    )
 }
 
 /** Botón principal en degradado violeta, en píldora y a todo lo ancho. */
@@ -791,13 +774,13 @@ fun ActivityCover(a: Activity, modifier: Modifier = Modifier, small: Boolean = f
 
 /** Mascota que flota suavemente arriba y abajo (da vida a las pantallas). */
 @Composable
-fun FloatingMascot(size: Dp, modifier: Modifier = Modifier, happy: Boolean = false) {
+fun FloatingMascot(size: Dp, modifier: Modifier = Modifier, happy: Boolean = false, pose: Cuac? = null) {
     val t = rememberInfiniteTransition(label = "mascota")
     val dy by t.animateFloat(
         initialValue = 0f, targetValue = -8f,
         animationSpec = infiniteRepeatable(tween(1400, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "flotar",
     )
-    Mascot(size, modifier.graphicsLayer { translationY = dy * density }, happy = happy)
+    Mascot(size, modifier.graphicsLayer { translationY = dy * density }, happy = happy, pose = pose)
 }
 
 /** Barra de progreso que se rellena con animación. */

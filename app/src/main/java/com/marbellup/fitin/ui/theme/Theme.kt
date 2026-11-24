@@ -26,7 +26,7 @@ import com.marbellup.fitin.R
 /*
  * Estilo (rediseño 2026): app deportiva luminosa en lila y violeta, con fondos en degradado
  * suave, tarjetas blancas tipo cristal muy redondeadas, botones en píldora, fotos de cada
- * deporte y la mascota robot de Fit-In como asistente.
+ * deporte y Cuac, el patito mascota de Fit-In como asistente.
  * Los estados conservan su significado: verde = comprobado, ámbar = falta algo,
  * rojo = barrera. Siempre van acompañados de texto. Todos los textos cumplen contraste AA.
  */

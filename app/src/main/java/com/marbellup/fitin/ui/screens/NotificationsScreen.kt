@@ -53,7 +53,7 @@ fun NotificationsScreen(state: AppState) {
 
             if (state.notifications.isEmpty()) {
                 Row(Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Mascot(56.dp)
+                    Mascot(56.dp, pose = com.marbellup.fitin.ui.Cuac.Duerme)
                     Text("Aún no hay avisos. Cuando salga algo que encaje contigo, aparecerá aquí y en tu móvil.",
                         style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
                 }

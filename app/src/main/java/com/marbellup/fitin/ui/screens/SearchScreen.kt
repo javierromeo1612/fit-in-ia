@@ -89,8 +89,8 @@ fun SearchScreen(state: AppState) {
 
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
                 when {
-                    state.query.isBlank() -> Hint("Escribe una o varias palabras: deporte, sitio, zona, hora o lo que necesitas (por ejemplo «piscina grúa» o «yoga tarde»).")
-                    results.isEmpty() -> Hint("No hay actividades con «${state.query}». Prueba con otra palabra.")
+                    state.query.isBlank() -> Hint(com.marbellup.fitin.ui.Cuac.Piensa, "Escribe una o varias palabras: deporte, sitio, zona, hora o lo que necesitas (por ejemplo «piscina grúa» o «yoga tarde»).")
+                    results.isEmpty() -> Hint(com.marbellup.fitin.ui.Cuac.Enfadado, "No hay actividades con «${state.query}». Prueba con otra palabra.")
                     else -> {
                         Text(
                             "${results.size} ${if (results.size == 1) "actividad" else "actividades"} · ordenadas por la IA para ti",
@@ -108,9 +108,9 @@ fun SearchScreen(state: AppState) {
 }
 
 @Composable
-private fun Hint(text: String) {
+private fun Hint(pose: com.marbellup.fitin.ui.Cuac, text: String) {
     Column(Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        FloatingMascot(96.dp)
+        FloatingMascot(96.dp, pose = pose)
         Text(text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 12.dp),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }

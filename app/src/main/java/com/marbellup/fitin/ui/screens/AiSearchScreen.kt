@@ -75,7 +75,7 @@ fun AiSearchScreen(state: AppState) {
             }
 
             Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-                com.marbellup.fitin.ui.FloatingMascot(64.dp)
+                com.marbellup.fitin.ui.FloatingMascot(64.dp, pose = com.marbellup.fitin.ui.Cuac.Piensa)
                 Text(
                     say("¡Hola, ${state.userName}! Marca lo que necesitas y lo que te gusta. Con eso te recomiendo actividades y sitios.",
                         "Marca lo que necesitas. Yo te digo qué hacer y dónde."),
