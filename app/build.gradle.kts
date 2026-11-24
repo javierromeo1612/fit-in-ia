@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     // Avisos periódicos en segundo plano (la IA revisa actividades nuevas aunque la app esté cerrada).
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.webkit)
     // Simulación que demuestra que el modelo aprende (app/src/test).
     testImplementation(libs.junit)
     debugImplementation(libs.androidx.compose.ui.tooling)

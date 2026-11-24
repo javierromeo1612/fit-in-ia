@@ -108,7 +108,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 // ⭐ Actividades cerca de ti · Ver todas →
                 SectionTitle(if (state.sport == null) "Actividades cerca de ti" else state.sport!!.label, "Ver todas") {
-                    state.tab = Tab.ParaTi
+                    state.open(Step.Search)
                 }
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     if (list.isEmpty()) {
@@ -126,7 +126,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             Text("¿Necesitas ayuda?", style = MaterialTheme.typography.titleLarge, color = Color.White)
                             Row(Modifier.padding(top = 6.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.22f))
                                 .padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("Pregúntale a Fit-In", style = MaterialTheme.typography.labelLarge, color = Color.White)
+                                Text("Pregúntale a Cuac", style = MaterialTheme.typography.labelLarge, color = Color.White)
                                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
                                     tint = Color.White, modifier = Modifier.size(18.dp).padding(start = 4.dp))
                             }

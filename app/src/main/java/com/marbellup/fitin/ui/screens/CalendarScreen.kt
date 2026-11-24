@@ -173,11 +173,11 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                 FloatingMascot(52.dp)
                                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                                     Text("Este día está libre", style = MaterialTheme.typography.titleMedium)
-                                    Text("Elige un día con punto o mira lo que te recomiendo.", style = MaterialTheme.typography.bodyMedium)
+                                    Text("Elige un día con punto o mira las actividades en Inicio.", style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
-                            GradientButton("Ver recomendaciones", Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-                                state.tab = com.marbellup.fitin.Tab.ParaTi
+                            GradientButton("Ver actividades", Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                                state.tab = com.marbellup.fitin.Tab.Inicio
                             }
                         }
                     } else {

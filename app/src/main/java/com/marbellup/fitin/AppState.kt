@@ -29,7 +29,7 @@ import com.marbellup.fitin.notify.Alerts
 enum class Tab(val label: String) {
     Inicio("Inicio"),
     Calendario("Calendario"),
-    ParaTi("Para ti"),
+    ParaTi("Chat"),
     Perfil("Perfil"),
 }
 

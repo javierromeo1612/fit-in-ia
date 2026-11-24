@@ -460,7 +460,7 @@ fun FitInBottomBar(state: AppState) {
                     }
                 }
             }
-            TabItem(state, Tab.ParaTi, Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome)
+            TabItem(state, Tab.ParaTi, Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
             TabItem(state, Tab.Perfil, Icons.Filled.Person, Icons.Outlined.Person)
         }
     }

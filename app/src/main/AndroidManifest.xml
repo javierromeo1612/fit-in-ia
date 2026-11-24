@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Avisos de actividades que encajan contigo. La IA funciona entera en el móvil: no hace falta Internet. -->
+    <!-- Avisos de actividades que encajan contigo. La IA de recomendaciones funciona entera en el móvil. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Solo para el chat con Cuac (Botpress), que habla con el bot por Internet. -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
