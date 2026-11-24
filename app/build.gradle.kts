@@ -10,11 +10,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.marbellup.fitin"
+        // Identificador propio: se instala junto a la Fit-In original sin sustituirla.
+        applicationId = "com.marbellup.fitin.ia"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = 2
+        versionName = "2.0-ia"
     }
 
     // Clave de firma FIJA para las compilaciones de prueba: así cada APK nuevo se instala
