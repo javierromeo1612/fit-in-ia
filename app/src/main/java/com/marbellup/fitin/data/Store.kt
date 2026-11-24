@@ -104,6 +104,23 @@ class Store(context: Context) {
         prefs.edit().putString("inbox", arr.toString()).apply()
     }
 
+    // ---------------------------------------------------------- «¿Qué tal fue?»
+    /** Valoraciones tras cada actividad: id → (carita, texto). Solo en el móvil. */
+    fun loadReviews(): Map<String, Valoracion> {
+        val j = prefs.getString("reviews", null)?.let { JSONObject(it) } ?: return emptyMap()
+        return j.keys().asSequence().mapNotNull { id ->
+            val o = j.optJSONObject(id) ?: return@mapNotNull null
+            val c = Carita.entries.firstOrNull { it.name == o.optString("c") } ?: return@mapNotNull null
+            id to Valoracion(c, o.optString("t"))
+        }.toMap()
+    }
+
+    fun saveReviews(m: Map<String, Valoracion>) {
+        val j = JSONObject()
+        m.forEach { (id, v) -> j.put(id, JSONObject().put("c", v.carita.name).put("t", v.texto)) }
+        prefs.edit().putString("reviews", j.toString()).apply()
+    }
+
     fun clearLearning() {
         prefs.edit().remove("weights").remove("updates").remove("history").apply()
     }

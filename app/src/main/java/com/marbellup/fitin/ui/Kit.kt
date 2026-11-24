@@ -599,6 +599,45 @@ val Need.shortLabel: String
         Need.Material -> "Material adaptado"
         Need.Monitor -> "Monitor"
         Need.GrupoReducido -> "Grupo pequeño"
+        Need.Guia -> "Persona guía"
+        Need.Bucle -> "Bucle magnético"
+        Need.Tranquilo -> "Sin mucho ruido"
+        Need.LecturaFacil -> "Lectura Fácil"
+        Need.Transporte -> "Transporte"
+        Need.PuertasAnchas -> "Puertas anchas"
+        Need.DistanciasCortas -> "Distancias cortas"
+        Need.BanoAdaptado -> "Baño adaptado"
+        Need.AyudaCambiarse -> "Ayuda al cambiarse"
+        Need.DuchaAdaptada -> "Ducha con asiento"
+        Need.VestuarioIndividual -> "Vestuario individual"
+        Need.BanoCerca -> "Baño cerca"
+        Need.AltoContraste -> "Alto contraste"
+        Need.Iluminacion -> "Buena luz"
+        Need.Audiodescripcion -> "Explicación en voz"
+        Need.PerroAsistencia -> "Perro de asistencia"
+        Need.AvisosVisuales -> "Avisos visuales"
+        Need.Vocaliza -> "Hablar claro"
+        Need.InfoEscrita -> "Info por escrito"
+        Need.Saac -> "Comunicación con tablero"
+        Need.PasoAPaso -> "Paso a paso"
+        Need.MasTiempo -> "Más tiempo"
+        Need.LuzSuave -> "Luz suave"
+        Need.EspacioCalma -> "Sitio de calma"
+        Need.ConocerAntes -> "Conocerlo antes"
+        Need.AvisarCambios -> "Avisar de cambios"
+        Need.Acogida -> "Recibirme al llegar"
+        Need.IntensidadBaja -> "Intensidad baja"
+        Need.Pausas -> "Pausas"
+        Need.Sentado -> "Sentado"
+        Need.SinCompetir -> "Sin competir"
+        Need.Familiar -> "Con un familiar"
+        Need.MismoGrupo -> "Mismo grupo"
+        Need.MismaEdad -> "Gente de mi edad"
+        Need.PrimerosAuxilios -> "Primeros auxilios"
+        Need.Medicacion -> "Medicación"
+        Need.SombraAgua -> "Sombra y agua"
+        Need.AguaTemplada -> "Agua climatizada"
+        Need.Gratuita -> "Gratis o barata"
         else -> label
     }
 
@@ -621,6 +660,41 @@ val Need.icon: ImageVector
         Need.Material -> Icons.Filled.Settings
         Need.Monitor -> Icons.Filled.SupportAgent
         Need.Acompanante -> Icons.Filled.Handshake
+        Need.Ascensor -> Icons.AutoMirrored.Filled.Accessible
+        Need.PuertasAnchas -> Icons.AutoMirrored.Filled.Accessible
+        Need.DistanciasCortas -> Icons.AutoMirrored.Filled.Accessible
+        Need.BanoAdaptado -> Icons.Filled.Wc
+        Need.AyudaCambiarse -> Icons.Filled.Wc
+        Need.DuchaAdaptada -> Icons.Filled.Wc
+        Need.VestuarioIndividual -> Icons.Filled.Wc
+        Need.BanoCerca -> Icons.Filled.Wc
+        Need.AltoContraste -> Icons.Filled.Visibility
+        Need.Iluminacion -> Icons.Filled.Lightbulb
+        Need.Audiodescripcion -> Icons.Filled.Hearing
+        Need.PerroAsistencia -> Icons.Filled.Handshake
+        Need.AvisosVisuales -> Icons.Filled.NotificationsActive
+        Need.Vocaliza -> Icons.Filled.Hearing
+        Need.InfoEscrita -> Icons.AutoMirrored.Filled.MenuBook
+        Need.Saac -> Icons.Filled.Image
+        Need.PasoAPaso -> Icons.AutoMirrored.Filled.MenuBook
+        Need.MasTiempo -> Icons.Filled.AccessTime
+        Need.LuzSuave -> Icons.Filled.Nightlight
+        Need.EspacioCalma -> Icons.Filled.SelfImprovement
+        Need.ConocerAntes -> Icons.Filled.Place
+        Need.AvisarCambios -> Icons.Filled.NotificationsActive
+        Need.Acogida -> Icons.Filled.VolunteerActivism
+        Need.IntensidadBaja -> Icons.Filled.Spa
+        Need.Pausas -> Icons.Filled.AccessTime
+        Need.Sentado -> Icons.AutoMirrored.Filled.Accessible
+        Need.SinCompetir -> Icons.Filled.SentimentSatisfied
+        Need.Familiar -> Icons.Filled.Groups
+        Need.MismoGrupo -> Icons.Filled.Groups
+        Need.MismaEdad -> Icons.Filled.Groups
+        Need.PrimerosAuxilios -> Icons.Filled.HealthAndSafety
+        Need.Medicacion -> Icons.Filled.HealthAndSafety
+        Need.SombraAgua -> Icons.Filled.WbSunny
+        Need.AguaTemplada -> Icons.Filled.Pool
+        Need.Gratuita -> Icons.Filled.Star
     }
 
 val Slot.icon: ImageVector
@@ -706,6 +780,41 @@ val Need.emoji: String
         Need.Material -> "🧰"
         Need.Monitor -> "🧑‍🏫"
         Need.Acompanante -> "🤝"
+        Need.Ascensor -> "🛗"
+        Need.PuertasAnchas -> "🚪"
+        Need.DistanciasCortas -> "🪑"
+        Need.BanoAdaptado -> "🚽"
+        Need.AyudaCambiarse -> "👕"
+        Need.DuchaAdaptada -> "🚿"
+        Need.VestuarioIndividual -> "🔐"
+        Need.BanoCerca -> "🧻"
+        Need.AltoContraste -> "🔆"
+        Need.Iluminacion -> "💡"
+        Need.Audiodescripcion -> "🗣️"
+        Need.PerroAsistencia -> "🐕‍🦺"
+        Need.AvisosVisuales -> "🚨"
+        Need.Vocaliza -> "👄"
+        Need.InfoEscrita -> "📝"
+        Need.Saac -> "📲"
+        Need.PasoAPaso -> "🔢"
+        Need.MasTiempo -> "⏳"
+        Need.LuzSuave -> "🌙"
+        Need.EspacioCalma -> "🧘"
+        Need.ConocerAntes -> "🗺️"
+        Need.AvisarCambios -> "🔔"
+        Need.Acogida -> "👋"
+        Need.IntensidadBaja -> "🐢"
+        Need.Pausas -> "⏸️"
+        Need.Sentado -> "💺"
+        Need.SinCompetir -> "😊"
+        Need.Familiar -> "👨‍👩‍👧"
+        Need.MismoGrupo -> "🔁"
+        Need.MismaEdad -> "🧑‍🤝‍🧑"
+        Need.PrimerosAuxilios -> "⛑️"
+        Need.Medicacion -> "💊"
+        Need.SombraAgua -> "⛱️"
+        Need.AguaTemplada -> "🌡️"
+        Need.Gratuita -> "🆓"
     }
 
 val Slot.emoji: String

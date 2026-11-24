@@ -51,6 +51,13 @@ La versión 2 trae un rediseño completo (lila, cristal y mascota) y un **recome
 
 Además: 14 deportes y más de 20 actividades de ejemplo con portadas distintas, buscador por palabras clave, calendario por semana o mes y «Mis logros» con estadísticas y medallas.
 
+### Traído de la versión de Talent Land
+
+- **«Cuéntanoslo»:** la persona cuenta con sus palabras, **escribiendo o con la voz**, qué necesita. Un **modelo propio** del equipo (regresión logística, unos 570 KB, dentro del móvil y sin internet) propone las necesidades con su «porque dijiste…» y pregunta cuando duda. Nada se guarda sin confirmar. Ver [`modelo/`](modelo).
+- **Catálogo de 50 necesidades en 9 grupos** (antes 16).
+- **«¿Qué tal fue?»** después de cada actividad: carita y unas palabras (también con la voz). Enseña al recomendador y, si en lo que cuentas aparece una necesidad nueva («había mucho ruido»), Cuac propone añadirla al perfil.
+- Fuentes Atkinson Hyperlegible Next en versiones fijas (la negrita no se veía en HyperOS).
+
 Cómo funciona, fórmulas, simulación y guion de demo: **[`ARQUITECTURA-IA.md`](ARQUITECTURA-IA.md)**. Las pantallas anteriores están en [`legacy-ui/`](legacy-ui).
 
 ## Lo que es (y lo que no)

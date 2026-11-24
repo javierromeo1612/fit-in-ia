@@ -5,6 +5,15 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Solo para el chat con Cuac (Botpress), que habla con el bot por Internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- «Cuéntanoslo» y «¿Qué tal fue?»: dictado por voz con el reconocimiento del sistema. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Reconocimiento de voz del sistema (visibilidad de paquetes en Android 11+). -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"

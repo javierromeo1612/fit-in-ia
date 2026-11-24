@@ -362,5 +362,7 @@ object Recommender {
     /** Necesidades que dependen del sitio físico (las demás dependen de la actividad). */
     val FACILITY_NEEDS = setOf(
         Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Grua, Need.Cubierta, Need.Bucle, Need.Tranquilo,
+        Need.Ascensor, Need.PuertasAnchas, Need.BanoAdaptado, Need.DuchaAdaptada, Need.VestuarioIndividual,
+        Need.AltoContraste, Need.Iluminacion, Need.AguaTemplada, Need.SombraAgua,
     )
 }

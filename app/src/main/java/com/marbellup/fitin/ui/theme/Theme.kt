@@ -193,15 +193,17 @@ private val DarkColors = darkColorScheme(
     inversePrimary = Color(0xFF5B3FD6),
 )
 
-/** Atkinson Hyperlegible Next: diseñada por el Braille Institute para baja visión. */
-@OptIn(ExperimentalTextApi::class)
-private fun atkinson(weight: Int) = Font(
-    resId = R.font.atkinson_next,
-    weight = FontWeight(weight),
-    variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
+/**
+ * Atkinson Hyperlegible Next: diseñada por el Braille Institute para baja visión.
+ * En versiones fijas (normal, media, negrita y extranegrita): algunos móviles (HyperOS)
+ * no aplican la negrita de la fuente variable.
+ */
+private val Atkinson = FontFamily(
+    Font(R.font.atkinson_regular, FontWeight.Normal),
+    Font(R.font.atkinson_medium, FontWeight.Medium),
+    Font(R.font.atkinson_bold, FontWeight.Bold),
+    Font(R.font.atkinson_extrabold, FontWeight.ExtraBold),
 )
-
-private val Atkinson = FontFamily(atkinson(400), atkinson(500), atkinson(700), atkinson(800))
 
 /** Nunito: redondeada y gruesa, como la tipografía de la referencia visual (licencia OFL). */
 @OptIn(ExperimentalTextApi::class)

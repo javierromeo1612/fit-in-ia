@@ -86,6 +86,10 @@ fun AiSearchScreen(state: AppState) {
                 )
             }
 
+            CuentanosloBanner(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp)) {
+                state.open(com.marbellup.fitin.Step.Cuentanoslo)
+            }
+
             Title("¿Qué necesitas?", "Solo lo que necesitas, nunca qué tienes.")
             for (g in NeedGroup.entries) {
                 Text(g.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,

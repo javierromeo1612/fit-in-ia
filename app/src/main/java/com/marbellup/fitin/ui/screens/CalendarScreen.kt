@@ -254,19 +254,22 @@ private fun AgendaRow(state: AppState, a: Activity) {
             Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (booked) {
-            // Valorar enseña al modelo qué le gusta de verdad (la señal más fuerte).
-            val rating = state.ratingOf(a.id)
-            Row(Modifier.padding(start = 56.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(when (rating) { true -> "Te gustó"; false -> "No te gustó"; null -> "¿Te ha gustado?" },
-                    style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                IconButton(onClick = { state.rate(a.id, true) }) {
-                    Icon(Icons.Filled.ThumbUp, contentDescription = "Me ha gustado",
-                        tint = if (rating == true) x.ok else MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                IconButton(onClick = { state.rate(a.id, false) }) {
-                    Icon(Icons.Filled.ThumbDown, contentDescription = "No me ha gustado",
-                        tint = if (rating == false) x.barrier else MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+            // «¿Qué tal fue?»: valorar enseña al modelo qué le gusta de verdad (la señal más fuerte).
+            val valoracion = state.reviews[a.id]
+            FilledTonalButton(
+                onClick = { state.open(Step.QueTalFue(a.id)) },
+                shape = RoundedCornerShape(50),
+                modifier = Modifier.padding(start = 56.dp, top = 6.dp).heightIn(min = 44.dp),
+            ) {
+                Text(
+                    when (valoracion?.carita) {
+                        com.marbellup.fitin.data.Carita.Genial -> "🤩 ¡Genial! · Cambiar"
+                        com.marbellup.fitin.data.Carita.Bien -> "🙂 Bien · Cambiar"
+                        com.marbellup.fitin.data.Carita.Regular -> "😕 Regular · Cambiar"
+                        null -> "¿Qué tal fue?"
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                )
             }
         }
     }

@@ -4,12 +4,14 @@ import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.marbellup.fitin.data.Activity
 import com.marbellup.fitin.data.AppNotification
 import com.marbellup.fitin.data.Barrier
+import com.marbellup.fitin.data.Carita
 import com.marbellup.fitin.data.BarrierStatus
 import com.marbellup.fitin.data.Dates
 import com.marbellup.fitin.data.GroupMember
@@ -24,6 +26,7 @@ import com.marbellup.fitin.data.Signal
 import com.marbellup.fitin.data.Slot
 import com.marbellup.fitin.data.Sport
 import com.marbellup.fitin.data.Store
+import com.marbellup.fitin.data.Valoracion
 import com.marbellup.fitin.notify.Alerts
 
 enum class Tab(val label: String) {
@@ -47,6 +50,10 @@ sealed interface Step {
     /** Buscador por palabras clave. */
     data object Search : Step
     data object Achievements : Step
+    /** «Cuéntanoslo»: necesidades contadas con texto o con la voz (modelo propio, sin internet). */
+    data object Cuentanoslo : Step
+    /** «¿Qué tal fue?» después de una actividad. */
+    data class QueTalFue(val activityId: String) : Step
 }
 
 data class Booking(val activityId: String, val companion: String)
@@ -100,7 +107,12 @@ class AppState(app: Application) : AndroidViewModel(app) {
     var banner by mutableStateOf<AppNotification?>(null)
     val unread: Int get() = notifications.count { it.status == "pending" }
 
+    // ---- «¿Qué tal fue?»
+    val reviews = mutableStateMapOf<String, Valoracion>().apply { putAll(store.loadReviews()) }
+
     init {
+        // Modelo propio de «Cuéntanoslo»: se carga de assets la primera vez que se usa.
+        com.marbellup.fitin.ai.propio.CuentanosloPropio.iniciar { app.assets.open("modelo_cuentanoslo.bin") }
         // Actividades «publicadas» en demos anteriores vuelven al catálogo.
         val published = store.loadSet("published")
         SampleData.upcoming.filter { it.id in published && SampleData.created.none { c -> c.id == it.id } }
@@ -165,6 +177,24 @@ class AppState(app: Application) : AndroidViewModel(app) {
         modelVersion++
     }
 
+    /** Guarda lo que la persona confirmó en «Cuéntanoslo»: se suma a lo que ya tenía. */
+    fun aplicarPerfil(elegidas: Set<Need>, deportes: List<Sport>, franja: com.marbellup.fitin.ai.PerfilIA.Franja) {
+        updateProfile(
+            profile.copy(
+                needs = profile.needs + elegidas,
+                sports = profile.sports + deportes,
+                slots = franja.slot?.let { profile.slots + it } ?: profile.slots,
+            ),
+        )
+    }
+
+    /** «¿Qué tal fue?»: guarda la valoración y enseña al modelo (Regular = no le gustó). */
+    fun valorar(activityId: String, carita: Carita, texto: String) {
+        reviews[activityId] = Valoracion(carita, texto.trim())
+        store.saveReviews(reviews)
+        rate(activityId, carita != Carita.Regular)
+    }
+
     fun toggle(need: Need) = updateProfile(profile.copy(needs = if (need in needs) needs - need else needs + need))
     fun toggleSport(s: Sport) = updateProfile(profile.copy(sports = if (s in profile.sports) profile.sports - s else profile.sports + s))
     fun toggleSlot(s: Slot) = updateProfile(profile.copy(slots = if (s in profile.slots) profile.slots - s else profile.slots + s))
@@ -191,7 +221,7 @@ class AppState(app: Application) : AndroidViewModel(app) {
     fun startOnboarding() {
         finishOnboarding()
         steps.clear()
-        steps.add(Step.AiSearch)
+        steps.add(Step.Cuentanoslo)
     }
 
     fun finishOnboarding() {

@@ -1,0 +1,10 @@
+Mi suegra tiene párkinson, tarda en hacer las cosas y se cansa al caminar. Le gustaría algo por la mañana.	DistanciasCortas,FAMILIAR,F_Manana,MasTiempo
+Tengo EPOC y me falta el aire con nada. Me encantaría volver a la piscina.	D_Natacion,IntensidadBaja,Pausas
+Mi novio es ciego desde los veinte años y quiere probar el tándem en bici.	Audiodescripcion,D_Ciclismo,FAMILIAR,Guia
+Soy Andrea, tengo 16 años y uso audífonos. Busco gente de mi edad para jugar al baloncesto.	Bucle,D_Baloncesto,MismaEdad
+A mi tío le amputaron una pierna y ahora lleva prótesis. Se agobia con mucha gente.	FAMILIAR,GrupoReducido,SinEscalones
+Mi hijo tiene espina bífida, va en silla y usa sonda.	BanoAdaptado,BanoCerca,FAMILIAR,PuertasAnchas,SinEscalones
+Mi abuela tiene alzhéimer: se pierde con facilidad y necesita caras conocidas.	FAMILIAR,MismoGrupo,PasoAPaso
+Tengo TDAH y si me dan muchas instrucciones a la vez me pierdo. Prefiero no competir.	PasoAPaso,SinCompetir
+Mi pareja va en silla eléctrica y necesitamos un vestuario donde pueda ayudarle a cambiarse.	AyudaCambiarse,BanoAdaptado,FAMILIAR,PuertasAnchas,SinEscalones,VestuarioIndividual
+Tengo artritis y el agua fría me destroza las manos. Me gustaría nadar por la tarde.	AguaTemplada,D_Natacion,F_Tarde,IntensidadBaja

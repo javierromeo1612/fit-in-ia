@@ -1,0 +1,25 @@
+Os escribo por mi hijo Álvaro, de 9 años. Tiene una parálisis y va en silla de ruedas manual. Le flipa el baloncesto y querría jugar los sábados por la mañana.	BanoAdaptado,D_Baloncesto,FAMILIAR,F_Manana,PuertasAnchas,SinEscalones
+Me llamo Carmen y tengo 67 años. Me cuesta mucho andar y me fatigo en cuanto hago un poco de esfuerzo. Me gustaría probar la natación.	D_Natacion,DistanciasCortas,IntensidadBaja,Pausas,SinEscalones
+Mi hija Marta es sorda y usamos lengua de signos en casa. Es muy deportista y le encanta la bici.	AvisosVisuales,D_Ciclismo,FAMILIAR,Signos
+Tengo 52 años, soy diabético y me tengo que pinchar insulina antes de comer. Busco algo tranquilo por la tarde.	F_Tarde,Medicacion,PrimerosAuxilios,Tranquilo
+Mi hermano tiene autismo y cuando hay mucho jaleo se pone muy nervioso. Necesita saber de antemano adónde va.	AvisarCambios,ConocerAntes,EspacioCalma,FAMILIAR,Tranquilo
+Desde que me jubilé no tengo con quién hacer deporte y me aburro mucho en casa. Me encantaría hacer senderismo.	Acompanante,D_Senderismo
+Es para mi madre: tiene 82 años, ve muy poco y le cuesta oír. No quiere ir sola.	Acompanante,AltoContraste,Bucle,FAMILIAR,Iluminacion,Vocaliza
+Soy usuaria de silla de ruedas y voy a todas partes con mi perro de asistencia. Me gustaría jugar al tenis.	BanoAdaptado,D_Tenis,PerroAsistencia,PuertasAnchas,SinEscalones
+Mi hijo tiene síndrome de Down, necesita que le expliquen las cosas despacio y con dibujos. Le gusta mucho el agua.	D_Natacion,FAMILIAR,LecturaFacil,MasTiempo,PasoAPaso,Pictogramas
+Tengo epilepsia y tomo pastillas cada ocho horas. Prefiero grupos pequeños.	GrupoReducido,Medicacion,PrimerosAuxilios
+Mi abuelo camina con andador y no puede con las escaleras. Le haría ilusión jugar al golf.	Ascensor,D_Golf,FAMILIAR,PuertasAnchas,SinEscalones
+Hola, me llamo Kike. Tengo ansiedad social y entrar en un sitio donde no conozco a nadie me cuesta un mundo.	Acogida,ConocerAntes
+Mi hija no habla y se comunica con pictogramas en una tablet. Necesita que alguien esté con ella durante la actividad.	FAMILIAR,Monitor,Pictogramas,Saac
+No tengo coche y vivo en las afueras, así que necesito que me lleven. Me apunto a lo que sea por la tarde.	F_Tarde,Transporte
+Mi pareja usa audífonos y lee los labios. Queremos hacer algo juntos los fines de semana.	Bucle,FAMILIAR,Familiar,Vocaliza
+Llevo muletas por una lesión de tobillo y estoy recuperándome. Me gustaría nadar un poco.	D_Natacion,IntensidadBaja,Pausas,SinEscalones
+Mi hija Inés tiene TEA y le molestan muchísimo las luces fuertes y los ruidos.	AvisarCambios,ConocerAntes,EspacioCalma,FAMILIAR,LuzSuave,Tranquilo
+Soy ciega y me gustaría hacer rutas por la montaña con alguien que me guíe.	Audiodescripcion,D_Senderismo,Guia
+Mi padre tiene problemas de corazón y no puede hacer esfuerzos. El calor le sienta fatal.	FAMILIAR,IntensidadBaja,SombraAgua
+Cobro una pensión muy pequeña y necesito algo barato. Me gusta montar en bicicleta.	D_Ciclismo,Gratuita
+Mi niño tiene discapacidad intelectual, es muy cariñoso y se agobia cuando hay mucha gente.	FAMILIAR,GrupoReducido,LecturaFacil,MasTiempo,PasoAPaso
+Tengo una lesión medular y uso una handbike. Necesito vestuario con camilla porque me cambio tumbado.	AyudaCambiarse,BanoAdaptado,Material,PuertasAnchas,SinEscalones,Vestuario
+Mi hija es muy tímida y es su primera vez. Prefiere estar siempre con las mismas compañeras.	Acogida,FAMILIAR,MismoGrupo
+Soy Manuel, tengo 45 años y oigo perfectamente, pero tengo baja visión y con poca luz me pierdo. Me gustaría jugar al baloncesto por la noche.	AltoContraste,D_Baloncesto,F_Noche,Iluminacion
+Mi mujer tiene fibromialgia y tiene que parar a menudo. Le gusta caminar por la playa.	FAMILIAR,IntensidadBaja,Pausas

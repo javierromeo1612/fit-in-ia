@@ -1,0 +1,45 @@
+Es para mi hija Lucía, tiene diez años y va en silla. Le encanta el baloncesto, pero se cansa rápido. Con mucho ruido se agobia, y por las tardes está sola.	Acompanante,BanoAdaptado,D_Baloncesto,FAMILIAR,F_Tarde,IntensidadBaja,Pausas,PuertasAnchas,SinEscalones,Tranquilo
+Soy Pedro, tengo 60 años. Me operaron de la rodilla y veo mal de lejos. Me gustaría nadar por las mañanas con gente tranquila.	AltoContraste,D_Natacion,F_Manana,Iluminacion,IntensidadBaja,Pausas,Tranquilo
+Mi hijo Hugo tiene autismo, no habla mucho y le cuestan los cambios. Le encanta correr y el agua.	AvisarCambios,ConocerAntes,D_Natacion,EspacioCalma,FAMILIAR,Pictogramas,Saac,Tranquilo
+Hola, me llamo Rosa. Llevo audífono desde hace años y en sitios con eco no me entero de nada. Me apetece probar algo de raqueta.	Bucle,D_Tenis
+Mi padre tiene 78 años, anda con andador y se agota enseguida. Antes salía mucho al monte.	D_Senderismo,FAMILIAR,IntensidadBaja,Pausas,PuertasAnchas,SinEscalones
+Soy ciego total y siempre voy con mi perra guía. Me gustaría hacer algo en el agua.	Audiodescripcion,D_Natacion,Guia,PerroAsistencia
+Mi hermana Elena tiene síndrome de Down, es muy sociable pero se lía si le explican muchas cosas a la vez.	FAMILIAR,LecturaFacil,MasTiempo,PasoAPaso
+Tengo 35 años y soy sorda de nacimiento, me comunico con lengua de signos. Quiero apuntarme a baloncesto.	AvisosVisuales,D_Baloncesto,Signos
+Mi madre tiene diabetes y con el calor del verano lo pasa fatal. No tenemos coche.	FAMILIAR,Medicacion,PrimerosAuxilios,SombraAgua,Transporte
+Busco algo para mi hijo Mario, que tiene epilepsia. Es tímido y le cuesta muchísimo entrar en sitios donde no conoce a nadie.	Acogida,FAMILIAR,PrimerosAuxilios
+Me llamo Antonio, tengo 70 años y desde que enviudé estoy muy solo. Me gustaría salir en bici con alguien.	Acompanante,D_Ciclismo
+Mi hija usa una silla eléctrica y necesita que la ayuden a cambiarse. Le encanta nadar pero para entrar en la piscina necesita una grúa.	AyudaCambiarse,BanoAdaptado,D_Natacion,FAMILIAR,Grua,PuertasAnchas,SinEscalones
+Soy Nerea, tengo ansiedad y los sitios con mucha gente me agobian. Prefiero ir siempre con el mismo grupo.	ConocerAntes,GrupoReducido,MismoGrupo
+Mi sobrino Pablo no lee y entiende las cosas mejor con dibujos. Por la tarde, después del cole, está libre.	FAMILIAR,F_Tarde,Pictogramas
+Tengo asma y no puedo hacer esfuerzos fuertes. Me interesa el golf.	D_Golf,IntensidadBaja
+Mi marido tiene artrosis y le duele mucho caminar. Vamos justos de dinero.	DistanciasCortas,FAMILIAR,Gratuita,IntensidadBaja
+Hola, soy Inés. Tengo baja visión y con poca luz no veo casi nada. Las luces muy fuertes también me molestan.	AltoContraste,Iluminacion,LuzSuave
+Mi hijo es no verbal y se comunica con una tablet. Necesita a alguien pendiente de él todo el rato.	FAMILIAR,Monitor,Pictogramas,Saac
+Quiero empezar a hacer deporte. Trabajo por las mañanas y no tengo con quién ir.	Acompanante,F_Tarde
+Mi abuela tiene 85 años, usa bastón y no puede subir escaleras. Le gustaría caminar un poco por el campo.	Ascensor,D_Senderismo,FAMILIAR,SinEscalones
+Soy Javi, voy en silla desde un accidente de moto y juego con una silla deportiva. Me encanta el baloncesto.	BanoAdaptado,D_Baloncesto,Material,PuertasAnchas,SinEscalones
+Mi hija Sofía tiene TEA. Los cambios de horario la descolocan mucho y si se desborda necesita un rincón donde calmarse.	AvisarCambios,ConocerAntes,EspacioCalma,FAMILIAR,Tranquilo
+Oigo bastante mal y leo los labios, así que necesito que me hablen de frente.	Bucle,Vocaliza
+Mi padre tuvo un ictus, camina con dificultad y tarda en entender las instrucciones.	FAMILIAR,MasTiempo,SinEscalones
+Tengo fibromialgia y necesito parar a descansar a menudo. Mejor por la mañana.	F_Manana,IntensidadBaja,Pausas
+Cuido de mi hermano, que tiene parálisis cerebral y va en silla. No puede vestirse solo y para cambiarse hay que tumbarlo.	AyudaCambiarse,BanoAdaptado,FAMILIAR,PuertasAnchas,SinEscalones,Vestuario
+Me llamo Lola, tengo 16 años y soy muy vergonzosa. Es la primera vez que voy a hacer deporte en grupo.	Acogida
+Mi madre tiene 80 años y no aguanta mucho tiempo de pie. Quiere ir conmigo.	DistanciasCortas,FAMILIAR,Familiar
+Soy Sergio. No tengo ningún problema de movilidad, pero oigo mal y llevo implante coclear.	Bucle,Vocaliza
+Mi hijo tiene problemas de corazón y se cansa muchísimo. Le encanta la piscina.	D_Natacion,FAMILIAR,IntensidadBaja,Pausas
+Tengo una lesión medular y voy en silla. Conduzco un coche adaptado y necesito aparcar cerca.	Aparcamiento,BanoAdaptado,PuertasAnchas,SinEscalones
+Mi hija se tapa los oídos cuando hay jaleo y no le gustan los focos fuertes.	FAMILIAR,LuzSuave,Tranquilo
+Es para mi nieto, que tiene dificultades de aprendizaje. Le encanta montar en bicicleta.	D_Ciclismo,FAMILIAR,LecturaFacil,MasTiempo,PasoAPaso
+Me mareo con el sol y tengo que beber agua constantemente. Prefiero a última hora del día.	F_Noche,SombraAgua
+Vivo en un pueblo sin autobús y no conduzco. Me gustaría jugar al tenis.	D_Tenis,Transporte
+Mi hija tiene crisis epilépticas y toma su medicación a horas fijas.	FAMILIAR,Medicacion,PrimerosAuxilios
+Soy Paco, tengo 66 años, estoy jubilado y me gustaría hacer rutas por la sierra. Ve bien y camina perfectamente.	D_Senderismo
+Mi hijo lleva andador y se fatiga mucho. Por las tardes no tiene con quién ir.	Acompanante,FAMILIAR,F_Tarde,IntensidadBaja,Pausas,PuertasAnchas,SinEscalones
+Tengo pérdida auditiva y no me entero cuando pitan el silbato.	AvisosVisuales,Bucle,Vocaliza
+Mi hija es muy alegre y no tiene ninguna dificultad, solo quiere jugar al baloncesto con amigas.	D_Baloncesto,FAMILIAR
+Me cuesta mucho conocer gente nueva y prefiero caras conocidas. Me gusta nadar.	D_Natacion,MismoGrupo
+Mi padre es invidente y necesita que alguien le explique en voz lo que está pasando.	Audiodescripcion,FAMILIAR,Guia
+Estoy en paro y no puedo pagar cuotas. Me encanta el ciclismo.	D_Ciclismo,Gratuita
+Mi hijo tiene discapacidad intelectual y necesita a un monitor a su lado. Le encanta el agua.	D_Natacion,FAMILIAR,LecturaFacil,MasTiempo,Monitor,PasoAPaso
+Me llamo Irene, tengo 40 años y uso muletas desde la operación. Por la noche me viene mejor.	F_Noche,SinEscalones

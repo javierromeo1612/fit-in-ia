@@ -1,0 +1,12 @@
+Mi hija tiene 15 años y lo que más le apetece es estar con chicas de su edad. Va en silla y después de la piscina necesita ducharse sentada.	BanoAdaptado,D_Natacion,DuchaAdaptada,FAMILIAR,MismaEdad,PuertasAnchas,SinEscalones
+Soy Ramón, tengo 72 años y me mareo si estoy mucho rato de pie. Me gustaría algo tranquilo con gente de mi quinta.	MismaEdad,Sentado,Tranquilo
+Cambio yo a mi hija porque no puede vestirse sola, y como soy su padre necesito un vestuario donde podamos entrar los dos.	AyudaCambiarse,FAMILIAR,VestuarioIndividual
+Mi hermano usa pañal y tiene que tener el baño a mano. Le encanta montar en bici.	BanoCerca,D_Ciclismo,FAMILIAR
+Soy sordo y prefiero que me manden la información por mensaje, no por megafonía.	AvisosVisuales,InfoEscrita,Signos
+A mi hijo le agobia muchísimo competir, quiere jugar al baloncesto pero sin marcador ni presión.	D_Baloncesto,FAMILIAR,SinCompetir
+Tengo esclerosis múltiple: el frío me deja rígida y en el agua fría no me puedo mover. Me encanta nadar.	AguaTemplada,D_Natacion,IntensidadBaja,Pausas
+Mi madre tiene poco equilibrio y tiene que hacer los ejercicios sentada. Por las mañanas está libre.	F_Manana,FAMILIAR,Sentado
+Mi hijo tiene autismo, no soporta los ruidos fuertes y le cuesta mucho perder: mejor algo sin competición.	AvisarCambios,ConocerAntes,EspacioCalma,FAMILIAR,SinCompetir,Tranquilo
+Soy Lorena, tengo 19 años, voy en silla y quiero hacer deporte con gente joven. Me gusta el tenis.	BanoAdaptado,D_Tenis,MismaEdad,PuertasAnchas,SinEscalones
+Mi padre usa sonda y necesita un baño cerca; además oye fatal.	BanoCerca,Bucle,FAMILIAR,Vocaliza
+Tengo parálisis cerebral, la espasticidad empeora con el frío y necesito el agua calentita. Después me ducho sentado.	AguaTemplada,DuchaAdaptada

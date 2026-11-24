@@ -99,7 +99,7 @@ fun WelcomeScreen(state: AppState) {
             }
 
             Text(
-                "Dinos qué necesitas y la IA te propone actividad, sitio comprobado y compañía.",
+                "Cuéntanos con tu voz o escribiendo qué necesitas y la IA te propone actividad, sitio comprobado y compañía.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

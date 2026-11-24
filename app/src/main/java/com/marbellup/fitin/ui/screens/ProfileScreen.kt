@@ -110,6 +110,7 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             }
                         }
                     }
+                    MenuRow(Icons.Filled.Mic, "Cuéntanoslo (voz o texto)", color = funColor(4)) { state.open(Step.Cuentanoslo) }
                     MenuRow(Icons.Outlined.EmojiEvents, "Mis logros", color = funColor(2)) { state.open(Step.Achievements) }
                     Spacer(Modifier.height(4.dp))
                 }

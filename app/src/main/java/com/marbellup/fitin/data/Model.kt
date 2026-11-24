@@ -9,33 +9,140 @@ import java.time.LocalDate
  * Antes de un piloto hay que sustituirlas por instalaciones reales comprobadas.
  */
 
-enum class NeedGroup(val label: String) {
-    Movilidad("Para moverte"),
-    Sentidos("Para ver y oír"),
-    Comprension("Para entender"),
-    Apoyo("Apoyo durante la actividad"),
-    Sitio("Sobre el sitio"),
+/*
+ * Catálogo de necesidades (50 en 9 grupos), traído de la versión de Talent Land del equipo.
+ * Los nombres de los valores son los que usa el modelo propio de «Cuéntanoslo»: no cambiarlos.
+ */
+enum class NeedGroup(val label: String, val short: String) {
+    Movilidad("Para moverte", "Moverte"),
+    Bano("Vestuario y baño", "Vestuario"),
+    Ver("Para ver", "Ver"),
+    Oir("Para oír", "Oír"),
+    Comprension("Para entender", "Entender"),
+    Bienestar("Para estar a gusto", "A gusto"),
+    Apoyo("Durante la actividad", "Actividad"),
+    Compania("Compañía", "Compañía"),
+    Cuidados("Cuidados y otras", "Cuidados"),
 }
 
-/** Lo que una persona necesita. Nunca se pregunta por un diagnóstico. */
-enum class Need(val group: NeedGroup, val label: String) {
-    SinEscalones(NeedGroup.Movilidad, "Acceso sin escalones"),
-    Aparcamiento(NeedGroup.Movilidad, "Aparcamiento reservado"),
-    Vestuario(NeedGroup.Movilidad, "Vestuario y baño adaptados"),
-    Grua(NeedGroup.Movilidad, "Grúa de piscina"),
-    Transporte(NeedGroup.Movilidad, "Transporte hasta allí"),
-    Signos(NeedGroup.Sentidos, "Lengua de signos"),
-    Bucle(NeedGroup.Sentidos, "Bucle magnético"),
-    Guia(NeedGroup.Sentidos, "Guía para personas ciegas"),
-    Tranquilo(NeedGroup.Sentidos, "Entorno tranquilo"),
-    LecturaFacil(NeedGroup.Comprension, "Explicaciones sencillas"),
-    Pictogramas(NeedGroup.Comprension, "Pictogramas"),
-    GrupoReducido(NeedGroup.Comprension, "Grupo pequeño"),
-    Material(NeedGroup.Apoyo, "Material adaptado"),
-    Monitor(NeedGroup.Apoyo, "Monitor de apoyo"),
-    Acompanante(NeedGroup.Apoyo, "Alguien que me acompañe"),
-    Cubierta(NeedGroup.Sitio, "Instalación cubierta"),
+/**
+ * Lo que una persona necesita. Nunca se pregunta por un diagnóstico.
+ *
+ * [pista] explica a quién suele servir o cómo lo diría alguien con sus palabras.
+ * La usa la IA de «Cuéntanoslo» para deducir la necesidad aunque no se nombre,
+ * y el buscador del perfil.
+ *
+ * Los nombres de los valores son estables: los usan las actividades de ejemplo y la IA.
+ */
+enum class Need(val group: NeedGroup, val label: String, val pista: String) {
+    // Para moverte
+    SinEscalones(NeedGroup.Movilidad, "Acceso sin escalones", "va en silla de ruedas, usa andador o muletas, le cuestan las escaleras"),
+    Ascensor(NeedGroup.Movilidad, "Ascensor", "no puede subir escaleras, instalación en varias plantas"),
+    PuertasAnchas(NeedGroup.Movilidad, "Puertas y pasillos anchos", "silla de ruedas, andador"),
+    Aparcamiento(NeedGroup.Movilidad, "Aparcamiento reservado", "va en coche adaptado, tiene tarjeta de aparcamiento"),
+    DistanciasCortas(NeedGroup.Movilidad, "Distancias cortas y sitios para sentarse", "se cansa al caminar, no puede andar mucho"),
+    Transporte(NeedGroup.Movilidad, "Transporte hasta allí", "no tiene cómo llegar, no conduce, depende de otros para moverse"),
+
+    // Vestuario y baño
+    BanoAdaptado(NeedGroup.Bano, "Baño adaptado", "silla de ruedas, necesita barras de apoyo"),
+    Vestuario(NeedGroup.Bano, "Vestuario adaptado con camilla", "necesita tumbarse para cambiarse, silla de ruedas"),
+    AyudaCambiarse(NeedGroup.Bano, "Ayuda para cambiarte", "no puede vestirse solo"),
+    Grua(NeedGroup.Bano, "Grúa de piscina", "no puede entrar al agua por la escalera, necesita ayuda para entrar a la piscina"),
+    DuchaAdaptada(NeedGroup.Bano, "Ducha adaptada con asiento", "necesita ducharse sentado, silla de ruedas, después de nadar"),
+    VestuarioIndividual(NeedGroup.Bano, "Vestuario individual o familiar", "le cambia un familiar de otro sexo, necesita intimidad para cambiarse"),
+    BanoCerca(NeedGroup.Bano, "Baño siempre cerca", "incontinencia, usa sonda o pañal, necesita ir al baño a menudo"),
+
+    // Para ver
+    Guia(NeedGroup.Ver, "Persona guía", "es ciego, ve muy poco"),
+    AltoContraste(NeedGroup.Ver, "Señalización en alto contraste o braille", "baja visión, lee braille"),
+    Iluminacion(NeedGroup.Ver, "Buena iluminación", "ve poco, le cuesta ver con poca luz"),
+    Audiodescripcion(NeedGroup.Ver, "Explicaciones en voz de lo que pasa", "ciego, baja visión"),
+    PerroAsistencia(NeedGroup.Ver, "Perro de asistencia bienvenido", "va con perro guía o de asistencia"),
+
+    // Para oír
+    Signos(NeedGroup.Oir, "Intérprete de lengua de signos", "es sordo, se comunica en lengua de signos"),
+    Bucle(NeedGroup.Oir, "Bucle magnético", "usa audífono o implante coclear, oye mal"),
+    AvisosVisuales(NeedGroup.Oir, "Avisos visuales", "no oye los avisos o el silbato, sordera"),
+    Vocaliza(NeedGroup.Oir, "Monitor que hable de frente y claro", "lee los labios, oye mal"),
+    InfoEscrita(NeedGroup.Oir, "Información por escrito", "es sordo, prefiere mensajes o carteles a explicaciones habladas"),
+
+    // Para entender
+    LecturaFacil(NeedGroup.Comprension, "Explicaciones en Lectura Fácil", "le cuesta entender textos, discapacidad intelectual, no lee bien"),
+    Pictogramas(NeedGroup.Comprension, "Pictogramas", "entiende mejor con dibujos, no lee"),
+    Saac(NeedGroup.Comprension, "Comunicación aumentativa (tablero o app)", "no habla, se comunica con tablero, tablet o pictogramas"),
+    PasoAPaso(NeedGroup.Comprension, "Instrucciones paso a paso", "se pierde con muchas instrucciones a la vez"),
+    MasTiempo(NeedGroup.Comprension, "Más tiempo para cada cosa", "va a su ritmo, necesita más tiempo para entender o hacer"),
+
+    // Para estar a gusto
+    Tranquilo(NeedGroup.Bienestar, "Entorno tranquilo, sin mucho ruido", "se agobia con el ruido, hipersensibilidad, autismo"),
+    LuzSuave(NeedGroup.Bienestar, "Luz suave", "le molestan las luces fuertes o los focos"),
+    GrupoReducido(NeedGroup.Bienestar, "Grupo pequeño", "le agobia mucha gente, le cuesta en grupos grandes"),
+    EspacioCalma(NeedGroup.Bienestar, "Un sitio de calma para retirarse", "a veces necesita parar y estar solo un rato, se desborda"),
+    ConocerAntes(NeedGroup.Bienestar, "Conocer el sitio antes de ir", "le cuesta lo nuevo, ansiedad, no le gustan las sorpresas"),
+    AvisarCambios(NeedGroup.Bienestar, "Que me avisen de los cambios", "necesita rutina, le afectan los cambios de horario o de sitio"),
+    Acogida(NeedGroup.Bienestar, "Que me reciban en la entrada", "primera vez, timidez, no sabe a quién dirigirse"),
+
+    // Durante la actividad
+    Monitor(NeedGroup.Apoyo, "Monitor de apoyo", "necesita ayuda o atención durante la actividad"),
+    Material(NeedGroup.Apoyo, "Material adaptado", "silla deportiva, bicicleta adaptada, material especial"),
+    IntensidadBaja(NeedGroup.Apoyo, "Intensidad baja", "se cansa rápido, poca resistencia, problemas de corazón o respiración"),
+    Pausas(NeedGroup.Apoyo, "Pausas frecuentes", "se fatiga, necesita descansar a menudo"),
+    Sentado(NeedGroup.Apoyo, "Poder hacerlo sentado", "no aguanta de pie, poco equilibrio, se marea de pie"),
+    SinCompetir(NeedGroup.Apoyo, "Sin competir, a mi ritmo", "le agobia competir, quiere disfrutar sin presión ni marcador"),
+
+    // Compañía
+    Acompanante(NeedGroup.Compania, "Alguien que me acompañe", "está solo, no tiene con quién ir, le da miedo ir solo"),
+    Familiar(NeedGroup.Compania, "Poder ir con un familiar", "quiere ir con su madre, padre, pareja o hijos"),
+    MismoGrupo(NeedGroup.Compania, "El mismo grupo cada semana", "le cuesta conocer gente nueva, prefiere caras conocidas"),
+    MismaEdad(NeedGroup.Compania, "Gente de mi edad", "es adolescente o joven y quiere estar con gente de su edad, o es mayor y busca gente mayor"),
+
+    // Cuidados y otras
+    PrimerosAuxilios(NeedGroup.Cuidados, "Personal que sepa actuar si me encuentro mal", "crisis, convulsiones, problemas de salud que pueden surgir"),
+    Medicacion(NeedGroup.Cuidados, "Tomar medicación a una hora fija", "toma pastillas a su hora, necesita parar para medicarse"),
+    SombraAgua(NeedGroup.Cuidados, "Sombra y agua", "le afecta el calor, se deshidrata"),
+    AguaTemplada(NeedGroup.Cuidados, "Agua climatizada", "le afecta el frío, espasticidad, rigidez muscular, necesita el agua templada"),
+    Gratuita(NeedGroup.Cuidados, "Actividad gratuita o de bajo coste", "no puede pagar mucho, poco dinero"),
+    Cubierta(NeedGroup.Cuidados, "Instalación cubierta", "le afecta la lluvia, el frío o el sol fuerte, prefiere bajo techo"),
 }
+
+/**
+ * Las actividades e instalaciones de ejemplo se describieron con el catálogo corto (16 necesidades).
+ * Para que encajen con el catálogo nuevo, cada necesidad comprobada implica otras parecidas
+ * (p. ej. «sin escalones» → «puertas anchas»). Son datos de ejemplo.
+ */
+private val implica: Map<Need, Set<Need>> = mapOf(
+    Need.SinEscalones to setOf(Need.PuertasAnchas, Need.Ascensor, Need.DistanciasCortas),
+    Need.Vestuario to setOf(Need.BanoAdaptado, Need.DuchaAdaptada, Need.VestuarioIndividual, Need.BanoCerca),
+    Need.Grua to setOf(Need.AguaTemplada, Need.AyudaCambiarse),
+    Need.Signos to setOf(Need.AvisosVisuales, Need.Vocaliza, Need.InfoEscrita),
+    Need.Bucle to setOf(Need.Vocaliza),
+    Need.Guia to setOf(Need.Audiodescripcion, Need.PerroAsistencia, Need.AltoContraste, Need.Iluminacion),
+    Need.Tranquilo to setOf(Need.LuzSuave, Need.EspacioCalma, Need.SinCompetir),
+    Need.LecturaFacil to setOf(Need.PasoAPaso, Need.InfoEscrita, Need.ConocerAntes, Need.AvisarCambios),
+    Need.Pictogramas to setOf(Need.Saac),
+    Need.GrupoReducido to setOf(Need.MismoGrupo, Need.MasTiempo),
+    Need.Material to setOf(Need.Sentado),
+    Need.Monitor to setOf(Need.Acogida, Need.IntensidadBaja, Need.Pausas, Need.PrimerosAuxilios, Need.Medicacion, Need.MasTiempo),
+    Need.Acompanante to setOf(Need.Familiar),
+    Need.Cubierta to setOf(Need.Iluminacion),
+)
+
+/** Amplía las necesidades comprobadas de un sitio o actividad al catálogo completo. */
+fun ampliarNecesidades(base: Set<Need>, gratuita: Boolean = false): Set<Need> {
+    val extra = base.flatMap { implica[it].orEmpty() }.toMutableSet()
+    if (Need.Cubierta !in base) extra += Need.SombraAgua
+    if (gratuita) extra += Need.Gratuita
+    return base + extra
+}
+
+private fun List<Activity>.ampliadas(): List<Activity> =
+    map { it.copy(features = ampliarNecesidades(it.features, gratuita = it.seal == Seal.Ayuntamiento)) }
+
+
+/** «¿Qué tal fue?»: cómo le fue a la persona en una actividad. */
+enum class Carita(val label: String) { Regular("Regular"), Bien("Bien"), Genial("¡Genial!") }
+
+data class Valoracion(val carita: Carita, val texto: String)
 
 enum class Seal(val label: String) {
     Ayuntamiento("Sello del Ayuntamiento"),
@@ -396,7 +503,7 @@ object SampleData {
             howToArrive = "Autobús adaptado desde el centro. El sendero no tiene baño.",
             meetingNote = "El autobús sale a las 9:00 en punto.",
         ),
-    )
+    ).ampliadas()
 
     /** Instalaciones de ejemplo (nombres genéricos). Lo que cubre cada una es lo comprobado del SITIO. */
     val facilities = listOf(
@@ -422,7 +529,7 @@ object SampleData {
             setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario), setOf(Sport.Atletismo), Seal.Ayuntamiento),
         Facility("Playa accesible", "Zona este",
             setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario), setOf(Sport.Vela, Sport.Natacion), Seal.Ayuntamiento),
-    )
+    ).map { it.copy(features = ampliarNecesidades(it.features)) }
 
     /**
      * Actividades que «publica el Ayuntamiento» durante la demo (botón en Perfil). Sirven para
@@ -465,7 +572,7 @@ object SampleData {
             spotsLeft = 10, offPeak = false, howToArrive = "Autobús desde el centro.",
             meetingNote = "Salida a las 9:30.", level = "intermedio",
         ),
-    )
+    ).ampliadas()
 
     /** Atajo para declarar más actividades de ejemplo sin repetir tanto código. */
     private fun ex(
@@ -557,7 +664,7 @@ object SampleData {
             "Paseo en tándem para personas ciegas o con baja visión, con guía.",
             "Carril bici del paseo marítimo", "Zona este", setOf(Need.SinEscalones, Need.Aparcamiento, Need.Vestuario, Need.Guia, Need.Material),
             Seal.Ayuntamiento, 1, spots = 4),
-    )
+    ).ampliadas()
 
     /** Actividades que crea la persona usuaria durante la demo (solo en memoria). */
     val created = androidx.compose.runtime.mutableStateListOf<Activity>()
