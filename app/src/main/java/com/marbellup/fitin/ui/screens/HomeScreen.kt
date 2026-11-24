@@ -73,7 +73,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     Row(Modifier.padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(10.dp))
-                        Text("Dime qué necesitas y te recomiendo…", style = MaterialTheme.typography.bodyLarge,
+                        Text("Buscar actividades…", style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
                         Icon(Icons.Filled.AutoAwesome, contentDescription = "Recomendaciones con IA", tint = MaterialTheme.colorScheme.primary)
                     }
@@ -92,11 +92,16 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             state.sport = if (state.sport == s) null else s
                         }
                     }
+                    item {
+                        CategoryTile("Más", Icons.Filled.MoreHoriz, MaterialTheme.colorScheme.primary, x.card, false) {
+                            state.open(Step.AiSearch)
+                        }
+                    }
                 }
 
                 // Recomendado por la IA
                 if (recs.isNotEmpty()) {
-                    SectionTitle("Elegido para ti", "Mis características") { state.open(Step.AiSearch) }
+                    SectionTitle("Elegido para ti", "Ver todas") { state.open(Step.AiSearch) }
                     LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(recs.take(4)) { rec ->
                             ActivityPhotoCard(rec.activity, state, rec, Modifier.width(300.dp), showReason = true)

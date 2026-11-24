@@ -15,6 +15,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -32,16 +34,24 @@ import com.marbellup.fitin.ui.GradientButton
 import com.marbellup.fitin.ui.Mascot
 import com.marbellup.fitin.ui.NeedPill
 import com.marbellup.fitin.ui.RoundIconButton
+import com.marbellup.fitin.ui.SelectTile
+import com.marbellup.fitin.ui.icon
 import com.marbellup.fitin.ui.say
 import com.marbellup.fitin.ui.shortLabel
 import com.marbellup.fitin.ui.theme.LocalExtra
+import com.marbellup.fitin.ui.tint
 
 private val zones = listOf("Zona centro", "Zona oeste", "Zona este", "Zona norte")
-private val levels = listOf("iniciacion" to "Iniciación", "intermedio" to "Intermedio", "avanzado" to "Avanzado", null to "Da igual")
+private val levels = listOf(
+    Triple("iniciacion", "Iniciación", Icons.Filled.EmojiPeople),
+    Triple("intermedio", "Intermedio", Icons.Filled.DirectionsRun),
+    Triple("avanzado", "Avanzado", Icons.Filled.EmojiEvents),
+    Triple(null, "Da igual", Icons.Filled.AllInclusive),
+)
 
 /**
- * «Tus características»: la persona marca lo que necesita, sus deportes, horario, nivel y zona
- * (o lo escribe con sus palabras). El modelo del móvil ordena actividades e instalaciones con eso.
+ * «Tus características»: TODO se elige con opciones (nada de texto), para que el modelo reciba
+ * siempre datos limpios. Con esto ordena actividades e instalaciones.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -51,81 +61,56 @@ fun AiSearchScreen(state: AppState) {
     var showResults by rememberSaveable { mutableStateOf(false) }
     val scroll = rememberScrollState()
     LaunchedEffect(showResults) { if (showResults) scroll.animateScrollTo(scroll.maxValue) }
+    val pastel = listOf(x.peach, x.sky, x.pink, x.mint, x.lilac)
 
     GradientBackground {
-        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding().verticalScroll(scroll).padding(bottom = 32.dp)) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(scroll).padding(bottom = 32.dp)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "Volver") { if (!state.back()) state.finishOnboarding() }
-                Spacer(Modifier.weight(1f))
+                Text("Mis preferencias", style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f).padding(start = 12.dp))
                 AiTag(state)
             }
 
-            Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.Top) {
-                Mascot(64.dp)
-                Column(
-                    Modifier.padding(start = 10.dp)
+            Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                Mascot(60.dp)
+                Text(
+                    say("¡Hola, ${state.userName}! Marca lo que necesitas y lo que te gusta. Con eso te recomiendo actividades y sitios.",
+                        "Marca lo que necesitas. Yo te digo qué hacer y dónde."),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 10.dp)
                         .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 22.dp, bottomEnd = 22.dp, bottomStart = 22.dp))
-                        .background(x.card).padding(14.dp),
-                ) {
-                    Text("¿Qué necesitas para hacer deporte a gusto?", style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.semantics { heading() })
-                    Text(
-                        say("Márcalo y te recomiendo actividad e instalación. Nunca te pregunto qué tienes, solo qué necesitas. Todo se queda en tu móvil.",
-                            "Marca lo que necesitas. Te digo qué actividad y qué sitio te van bien."),
-                        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                        .background(x.card).padding(12.dp),
+                )
             }
 
-            // Lenguaje natural (procesado en el móvil)
-            GlassCard(Modifier.padding(16.dp)) {
-                Column(Modifier.padding(14.dp)) {
-                    OutlinedTextField(
-                        value = state.prompt, onValueChange = { state.prompt = it },
-                        modifier = Modifier.fillMaxWidth(), minLines = 2, shape = RoundedCornerShape(18.dp),
-                        label = { Text("O dímelo con tus palabras") },
-                        placeholder = { Text("Pádel nivel intermedio por la tarde, pista cubierta y accesible") },
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    FilledTonalButton(
-                        onClick = { state.applyText() }, enabled = state.prompt.isNotBlank(),
-                        shape = RoundedCornerShape(50), modifier = Modifier.heightIn(min = 48.dp),
-                    ) {
-                        Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Rellenar mis características")
-                    }
-                }
-            }
-
-            Section("Lo que necesitas")
+            Title("¿Qué necesitas?", "Solo lo que necesitas, nunca qué tienes.")
             for (g in NeedGroup.entries) {
-                Text(g.label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 20.dp, top = 6.dp, bottom = 4.dp))
-                FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    for (n in Need.entries.filter { it.group == g }) {
-                        Choice(n.label, n in p.needs) { state.toggle(n) }
-                    }
+                Text(g.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 6.dp))
+                TileGrid(Need.entries.filter { it.group == g }) { n, m ->
+                    SelectTile(n.shortLabel, n.icon, n in p.needs, m) { state.toggle(n) }
                 }
             }
 
-            Section("Deportes que te gustan")
-            FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                for (s in Sport.entries) Choice(s.label, s in p.sports) { state.toggleSport(s) }
+            Title("¿Qué deportes te gustan?")
+            TileGrid(Sport.entries.toList()) { s, m ->
+                SelectTile(s.label, s.icon, s in p.sports, m, tint = s.tint, bg = pastel[s.ordinal % pastel.size]) { state.toggleSport(s) }
             }
 
-            Section("Cuándo te viene bien")
-            FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                for (s in Slot.entries) Choice(s.label, s in p.slots) { state.toggleSlot(s) }
+            Title("¿Cuándo te viene bien?")
+            TileGrid(Slot.entries.toList(), perRow = 4) { s, m ->
+                SelectTile(s.label, s.icon, s in p.slots, m) { state.toggleSlot(s) }
             }
 
-            Section("Tu nivel")
-            FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                for ((code, label) in levels) Choice(label, p.level == code) { state.setLevel(code) }
+            Title("¿Qué nivel tienes?")
+            TileGrid(levels, perRow = 4) { (code, label, icon), m ->
+                SelectTile(label, icon, p.level == code, m) { state.setLevel(code) }
             }
 
-            Section("Dónde vives o te mueves")
-            FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                for (z in zones) Choice(z.removePrefix("Zona ").replaceFirstChar { it.uppercase() }, p.zone == z) {
+            Title("¿Por dónde te mueves?")
+            TileGrid(zones, perRow = 4) { z, m ->
+                SelectTile(z.removePrefix("Zona ").replaceFirstChar { it.uppercase() }, Icons.Filled.Place, p.zone == z, m) {
                     state.setZone(if (p.zone == z) null else z)
                 }
             }
@@ -136,18 +121,14 @@ fun AiSearchScreen(state: AppState) {
 
             if (showResults) {
                 val ranked = state.ranked()
-                Section("Actividades para ti")
-                Text(
-                    "Ordenadas por el modelo según tus características y lo que has ido eligiendo.",
-                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
-                )
+                Title("Actividades para ti", "Ordenadas por la IA según lo que has marcado y lo que vas eligiendo.")
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     for (r in ranked.take(5)) ActivityPhotoCard(r.activity, state, r)
                 }
 
                 val sport = p.sports.firstOrNull() ?: ranked.firstOrNull()?.activity?.sport
-                Section(if (sport != null) "Instalaciones para ${sport.label.lowercase()}" else "Instalaciones para ti")
+                Title(if (sport != null) "Sitios para ${sport.label.lowercase()}" else "Sitios para ti",
+                    "Lo que cubre cada instalación de lo que necesitas.")
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     for (f in state.facilitiesFor(sport).take(3)) {
                         GlassCard {
@@ -159,7 +140,8 @@ fun AiSearchScreen(state: AppState) {
                                     Text(f.facility.name, style = MaterialTheme.typography.titleMedium)
                                     Text(f.facility.zone + " · " + f.facility.seal.label, style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    FlowRow(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                         f.covered.forEach { NeedPill(it.shortLabel, true) }
                                         f.missing.forEach { NeedPill(it.shortLabel, false) }
                                     }
@@ -179,16 +161,24 @@ fun AiSearchScreen(state: AppState) {
 }
 
 @Composable
-private fun Section(title: String) {
-    Text(title, style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 6.dp).semantics { heading() })
+private fun Title(title: String, subtitle: String? = null) {
+    Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 4.dp)) {
+        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+        if (subtitle != null) {
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
 
+/** Rejilla de mosaicos, 3 por fila como en la referencia (rellena la última fila para que no se estiren). */
 @Composable
-private fun Choice(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(
-        selected = selected, onClick = onClick, label = { Text(label) },
-        leadingIcon = if (selected) ({ Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }) else null,
-        shape = RoundedCornerShape(50), modifier = Modifier.heightIn(min = 48.dp),
-    )
+private fun <T> TileGrid(items: List<T>, perRow: Int = 3, tile: @Composable (T, Modifier) -> Unit) {
+    Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        for (row in items.chunked(perRow)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                for (item in row) tile(item, Modifier.weight(1f))
+                repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
 }

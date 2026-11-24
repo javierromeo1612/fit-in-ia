@@ -15,7 +15,6 @@
 ```mermaid
 flowchart LR
     P[Características de la persona<br/>necesidades · deportes · horario · nivel · zona] --> X
-    T[Texto libre<br/>«pádel intermedio por la tarde, pista cubierta»] -- PLN local --> P
     A[Actividad + instalación<br/>lo que cubre · horario · nivel · zona · sello] --> X
     H[Historial: lo que eligió,<br/>le gustó o descartó] --> X
     X[17 factores x] --> M["Modelo  P(encaja) = σ(w·x)"]
@@ -30,7 +29,7 @@ Código: [`app/src/main/java/com/marbellup/fitin/data/Recommender.kt`](app/src/m
 
 ## 2. Los datos de entrada
 
-**De la persona** (pantalla «Tus características», o escrito con sus palabras):
+**De la persona** (pantalla «Mis preferencias»). Todo se **elige tocando mosaicos**, sin escribir, para que el modelo reciba siempre datos limpios y comparables:
 
 | Característica | Ejemplos |
 |---|---|
@@ -44,7 +43,7 @@ Se pregunta **qué necesita, nunca qué tiene**: no se recoge ningún diagnósti
 
 **De cada actividad e instalación:** lo que cubre el sitio (comprobado: sin escalones, grúa, cubierta…) y la actividad (monitor, material adaptado, intérprete…), día y hora, nivel, zona, sello de verificación, confirmaciones de otras personas, voluntariado y plazas.
 
-**Texto libre:** un procesador de lenguaje natural **local** (`LocalAi.kt`, por reglas y sin conexión) convierte *«Busco jugar pádel nivel intermedio por la tarde, necesito pista cubierta y que sea accesible»* en: pádel · intermedio · tardes · sin escalones + instalación cubierta.
+**Por qué opciones y no texto libre:** con texto, el modelo dependería de cómo escribe cada persona («accesible», «voy en silla», «sin barreras»…) y podría malinterpretarlo. Con opciones cerradas, cada característica es una variable exacta del modelo. El asistente del chat también funciona con preguntas para tocar («¿Qué hay cerca de mí?», «¿Qué hay para silla de ruedas?», «Quiero un deporte concreto»…).
 
 ---
 
@@ -102,7 +101,7 @@ Los pesos y el historial se guardan en el móvil (`Store.kt`) y sobreviven al ce
 ### 3.3 Instalaciones
 
 El mismo modelo puntúa las **instalaciones** de un deporte con los factores del sitio: cobertura de las necesidades físicas, lo que falta, proximidad y sello. Se usa en:
-- «Tus características › Ver mis recomendaciones» (instalaciones para tu deporte).
+- «Mis preferencias › Ver mis recomendaciones» (sitios para tu deporte).
 - «+ Crear actividad»: la IA ordena dónde organizarla y marca la mejor opción.
 
 ### 3.4 Explicabilidad
@@ -161,7 +160,7 @@ Además, de lo que recomienda en el top-3, el **79 %** cubre todas las necesidad
 
 ## 7. Guion de demo (3 minutos)
 
-1. **Comenzar.** Lucía escribe *«pádel nivel intermedio por la tarde, pista cubierta y accesible»* › **Rellenar mis características**. Se marcan solas.
+1. **Comenzar.** Lucía marca en los mosaicos: *sin escalones, aseo adaptado, cubierta* · *pádel* · *tardes* · *intermedio* · *centro*.
 2. **Ver mis recomendaciones:**
    - Pádel inclusivo de hoy a las 18:30 con un 98 %: «Cubre lo que necesitas, es un deporte que te gusta, es en tu horario».
    - Debajo, instalaciones de pádel ordenadas, con lo que cubre cada una.

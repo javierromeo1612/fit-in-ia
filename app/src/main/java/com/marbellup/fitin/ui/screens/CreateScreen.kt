@@ -126,18 +126,16 @@ fun CreateScreen(state: AppState) {
 
                 Text("¿Qué necesitas?", style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(start = 20.dp, top = 22.dp, bottom = 8.dp).semantics { heading() })
-                FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (o in needOptions) {
-                        val sel = o.label in chosen
-                        FilterChip(
-                            selected = sel,
-                            onClick = { chosen = if (sel) chosen - o.label else chosen + o.label },
-                            label = { Text(o.label) },
-                            leadingIcon = { Icon(o.icon, contentDescription = null, modifier = Modifier.size(18.dp)) },
-                            shape = RoundedCornerShape(50),
-                            modifier = Modifier.heightIn(min = 48.dp),
-                        )
+                Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    for (row in needOptions.chunked(3)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            for (o in row) {
+                                val sel = o.label in chosen
+                                com.marbellup.fitin.ui.SelectTile(o.label, o.icon, sel, Modifier.weight(1f)) {
+                                    chosen = if (sel) chosen - o.label else chosen + o.label
+                                }
+                            }
+                        }
                     }
                 }
 

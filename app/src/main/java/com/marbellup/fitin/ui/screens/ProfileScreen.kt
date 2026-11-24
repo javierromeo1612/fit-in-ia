@@ -76,7 +76,7 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 GlassCard(Modifier.padding(horizontal = 16.dp)) {
                     MenuRow(Icons.Outlined.EventNote, "Mis actividades", "${state.joined.size} con plaza") { state.tab = Tab.Calendario }
-                    MenuRow(Icons.Outlined.AutoAwesome, "Mis características", "Lo que necesitas, deportes, horario, nivel y zona") { state.open(Step.AiSearch) }
+                    MenuRow(Icons.Outlined.Tune, "Mis preferencias", "Lo que necesitas, deportes, horario, nivel y zona") { state.open(Step.AiSearch) }
                     MenuRow(Icons.Outlined.Psychology, "Cómo aprende tu IA", "${state.history.size} acciones aprendidas · todo en tu móvil") { state.open(Step.Model) }
                     MenuRow(Icons.Outlined.Accessibility, "Mis necesidades", "${state.needs.size} elegidas · se usan para recomendarte") {
                         showNeeds = !showNeeds

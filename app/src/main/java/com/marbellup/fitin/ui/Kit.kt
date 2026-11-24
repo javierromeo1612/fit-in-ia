@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -42,6 +44,7 @@ import com.marbellup.fitin.data.Activity
 import com.marbellup.fitin.data.AppNotification
 import com.marbellup.fitin.data.Need
 import com.marbellup.fitin.data.Scored
+import com.marbellup.fitin.data.Slot
 import com.marbellup.fitin.ui.theme.LocalExtra
 
 /*
@@ -238,14 +241,15 @@ fun ActivityPhotoCard(
 ) {
     val x = LocalExtra.current
     GlassCard(modifier, onClick = { state.open(Step.Detail(a.id)) }) {
-        Box {
+        // Como en la referencia: foto grande y un panel blanco encima, abajo, con los datos y la flecha.
+        Box(Modifier.fillMaxWidth().height(236.dp).padding(8.dp)) {
             Image(
                 painter = painterResource(a.sport.photo),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().height(150.dp).padding(8.dp).clip(RoundedCornerShape(20.dp)),
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)),
             )
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (rec != null) {
                     Row(
                         Modifier.clip(RoundedCornerShape(50)).background(primaryBrush()).padding(horizontal = 10.dp, vertical = 5.dp),
@@ -267,12 +271,7 @@ fun ActivityPhotoCard(
                 }
                 Spacer(Modifier.weight(1f))
                 val fav = a.id in state.favorites
-                Surface(
-                    onClick = { state.toggleFavorite(a.id) },
-                    shape = CircleShape,
-                    color = Color.White,
-                    modifier = Modifier.size(44.dp),
-                ) {
+                Surface(onClick = { state.toggleFavorite(a.id) }, shape = CircleShape, color = Color.White, modifier = Modifier.size(44.dp)) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             if (fav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -282,26 +281,32 @@ fun ActivityPhotoCard(
                     }
                 }
             }
-        }
-        Row(Modifier.padding(start = 16.dp, end = 12.dp, bottom = 14.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                    Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(4.dp))
-                    Text(a.shortDate, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${a.place} · ${a.zone}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = x.card.copy(alpha = 0.96f),
+                shadowElevation = 2.dp,
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(8.dp),
+            ) {
+                Row(Modifier.padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                            Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(4.dp))
+                            Text(a.shortDate, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(4.dp))
+                            Text(a.place, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                    Box(Modifier.size(44.dp).clip(CircleShape).background(x.mint), contentAlignment = Alignment.Center) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF1B5E3F))
+                    }
                 }
             }
-            Box(
-                Modifier.size(46.dp).clip(CircleShape).background(x.mint),
-                contentAlignment = Alignment.Center,
-            ) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF1B5E3F)) }
         }
         if (rec != null && showReason) {
             AiReason(rec.explanation, Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp))
@@ -497,3 +502,83 @@ val Need.shortLabel: String
         Need.GrupoReducido -> "Grupo pequeño"
         else -> label
     }
+
+/** Icono de cada necesidad, para elegirlas tocando (sin escribir). */
+val Need.icon: ImageVector
+    get() = when (this) {
+        Need.SinEscalones -> Icons.AutoMirrored.Filled.Accessible
+        Need.Aparcamiento -> Icons.Filled.LocalParking
+        Need.Vestuario -> Icons.Filled.Wc
+        Need.Grua -> Icons.Filled.Pool
+        Need.Transporte -> Icons.Filled.DirectionsBus
+        Need.Cubierta -> Icons.Filled.Roofing
+        Need.Signos -> Icons.Filled.SignLanguage
+        Need.Bucle -> Icons.Filled.Hearing
+        Need.Guia -> Icons.Filled.VisibilityOff
+        Need.Tranquilo -> Icons.Filled.VolumeOff
+        Need.LecturaFacil -> Icons.AutoMirrored.Filled.MenuBook
+        Need.Pictogramas -> Icons.Filled.Image
+        Need.GrupoReducido -> Icons.Filled.Groups
+        Need.Material -> Icons.Filled.Settings
+        Need.Monitor -> Icons.Filled.SupportAgent
+        Need.Acompanante -> Icons.Filled.Handshake
+    }
+
+val Slot.icon: ImageVector
+    get() = when (this) {
+        Slot.Manana -> Icons.Filled.WbSunny
+        Slot.Mediodia -> Icons.Filled.LunchDining
+        Slot.Tarde -> Icons.Filled.WbTwilight
+        Slot.Noche -> Icons.Filled.NightsStay
+    }
+
+/**
+ * Mosaico seleccionable como los de «Crear actividad» de la referencia: icono sobre fondo pastel
+ * y texto debajo. Marcado = borde violeta y check. Objetivo táctil amplio.
+ */
+@Composable
+fun SelectTile(
+    label: String,
+    icon: ImageVector,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.primary,
+    bg: Color = LocalExtra.current.card,
+    onClick: () -> Unit,
+) {
+    val shape = RoundedCornerShape(20.dp)
+    Surface(
+        onClick = onClick,
+        shape = shape,
+        color = if (selected) LocalExtra.current.lilac else bg,
+        shadowElevation = if (selected) 0.dp else 1.dp,
+        modifier = modifier
+            .heightIn(min = 92.dp)
+            .then(if (selected) Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .semantics { role = Role.Checkbox; this.selected = selected },
+    ) {
+        Box {
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelLarge,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    maxLines = 2,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+            }
+            if (selected) {
+                Box(
+                    Modifier.align(Alignment.TopEnd).padding(6.dp).size(20.dp).clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp)) }
+            }
+        }
+    }
+}

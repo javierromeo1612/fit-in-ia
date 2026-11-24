@@ -43,7 +43,7 @@ Fit-In empieza preguntándote **qué necesitas, nunca qué tienes**. Con eso te 
 
 La versión 2 trae un rediseño completo (lila, cristal y mascota) y un **recomendador con aprendizaje automático que funciona entero en el móvil**, sin APIs ni Internet:
 
-- La persona marca sus **características** (lo que necesita, deportes, horario, nivel y zona) o las escribe con sus palabras.
+- La persona marca sus **características** (lo que necesita, deportes, horario, nivel y zona) tocando opciones, sin escribir.
 - Un modelo de **regresión logística con aprendizaje en línea** ordena **actividades e instalaciones** según esas características y explica por qué.
 - **Aprende** de cada acción: apuntarse, «me gusta», valorar, «no me interesa».
 - **Avisa** (notificaciones de Android) cuando aparece algo que encaja al menos un 70 %.
