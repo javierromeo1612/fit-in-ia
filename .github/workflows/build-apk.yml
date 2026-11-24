@@ -1,0 +1,50 @@
+name: Compilar APK de Fit-In
+
+# Se ejecuta en cada subida a main y también a mano (pestaña Actions > Run workflow)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java 25 (el que pide el proyecto)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Aceptar licencias del SDK de Android
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compilar APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Guardar como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fit-In-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publicar en Releases (enlace fijo para el móvil)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk Fit-In.apk
+          gh release delete apk-latest --cleanup-tag -y || true
+          gh release create apk-latest Fit-In.apk \
+            --title "Fit-In (APK para instalar)" \
+            --notes "Última compilación automática. Descarga Fit-In.apk desde el móvil e instálalo." \
+            --target "${{ github.sha }}"

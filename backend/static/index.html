@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fit-In · Consola del motor de IA</title>
+<style>
+  :root{--bg:#F1EEFF;--card:#fff;--ink:#231B4D;--muted:#5E5785;--primary:#5B3FD6;--primary2:#7C5CFF;--chip:#ECE7FF;--ok:#1E8A5A;--warn:#B4690E;--line:#E3DDFB}
+  *{box-sizing:border-box} body{margin:0;font:16px/1.45 "Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(1200px 600px at 10% -10%,#DCD3FF,transparent),radial-gradient(900px 500px at 110% 10%,#CFE4FF,transparent),var(--bg);min-height:100vh}
+  header{display:flex;align-items:center;gap:12px;padding:20px 28px}
+  header h1{font-size:22px;margin:0} .badge{font-size:13px;padding:4px 10px;border-radius:99px;background:var(--chip);color:var(--primary);font-weight:700}
+  main{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;padding:0 28px 40px}
+  @media (max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border:1px solid #fff;border-radius:24px;padding:20px;box-shadow:0 10px 30px rgba(91,63,214,.10)}
+  h2{font-size:18px;margin:0 0 12px}
+  textarea{width:100%;min-height:90px;border-radius:18px;border:2px solid var(--line);padding:14px;font:inherit;resize:vertical}
+  textarea:focus{outline:3px solid #C9BCFF;border-color:var(--primary2)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  button{font:inherit;font-weight:700;border:0;border-radius:99px;padding:12px 20px;cursor:pointer;min-height:48px}
+  .primary{background:linear-gradient(135deg,var(--primary2),var(--primary));color:#fff}
+  .ghost{background:var(--chip);color:var(--primary)}
+  .chip{display:inline-block;background:var(--chip);color:var(--ink);border-radius:99px;padding:5px 12px;margin:3px 4px 3px 0;font-size:14px}
+  .chip.ok{background:#E2F5EC;color:#0F5E3B}.chip.warn{background:#FFF1DC;color:#7A4508}
+  .rec{display:flex;gap:14px;padding:14px;border-radius:20px;border:1px solid var(--line);margin-top:12px;background:#fff}
+  .rec .pct{min-width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--primary2),var(--primary))}
+  .rec h3{margin:0;font-size:17px}.muted{color:var(--muted);font-size:14px}
+  .ai{background:linear-gradient(135deg,#F4F0FF,#EAF3FF);border-radius:16px;padding:10px 12px;margin-top:8px;font-size:15px}
+  .notif{border-left:4px solid var(--primary2);background:#fff;border-radius:14px;padding:10px 12px;margin-top:10px}
+  pre{white-space:pre-wrap;background:#1E1838;color:#E9E4FF;border-radius:16px;padding:12px;font-size:12.5px;max-height:320px;overflow:auto}
+  select{font:inherit;border-radius:12px;padding:8px;border:2px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Fit-In · motor de IA</h1>
+  <span class="badge" id="engine">…</span>
+  <span class="muted">Datos de ejemplo para la demo</span>
+</header>
+<main>
+  <section class="card">
+    <h2>1 · ¿Qué te apetece? (en tus palabras)</h2>
+    <label class="muted" for="user">Usuario</label>
+    <select id="user"></select>
+    <textarea id="text" aria-label="Lo que buscas">Busco jugar pádel nivel intermedio hoy por la tarde, necesito pista cubierta y que sea accesible</textarea>
+    <div class="row">
+      <button class="primary" id="go">✨ Buscar con IA</button>
+      <button class="ghost" data-ex="Quiero nadar mañana por la mañana, voy en silla de ruedas y necesito grúa">Natación</button>
+      <button class="ghost" data-ex="Me apetece pádel nivel intermedio mañana por la tarde, pista cubierta">Pádel mañana (grupo nuevo)</button>
+      <button class="ghost" data-ex="Baloncesto el finde con gente, necesito intérprete de lengua de signos">Baloncesto</button>
+    </div>
+    <div id="needs" style="margin-top:14px"></div>
+    <div id="msg" class="ai" hidden></div>
+    <div id="recs"></div>
+    <div id="group"></div>
+  </section>
+  <section>
+    <div class="card">
+      <h2>2 · Notificaciones inteligentes</h2>
+      <div class="row">
+        <select id="inboxUser"></select>
+        <button class="ghost" id="sim">Simular: alguien compatible te busca</button>
+        <button class="ghost" id="reset">Reiniciar demo</button>
+      </div>
+      <div id="inbox"></div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <h2>JSON de la última respuesta</h2>
+      <pre id="raw">—</pre>
+    </div>
+  </section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const USERS = ["lucia","raul","irene","luis","marcos","ana","bea","tomas"];
+for (const sel of [$("#user"), $("#inboxUser")]) USERS.forEach(u => sel.add(new Option(u, u)));
+let NEEDS = {};
+const api = async (path, body, method) => {
+  const r = await fetch(path, {method: method || (body ? "POST" : "GET"), headers: {"Content-Type": "application/json"}, body: body ? JSON.stringify(body) : undefined});
+  const j = await r.json(); $("#raw").textContent = JSON.stringify(j, null, 2); return j;
+};
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function search() {
+  $("#go").disabled = true; $("#go").textContent = "Pensando…";
+  try {
+    const r = await api("/api/recommendations", {user_id: $("#user").value, text: $("#text").value});
+    const n = r.needs;
+    $("#needs").innerHTML = `<div class="muted">La IA ha entendido (${esc(r.engine.extraccion)}):</div>` +
+      (n.actividad ? `<span class="chip">🏅 ${esc(n.actividad)}</span>` : "") +
+      (n.nivel ? `<span class="chip">📈 ${esc(n.nivel)}</span>` : "") +
+      `<span class="chip">🕒 ${esc(n.cuando.dia)} · ${esc(n.cuando.franja)}</span>` +
+      r.needs_labels.map(l => `<span class="chip">♿ ${esc(l)}</span>`).join("");
+    $("#msg").hidden = false; $("#msg").textContent = "🤖 " + r.message;
+    $("#recs").innerHTML = r.recommendations.map(x => `
+      <div class="rec">
+        <div class="pct">${x.match}%</div>
+        <div style="flex:1">
+          <h3>${x.proposed ? "✨ " : ""}${esc(x.event.title)}</h3>
+          <div class="muted">${esc(x.event.short_date)} · ${esc(x.event.place)} · ${x.distance_km ?? "?"} km · quedan ${x.event.spots_left} plazas</div>
+          <div class="ai">${esc(x.reason)}</div>
+          <div>${x.covered.map(c => `<span class="chip ok">✓ ${esc(NEEDS[c])}</span>`).join("")}${x.missing.map(c => `<span class="chip warn">! falta ${esc(NEEDS[c])}</span>`).join("")}</div>
+        </div>
+      </div>`).join("");
+    const g = r.grouping;
+    $("#group").innerHTML = g ? `<div class="ai" style="margin-top:14px"><b>Smart grouping (${esc(g.mode)})</b><br>${esc(g.message)}
+      ${(g.candidates||[]).map(c => `<div class="notif"><b>${esc(c.name)}</b> · compatibilidad ${Math.round(c.compat*100)}%<br><span class="muted">${c.shared.map(esc).join(" · ")}</span></div>`).join("")}</div>` : "";
+    inbox();
+  } finally { $("#go").disabled = false; $("#go").textContent = "✨ Buscar con IA"; }
+}
+async function inbox() {
+  const u = $("#inboxUser").value;
+  const list = await (await fetch(`/api/notifications/${u}`)).json();
+  $("#inbox").innerHTML = list.length ? list.map(n => `
+    <div class="notif"><b>${esc(n.title)}</b><br>${esc(n.body)}
+      ${n.status === "pending" ? `<div class="row"><button class="primary" onclick="respond('${n.id}',true)">Me apunto</button><button class="ghost" onclick="respond('${n.id}',false)">Ahora no</button></div>` :
+        `<div class="muted">${n.status === "accepted" ? "✓ Aceptada" : n.status === "declined" ? "Rechazada" : ""}</div>`}
+    </div>`).join("") : `<p class="muted">Sin notificaciones.</p>`;
+}
+window.respond = async (id, accept) => { await api(`/api/notifications/${id}/respond`, {accept}); inbox(); };
+$("#go").onclick = search;
+document.querySelectorAll("[data-ex]").forEach(b => b.onclick = () => { $("#text").value = b.dataset.ex; search(); });
+$("#inboxUser").onchange = inbox;
+$("#sim").onclick = async () => { $("#inboxUser").value = "lucia"; await api("/api/demo/incoming", {}); inbox(); };
+$("#reset").onclick = async () => { await api("/api/demo/reset", {}); $("#recs").innerHTML = $("#group").innerHTML = $("#needs").innerHTML = ""; $("#msg").hidden = true; inbox(); };
+(async () => {
+  const h = await (await fetch("/api/health")).json();
+  $("#engine").textContent = h.llm === "claude" ? `Claude · ${h.models.rapido} + ${h.models.razonamiento}` : "Modo local (sin clave)";
+  NEEDS = (await (await fetch("/api/catalog")).json()).needs;
+  inbox();
+})();
+</script>
+</body>
+</html>
