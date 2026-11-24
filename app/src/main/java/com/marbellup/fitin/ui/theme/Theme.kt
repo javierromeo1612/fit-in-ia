@@ -85,7 +85,7 @@ private val LightExtra = ExtraColors(
     tileSelected = Color(0xFF6C4CF0),
     hero = Color(0xFF6C4CF0),
     flame = Color(0xFFF2852B),
-    gradientTop = Color(0xFFDCCFFF),
+    gradientTop = Color(0xFFD6C8FF),
     gradientBottom = Color(0xFFF6F3FF),
     lilac = Color(0xFFEDE5FF),
     sky = Color(0xFFE1EEFF),
@@ -142,9 +142,9 @@ private val LightColors = lightColorScheme(
     errorContainer = Color(0xFFFDE4E1),
     onErrorContainer = Color(0xFF5F0A0A),
     background = Color(0xFFF4F1FF),
-    onBackground = Color(0xFF231B4D),
+    onBackground = Color(0xFF241D5C),
     surface = Color(0xFFF4F1FF),
-    onSurface = Color(0xFF231B4D),
+    onSurface = Color(0xFF241D5C),
     surfaceVariant = Color(0xFFF2EEFF),
     onSurfaceVariant = Color(0xFF575079),
     outline = Color(0xFF8E88AE),
@@ -202,31 +202,45 @@ private fun atkinson(weight: Int) = Font(
 
 private val Atkinson = FontFamily(atkinson(400), atkinson(500), atkinson(700), atkinson(800))
 
-private fun TextStyle.voice(weight: Int, tracking: Double = 0.0) = copy(
-    fontFamily = Atkinson,
+/** Nunito: redondeada y gruesa, como la tipografía de la referencia visual (licencia OFL). */
+@OptIn(ExperimentalTextApi::class)
+private fun nunito(weight: Int) = Font(
+    resId = R.font.nunito,
+    weight = FontWeight(weight),
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
+)
+
+private val Nunito = FontFamily(nunito(500), nunito(600), nunito(700), nunito(800), nunito(900))
+
+private fun TextStyle.voice(family: FontFamily, weight: Int, tracking: Double = 0.0) = copy(
+    fontFamily = family,
     fontWeight = FontWeight(weight),
     letterSpacing = tracking.em,
 )
 
 private val Base = Typography()
 
-private val AppTypography = Typography(
-    displayLarge = Base.displayLarge.voice(800, -0.02),
-    displayMedium = Base.displayMedium.voice(800, -0.02),
-    displaySmall = Base.displaySmall.voice(800, -0.02),
-    headlineLarge = Base.headlineLarge.voice(800, -0.02),
-    headlineMedium = Base.headlineMedium.voice(800, -0.015),
-    headlineSmall = Base.headlineSmall.voice(800, -0.01),
-    titleLarge = Base.titleLarge.voice(800, -0.01),
-    titleMedium = Base.titleMedium.voice(700),
-    titleSmall = Base.titleSmall.voice(700),
-    bodyLarge = Base.bodyLarge.voice(400),
-    bodyMedium = Base.bodyMedium.voice(400),
-    bodySmall = Base.bodySmall.voice(500),
-    labelLarge = Base.labelLarge.voice(700),
-    labelMedium = Base.labelMedium.voice(700),
-    labelSmall = Base.labelSmall.voice(700),
+private fun typography(f: FontFamily, body: Int) = Typography(
+    displayLarge = Base.displayLarge.voice(f, 900, -0.02),
+    displayMedium = Base.displayMedium.voice(f, 900, -0.02),
+    displaySmall = Base.displaySmall.voice(f, 900, -0.02),
+    headlineLarge = Base.headlineLarge.voice(f, 900, -0.02),
+    headlineMedium = Base.headlineMedium.voice(f, 900, -0.015),
+    headlineSmall = Base.headlineSmall.voice(f, 900, -0.01),
+    titleLarge = Base.titleLarge.voice(f, 800, -0.01),
+    titleMedium = Base.titleMedium.voice(f, 800),
+    titleSmall = Base.titleSmall.voice(f, 800),
+    bodyLarge = Base.bodyLarge.voice(f, body),
+    bodyMedium = Base.bodyMedium.voice(f, body),
+    bodySmall = Base.bodySmall.voice(f, body),
+    labelLarge = Base.labelLarge.voice(f, 800),
+    labelMedium = Base.labelMedium.voice(f, 800),
+    labelSmall = Base.labelSmall.voice(f, 800),
 )
+
+/** Estilo de la referencia (Nunito) y alternativa de lectura fácil (Atkinson Hyperlegible). */
+private val AppTypography = typography(Nunito, 600)
+private val EasyTypography = typography(Atkinson, 400)
 
 private val AppShapes = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
@@ -240,12 +254,14 @@ private val AppShapes = Shapes(
 fun FitInTheme(
     // Siempre claro, aunque el móvil esté en modo oscuro: es el estilo elegido para la demo.
     darkTheme: Boolean = false,
+    /** Lectura fácil: cambia a Atkinson Hyperlegible, diseñada para baja visión. */
+    easyRead: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(LocalExtra provides if (darkTheme) DarkExtra else LightExtra) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,
-            typography = AppTypography,
+            typography = if (easyRead) EasyTypography else AppTypography,
             shapes = AppShapes,
             content = content,
         )

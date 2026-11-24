@@ -89,7 +89,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     }
                 }
 
-                GlassCard(Modifier.padding(16.dp).animateContentSize()) {
+                GlassCard(Modifier.padding(16.dp).animateContentSize(), color = if (monthView) x.card else Color.White.copy(alpha = 0.55f)) {
                     Column(Modifier.padding(horizontal = 8.dp, vertical = 12.dp)) {
                         val days: List<LocalDate?>
                         if (monthView) {
@@ -225,8 +225,8 @@ private fun DayActivity(state: AppState, a: Activity, bg: Color) {
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(56.dp).clip(RoundedCornerShape(18.dp)).background(Color.White), contentAlignment = Alignment.Center) {
-                    Text(a.sport.emoji, fontSize = 30.sp)
+                Box(Modifier.size(60.dp), contentAlignment = Alignment.Center) {
+                    Text(a.sport.emoji, fontSize = 42.sp)
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 2)

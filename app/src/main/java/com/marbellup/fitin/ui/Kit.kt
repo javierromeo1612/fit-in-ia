@@ -79,6 +79,12 @@ fun GradientBackground(modifier: Modifier = Modifier, content: @Composable BoxSc
                     radius = size.width * 0.8f), radius = size.width * 0.8f, center = Offset(size.width * 0.1f, size.height * 0.05f))
                 drawCircle(Brush.radialGradient(listOf(blobB, Color.Transparent), center = Offset(size.width * 0.95f, size.height * 0.35f),
                     radius = size.width * 0.7f), radius = size.width * 0.7f, center = Offset(size.width * 0.95f, size.height * 0.35f))
+                // Nubes blancas suaves arriba, como en la referencia
+                val cloud = Color.White.copy(alpha = 0.55f)
+                for ((cx, cy, r) in listOf(Triple(0.12f, 0.02f, 0.16f), Triple(0.3f, 0.0f, 0.14f), Triple(0.78f, 0.03f, 0.18f), Triple(0.95f, 0.0f, 0.12f))) {
+                    drawCircle(Brush.radialGradient(listOf(cloud, Color.Transparent), center = Offset(size.width * cx, size.height * cy),
+                        radius = size.width * r * 1.6f), radius = size.width * r * 1.6f, center = Offset(size.width * cx, size.height * cy))
+                }
             },
         content = content,
     )
@@ -271,15 +277,16 @@ fun ActivityPhotoCard(
         Box(Modifier.fillMaxWidth().height(236.dp).padding(8.dp)) {
             ActivityCover(a, Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)))
             Row(Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                if (rec != null) {
-                    Row(
-                        Modifier.clip(RoundedCornerShape(50)).background(primaryBrush()).padding(horizontal = 10.dp, vertical = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("${rec.match}% para ti", color = Color.White, style = MaterialTheme.typography.labelMedium)
+                // Insignia de gente que va, como «+10» en la referencia
+                Row(
+                    Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f)).padding(start = 4.dp, end = 10.dp, top = 3.dp, bottom = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(22.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.Groups, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
                     }
+                    Spacer(Modifier.width(4.dp))
+                    Text("+${a.group.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                 }
                 if (a.status == "propuesta") {
                     Spacer(Modifier.width(6.dp))
@@ -310,7 +317,17 @@ fun ActivityPhotoCard(
             ) {
                 Row(Modifier.padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false))
+                            if (rec != null) {
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    "✨ ${rec.match}%", color = Color.White, style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.clip(RoundedCornerShape(50)).background(primaryBrush()).padding(horizontal = 7.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
                             Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
                             Spacer(Modifier.width(4.dp))
@@ -323,8 +340,8 @@ fun ActivityPhotoCard(
                                 maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
-                    Box(Modifier.size(44.dp).clip(CircleShape).background(x.mint), contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF1B5E3F))
+                    Box(Modifier.size(46.dp).clip(CircleShape).background(Color(0xFFD8F27E)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF24411A))
                     }
                 }
             }

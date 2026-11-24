@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -58,17 +59,18 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 Text("Deportista Fit-In 💜", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                 // Progreso
-                GlassCard(Modifier.padding(16.dp), color = x.lilac) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                GlassCard(Modifier.padding(16.dp), color = Color(0xFFE6F6CF)) {
+                    Row(Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFE4F7C8), Color(0xFFE9E3FF)))).padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text("💜 Tu progreso", style = MaterialTheme.typography.titleSmall)
                             Text("${state.points}", style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.primary)
                             Text("Puntos Fit-In", style = MaterialTheme.typography.bodyMedium)
                         }
                         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                            for (h in listOf(18, 28, 22, 40, 52)) {
-                                Box(Modifier.width(10.dp).height(h.dp).clip(RoundedCornerShape(5.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f + h / 100f)))
+                            val bars = listOf(18 to Color(0xFF7C5CFF), 28 to Color(0xFF3CC7A0), 22 to Color(0xFF5ED3C4), 40 to Color(0xFF4FA3FF), 52 to Color(0xFF8B6CFF))
+                            for ((h, c) in bars) {
+                                Box(Modifier.width(11.dp).height(h.dp).clip(RoundedCornerShape(6.dp)).background(c))
                             }
                         }
                         Spacer(Modifier.width(10.dp))

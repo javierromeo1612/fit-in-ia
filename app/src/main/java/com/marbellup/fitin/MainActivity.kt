@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
         Alerts.schedule(this)
         handleIntent(intent)
         setContent {
-            FitInTheme {
+            FitInTheme(easyRead = state.easyRead) {
                 val density = LocalDensity.current
                 val scaled = Density(density.density, density.fontScale * if (state.bigText) 1.3f else 1f)
                 CompositionLocalProvider(
