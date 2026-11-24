@@ -17,6 +17,17 @@ android {
         versionName = "0.1"
     }
 
+    // Clave de firma FIJA para las compilaciones de prueba: así cada APK nuevo se instala
+    // encima del anterior sin tener que desinstalar. Solo para la demo, no para Google Play.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
