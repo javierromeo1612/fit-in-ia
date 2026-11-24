@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import com.marbellup.fitin.R
 
 /*
@@ -220,22 +221,25 @@ private fun TextStyle.voice(family: FontFamily, weight: Int, tracking: Double = 
 
 private val Base = Typography()
 
+private fun TextStyle.size(sp: Int, line: Int) = copy(fontSize = sp.sp, lineHeight = line.sp)
+
+/** Tamaños compactos, medidos sobre la referencia visual. */
 private fun typography(f: FontFamily, body: Int) = Typography(
     displayLarge = Base.displayLarge.voice(f, 900, -0.02),
-    displayMedium = Base.displayMedium.voice(f, 900, -0.02),
-    displaySmall = Base.displaySmall.voice(f, 900, -0.02),
-    headlineLarge = Base.headlineLarge.voice(f, 900, -0.02),
-    headlineMedium = Base.headlineMedium.voice(f, 900, -0.015),
-    headlineSmall = Base.headlineSmall.voice(f, 900, -0.01),
-    titleLarge = Base.titleLarge.voice(f, 800, -0.01),
-    titleMedium = Base.titleMedium.voice(f, 800),
-    titleSmall = Base.titleSmall.voice(f, 800),
-    bodyLarge = Base.bodyLarge.voice(f, body),
-    bodyMedium = Base.bodyMedium.voice(f, body),
-    bodySmall = Base.bodySmall.voice(f, body),
-    labelLarge = Base.labelLarge.voice(f, 800),
-    labelMedium = Base.labelMedium.voice(f, 800),
-    labelSmall = Base.labelSmall.voice(f, 800),
+    displayMedium = Base.displayMedium.voice(f, 900, -0.02).size(38, 44),
+    displaySmall = Base.displaySmall.voice(f, 900, -0.02).size(32, 38),
+    headlineLarge = Base.headlineLarge.voice(f, 900, -0.02).size(28, 34),
+    headlineMedium = Base.headlineMedium.voice(f, 900, -0.015).size(25, 31),
+    headlineSmall = Base.headlineSmall.voice(f, 900, -0.01).size(22, 28),
+    titleLarge = Base.titleLarge.voice(f, 800, -0.01).size(18, 24),
+    titleMedium = Base.titleMedium.voice(f, 800).size(15, 20),
+    titleSmall = Base.titleSmall.voice(f, 800).size(13, 18),
+    bodyLarge = Base.bodyLarge.voice(f, body).size(15, 21),
+    bodyMedium = Base.bodyMedium.voice(f, body).size(13, 18),
+    bodySmall = Base.bodySmall.voice(f, body).size(12, 16),
+    labelLarge = Base.labelLarge.voice(f, 800).size(13, 18),
+    labelMedium = Base.labelMedium.voice(f, 800).size(11, 14),
+    labelSmall = Base.labelSmall.voice(f, 800).size(10, 13),
 )
 
 /** Estilo de la referencia (Nunito) y alternativa de lectura fácil (Atkinson Hyperlegible). */
@@ -263,7 +267,12 @@ fun FitInTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,
             typography = if (easyRead) EasyTypography else AppTypography,
             shapes = AppShapes,
-            content = content,
-        )
+        ) {
+            // Texto en azul marino-violeta como en la referencia (no negro), también sobre fondos transparentes.
+            CompositionLocalProvider(
+                androidx.compose.material3.LocalContentColor provides (if (darkTheme) DarkColors else LightColors).onBackground,
+                content = content,
+            )
+        }
     }
 }

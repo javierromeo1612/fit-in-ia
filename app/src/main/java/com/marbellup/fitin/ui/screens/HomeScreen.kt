@@ -49,11 +49,13 @@ import com.marbellup.fitin.ui.tint
  * Inicio, calcado de la referencia: saludo y campana, buscador, cuatro accesos rápidos,
  * «Actividades cerca de ti» (ordenadas por la IA) y la tarjeta de ayuda con la mascota.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     val x = LocalExtra.current
     val ranked = state.ranked()
     val list = ranked.filter { state.sport == null || it.activity.sport == state.sport }
+    var showSports by remember { mutableStateOf(false) }
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
@@ -63,8 +65,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     Column(Modifier.weight(1f)) {
                         Text("Hola, ${state.userName} 👋", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.semantics { heading() })
-                        Text("¿Qué te apetece hacer hoy?", style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("¿Qué te apetece hacer hoy?", style = MaterialTheme.typography.bodyLarge)
                     }
                     RoundIconButton(Icons.Outlined.Notifications, "Avisos", badge = state.unread) { state.open(Step.Notifications) }
                 }
@@ -75,29 +76,27 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     shape = RoundedCornerShape(50),
                     color = x.card,
                     shadowElevation = 2.dp,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp).fillMaxWidth().heightIn(min = 54.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp).fillMaxWidth().heightIn(min = 46.dp),
                 ) {
                     Row(Modifier.padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(10.dp))
-                        Text("Buscar actividades…", style = MaterialTheme.typography.bodyLarge,
+                        Text("Buscar actividades…", style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
-                // Accesos rápidos en mosaicos blancos con iconos de color, como en la referencia (desliza para ver todos)
-                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    item {
-                        QuickTile("Cerca", "📍", state.sport == null, Modifier.width(78.dp)) { state.sport = null }
+                // Cuatro accesos rápidos en una fila, como en la referencia («Más» abre todos los deportes)
+                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickTile("Cerca", "📍", state.sport == null, Modifier.weight(1f)) { state.sport = null }
+                    QuickTile("Piscina", Sport.Natacion.emoji, state.sport == Sport.Natacion, Modifier.weight(1f)) {
+                        state.sport = if (state.sport == Sport.Natacion) null else Sport.Natacion
                     }
-                    items(Sport.entries.toList()) { s ->
-                        QuickTile(if (s == Sport.Natacion) "Piscina" else s.label, s.emoji, state.sport == s, Modifier.width(78.dp)) {
-                            state.sport = if (state.sport == s) null else s
-                        }
+                    QuickTile("Baloncesto", Sport.Baloncesto.emoji, state.sport == Sport.Baloncesto, Modifier.weight(1f)) {
+                        state.sport = if (state.sport == Sport.Baloncesto) null else Sport.Baloncesto
                     }
-                    item {
-                        QuickTile("Más", "⋯", false, Modifier.width(78.dp)) { state.open(Step.AiSearch) }
-                    }
+                    val other = state.sport?.takeIf { it != Sport.Natacion && it != Sport.Baloncesto }
+                    QuickTile(other?.label ?: "Más", other?.emoji ?: "⋯", other != null, Modifier.weight(1f)) { showSports = true }
                 }
 
                 // ⭐ Actividades cerca de ti · Ver todas →
@@ -142,6 +141,23 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
             }
         }
     }
+
+    // «Más»: todos los deportes en mosaicos
+    if (showSports) {
+        ModalBottomSheet(onDismissRequest = { showSports = false }, containerColor = LocalExtra.current.gradientBottom) {
+            Text("Elige un deporte", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 20.dp, bottom = 12.dp))
+            Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                for (row in Sport.entries.chunked(4)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        for (sp in row) {
+                            QuickTile(sp.label, sp.emoji, state.sport == sp, Modifier.weight(1f)) { state.sport = sp; showSports = false }
+                        }
+                        repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /** Acceso rápido: mosaico blanco con icono de color y texto debajo, como en la referencia. */
@@ -153,16 +169,16 @@ private fun QuickTile(label: String, emoji: String, selected: Boolean, modifier:
     Surface(
         onClick = onClick,
         interactionSource = source,
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(18.dp),
         color = if (selected) LocalExtra.current.lilac else LocalExtra.current.card,
         shadowElevation = if (selected) 6.dp else 2.dp,
-        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale }.heightIn(min = 84.dp)
+        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale }.heightIn(min = 70.dp)
             .semantics { role = Role.Tab; this.selected = selected },
     ) {
         Column(Modifier.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center) {
-            Text(emoji, fontSize = 30.sp)
-            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.padding(top = 4.dp))
+            Text(emoji, fontSize = 24.sp)
+            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.padding(top = 3.dp))
         }
     }
 }

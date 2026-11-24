@@ -44,28 +44,30 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(Modifier.fillMaxWidth().padding(top = 12.dp, end = 16.dp), horizontalArrangement = Arrangement.End) {
+                Row(Modifier.fillMaxWidth().padding(top = 8.dp, end = 16.dp).height(44.dp), horizontalArrangement = Arrangement.End) {
                     com.marbellup.fitin.ui.RoundIconButton(Icons.Filled.Settings, "Mis preferencias") { state.open(Step.AiSearch) }
                 }
                 Box {
-                    Avatar("${state.userName} García", size = 104.dp)
+                    Box(Modifier.size(96.dp).clip(CircleShape).background(Color.White).padding(4.dp)) {
+                        Avatar("${state.userName} García", size = 88.dp)
+                    }
                     Box(
-                        Modifier.align(Alignment.BottomEnd).size(32.dp).clip(CircleShape).background(x.flame),
+                        Modifier.align(Alignment.BottomEnd).size(26.dp).clip(CircleShape).background(Color(0xFFF2A93B)),
                         contentAlignment = Alignment.Center,
-                    ) { Icon(Icons.Filled.Check, contentDescription = "Perfil verificado", tint = Color.White, modifier = Modifier.size(20.dp)) }
+                    ) { Icon(Icons.Filled.Check, contentDescription = "Perfil verificado", tint = Color.White, modifier = Modifier.size(16.dp)) }
                 }
                 Text("${state.userName} García", style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(top = 10.dp).semantics { heading() })
-                Text("Deportista Fit-In 💜", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    modifier = Modifier.padding(top = 8.dp).semantics { heading() })
+                Text("Deportista · Fit-In 💜", style = MaterialTheme.typography.bodyMedium)
 
                 // Progreso
-                GlassCard(Modifier.padding(16.dp), color = Color(0xFFE6F6CF)) {
-                    Row(Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFE4F7C8), Color(0xFFE9E3FF)))).padding(16.dp),
+                GlassCard(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), color = Color(0xFFE6F6CF)) {
+                    Row(Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFE2F6C4), Color(0xFFEDE8FF)))).padding(horizontal = 16.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("💜 Tu progreso", style = MaterialTheme.typography.titleSmall)
-                            Text("${state.points}", style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.primary)
-                            Text("Puntos Fit-In", style = MaterialTheme.typography.bodyMedium)
+                            Text("💜 Tu progreso", style = MaterialTheme.typography.labelLarge)
+                            Text("${state.points}", style = MaterialTheme.typography.displaySmall)
+                            Text("Puntos Fit-In", style = MaterialTheme.typography.bodySmall)
                         }
                         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                             val bars = listOf(18 to Color(0xFF7C5CFF), 28 to Color(0xFF3CC7A0), 22 to Color(0xFF5ED3C4), 40 to Color(0xFF4FA3FF), 52 to Color(0xFF8B6CFF))
@@ -74,19 +76,18 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             }
                         }
                         Spacer(Modifier.width(10.dp))
-                        com.marbellup.fitin.ui.FloatingMascot(76.dp, happy = true)
+                        com.marbellup.fitin.ui.FloatingMascot(68.dp, happy = true)
                     }
                 }
 
+                // Menú como en la referencia: icono, texto y «>»
                 GlassCard(Modifier.padding(horizontal = 16.dp)) {
-                    MenuRow(Icons.Outlined.EventNote, "Mis actividades", "${state.joined.size} con plaza") { state.tab = Tab.Calendario }
-                    MenuRow(Icons.Outlined.Tune, "Mis preferencias", "Lo que necesitas, deportes, horario, nivel y zona") { state.open(Step.AiSearch) }
-                    MenuRow(Icons.Outlined.Psychology, "Cómo aprende tu IA", "${state.history.size} acciones aprendidas · todo en tu móvil") { state.open(Step.Model) }
-                    MenuRow(Icons.Outlined.Accessibility, "Mis necesidades", "${state.needs.size} elegidas · se usan para recomendarte") {
-                        showNeeds = !showNeeds
-                    }
+                    Spacer(Modifier.height(4.dp))
+                    MenuRow(Icons.Outlined.EventNote, "Mis actividades") { state.tab = Tab.Calendario }
+                    MenuRow(Icons.Outlined.Settings, "Mis preferencias") { state.open(Step.AiSearch) }
+                    MenuRow(Icons.Outlined.Accessibility, "Mis necesidades") { showNeeds = !showNeeds }
                     if (showNeeds) {
-                        Column(Modifier.padding(horizontal = 18.dp, vertical = 4.dp)) {
+                        Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                             for (g in NeedGroup.entries) {
                                 Text(g.label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
                                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -96,20 +97,27 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                             onClick = { state.toggle(n) },
                                             label = { Text(n.label) },
                                             shape = RoundedCornerShape(50),
-                                            modifier = Modifier.heightIn(min = 48.dp),
+                                            modifier = Modifier.heightIn(min = 44.dp),
                                         )
                                     }
                                 }
                             }
                         }
                     }
-                    MenuRow(Icons.Outlined.EmojiEvents, "Mis logros", "${state.stats().unlocked} medallas · ${state.stats().sports} deportes probados") { state.open(Step.Achievements) }
+                    MenuRow(Icons.Outlined.EmojiEvents, "Mis logros") { state.open(Step.Achievements) }
+                    Spacer(Modifier.height(4.dp))
+                }
+
+                GlassCard(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                    Spacer(Modifier.height(4.dp))
+                    MenuRow(Icons.Outlined.Psychology, "Cómo aprende tu IA") { state.open(Step.Model) }
                     MenuRow(Icons.Outlined.Notifications, "Avisos de la IA", badge = state.unread) { state.open(Step.Notifications) }
-                    MenuRow(Icons.Outlined.AccountBalance, "Panel del Ayuntamiento", "Impacto y demanda no atendida") { state.open(Step.Council) }
+                    MenuRow(Icons.Outlined.AccountBalance, "Panel del Ayuntamiento") { state.open(Step.Council) }
+                    Spacer(Modifier.height(4.dp))
                 }
 
                 // Accesibilidad de la propia app
-                GlassCard(Modifier.padding(16.dp)) {
+                GlassCard(Modifier.padding(horizontal = 16.dp).padding(bottom = 14.dp)) {
                     SettingSwitch("Texto más grande", state.bigText) { state.bigText = it }
                     SettingSwitch("Lectura fácil", state.easyRead) { state.easyRead = it }
                     SettingSwitch("Avisarme de actividades que encajan", state.alertsOn) { state.setAlerts(it) }
@@ -129,7 +137,7 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 @Composable
 private fun SettingSwitch(title: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 18.dp),
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))

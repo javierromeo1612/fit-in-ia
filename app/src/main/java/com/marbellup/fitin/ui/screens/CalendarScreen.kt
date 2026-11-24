@@ -67,9 +67,12 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
                 Row(Modifier.padding(start = 20.dp, end = 12.dp, top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("📅", fontSize = 24.sp)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Mi calendario", style = MaterialTheme.typography.headlineSmall,
+                    Box(Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Text("Mi calendario", style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.weight(1f).semantics { heading() })
                     // Semana / Mes
                     Row(Modifier.clip(RoundedCornerShape(50)).background(x.card).padding(4.dp)) {
@@ -83,7 +86,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                     .background(if (on) MaterialTheme.colorScheme.primary else Color.Transparent)
                                     .clickable { monthView = isMonth; monthShift = 0 }
                                     .semantics { role = Role.Tab; this.selected = on }
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                    .padding(horizontal = 12.dp, vertical = 7.dp),
                             )
                         }
                     }
@@ -198,7 +201,7 @@ private fun DayCell(d: LocalDate, isSelected: Boolean, isToday: Boolean, items: 
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            Modifier.size(42.dp).clip(CircleShape)
+            Modifier.size(38.dp).clip(CircleShape)
                 .background(if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) x.lilac else Color.Transparent)
                 .then(if (mine) Modifier.border(2.5.dp, x.flame, CircleShape) else Modifier),
             contentAlignment = Alignment.Center,
@@ -225,16 +228,16 @@ private fun DayActivity(state: AppState, a: Activity, bg: Color) {
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(60.dp), contentAlignment = Alignment.Center) {
-                    Text(a.sport.emoji, fontSize = 42.sp)
+                Box(Modifier.size(52.dp), contentAlignment = Alignment.Center) {
+                    Text(a.sport.emoji, fontSize = 36.sp)
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 2)
                     Text(a.shortDate, style = MaterialTheme.typography.bodyMedium)
                     Text(a.place, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Box(Modifier.size(42.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color.White)
+                Box(Modifier.size(30.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }
             if (booked) {

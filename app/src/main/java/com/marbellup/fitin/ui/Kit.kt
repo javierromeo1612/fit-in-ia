@@ -183,30 +183,32 @@ fun GlassCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val shape = RoundedCornerShape(26.dp)
+    val shape = RoundedCornerShape(22.dp)
     if (onClick != null) {
         val source = remember { MutableInteractionSource() }
         val pressed by source.collectIsPressedAsState()
         val scale by animateFloatAsState(if (pressed) 0.97f else 1f, label = "pulsar")
         Surface(
             onClick = onClick, modifier = modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale },
-            shape = shape, color = color, shadowElevation = 4.dp, interactionSource = source,
+            shape = shape, color = color, shadowElevation = 3.dp, interactionSource = source,
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f)),
         ) { Column(content = content) }
     } else {
-        Surface(modifier = modifier.fillMaxWidth(), shape = shape, color = color, shadowElevation = 4.dp) { Column(content = content) }
+        Surface(modifier = modifier.fillMaxWidth(), shape = shape, color = color, shadowElevation = 3.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))) { Column(content = content) }
     }
 }
 
 /** Botón redondo de icono (volver, campana, ajustes…) con objetivo táctil de 48 dp o más. */
 @Composable
 fun RoundIconButton(icon: ImageVector, description: String, badge: Int = 0, onClick: () -> Unit) {
-    Surface(onClick = onClick, shape = CircleShape, color = LocalExtra.current.card, shadowElevation = 2.dp, modifier = Modifier.size(50.dp)) {
+    Surface(onClick = onClick, shape = CircleShape, color = LocalExtra.current.card, shadowElevation = 3.dp, modifier = Modifier.size(44.dp)) {
         Box(contentAlignment = Alignment.Center) {
             Icon(icon, contentDescription = if (badge > 0) "$description, $badge sin leer" else description,
-                tint = MaterialTheme.colorScheme.onSurface)
+                tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
             if (badge > 0) {
                 Box(
-                    Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp).size(18.dp).clip(CircleShape)
+                    Modifier.align(Alignment.TopEnd).padding(top = 5.dp, end = 5.dp).size(16.dp).clip(CircleShape)
                         .background(LocalExtra.current.notification),
                     contentAlignment = Alignment.Center,
                 ) { Text("$badge", color = Color.White, style = MaterialTheme.typography.labelSmall) }
@@ -274,7 +276,7 @@ fun ActivityPhotoCard(
     val x = LocalExtra.current
     GlassCard(modifier, onClick = { state.open(Step.Detail(a.id)) }) {
         // Como en la referencia: foto grande y un panel blanco encima, abajo, con los datos y la flecha.
-        Box(Modifier.fillMaxWidth().height(236.dp).padding(8.dp)) {
+        Box(Modifier.fillMaxWidth().height(206.dp).padding(6.dp)) {
             ActivityCover(a, Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)))
             Row(Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 // Insignia de gente que va, como «+10» en la referencia
@@ -299,7 +301,7 @@ fun ActivityPhotoCard(
                 }
                 Spacer(Modifier.weight(1f))
                 val fav = a.id in state.favorites
-                Surface(onClick = { state.toggleFavorite(a.id) }, shape = CircleShape, color = Color.White, modifier = Modifier.size(44.dp)) {
+                Surface(onClick = { state.toggleFavorite(a.id) }, shape = CircleShape, color = Color.White, modifier = Modifier.size(36.dp)) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             if (fav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -315,7 +317,7 @@ fun ActivityPhotoCard(
                 shadowElevation = 2.dp,
                 modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(8.dp),
             ) {
-                Row(Modifier.padding(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -340,7 +342,7 @@ fun ActivityPhotoCard(
                                 maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
-                    Box(Modifier.size(46.dp).clip(CircleShape).background(Color(0xFFD8F27E)), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(38.dp).clip(CircleShape).background(Color(0xFFD8F27E)), contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF24411A))
                     }
                 }
@@ -372,7 +374,7 @@ fun FitInBottomBar(state: AppState) {
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Row(
-            Modifier.navigationBarsPadding().fillMaxWidth().height(76.dp).padding(horizontal = 8.dp),
+            Modifier.navigationBarsPadding().fillMaxWidth().height(64.dp).padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TabItem(state, Tab.Inicio, Icons.Filled.Home, Icons.Outlined.Home)
@@ -383,10 +385,10 @@ fun FitInBottomBar(state: AppState) {
                     shape = CircleShape,
                     color = Color.Transparent,
                     shadowElevation = 6.dp,
-                    modifier = Modifier.size(58.dp),
+                    modifier = Modifier.size(50.dp),
                 ) {
                     Box(Modifier.background(primaryBrush(), CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Add, contentDescription = "Crear actividad", tint = Color.White, modifier = Modifier.size(30.dp))
+                        Icon(Icons.Filled.Add, contentDescription = "Crear actividad", tint = Color.White, modifier = Modifier.size(28.dp))
                     }
                 }
             }
@@ -409,8 +411,8 @@ private fun RowScope.TabItem(state: AppState, tab: Tab, selectedIcon: ImageVecto
             .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(if (selected) selectedIcon else icon, contentDescription = null, tint = color)
-        Text(tab.label, style = MaterialTheme.typography.labelMedium, color = color, maxLines = 1,
+        Icon(if (selected) selectedIcon else icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+        Text(tab.label, style = MaterialTheme.typography.labelSmall, color = color, maxLines = 1,
             fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold)
     }
 }
@@ -476,20 +478,18 @@ fun ActivityMiniRow(a: Activity, subtitle: String? = null, onClick: () -> Unit) 
     }
 }
 
-/** Fila de menú del perfil. */
+/** Fila de menú del perfil, como en la referencia: icono violeta, texto y «>». */
 @Composable
 fun MenuRow(icon: ImageVector, title: String, detail: String? = null, badge: Int = 0, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .heightIn(min = 60.dp)
-            .padding(horizontal = 18.dp, vertical = 10.dp),
+            .heightIn(min = 50.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(40.dp).clip(RoundedCornerShape(14.dp)).background(LocalExtra.current.chip), contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        }
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             if (detail != null) {
@@ -499,12 +499,11 @@ fun MenuRow(icon: ImageVector, title: String, detail: String? = null, badge: Int
         if (badge > 0) {
             Text(
                 "$badge", color = Color.White, style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.clip(RoundedCornerShape(50)).background(LocalExtra.current.notification).padding(horizontal = 8.dp, vertical = 2.dp),
+                modifier = Modifier.clip(RoundedCornerShape(50)).background(LocalExtra.current.notification).padding(horizontal = 7.dp, vertical = 1.dp),
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(6.dp))
         }
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp))
+        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
     }
 }
 
@@ -592,7 +591,7 @@ fun SelectTile(
         shadowElevation = if (selected) 0.dp else 1.dp,
         modifier = modifier
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .heightIn(min = 92.dp)
+            .heightIn(min = 80.dp)
             .then(if (selected) Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
             .semantics { role = Role.Checkbox; this.selected = selected },
     ) {
@@ -602,7 +601,7 @@ fun SelectTile(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                if (emoji != null) Text(emoji, fontSize = 30.sp) else Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
+                if (emoji != null) Text(emoji, fontSize = 26.sp) else Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(30.dp))
                 Text(
                     label,
                     style = MaterialTheme.typography.labelLarge,
