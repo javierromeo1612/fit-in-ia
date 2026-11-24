@@ -125,17 +125,20 @@ fun ActivityScreen(state: AppState, activityId: String) {
                         }
                         rec?.missing?.forEach { NeedPill(it.shortLabel, false) }
                     }
+                    Row(
+                        Modifier.padding(top = 6.dp).clip(RoundedCornerShape(50)).background(x.chip)
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.Groups, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(if (a.spotsLeft == 1) "Queda 1 plaza" else "Quedan ${a.spotsLeft} plazas",
+                            style = MaterialTheme.typography.labelLarge)
+                    }
 
                     if (rec != null) {
-                        AiReason("${rec.match} % de encaje contigo. ${rec.explanation}", Modifier.padding(top = 12.dp))
-                        // Contribución de cada característica del modelo (explicabilidad)
-                        Text("Lo que ha tenido en cuenta la IA", style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(top = 12.dp, bottom = 6.dp))
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            for (r in rec.reasons.filter { kotlin.math.abs(it.contribution) >= 0.1 }.take(6)) {
-                                NeedPill((if (r.contribution > 0) "+ " else "− ") + r.feature.label, r.contribution > 0)
-                            }
-                        }
+                        AiReason("${rec.match} % de encaje contigo. ${rec.explanation}", Modifier.padding(top = 14.dp))
                     }
 
                     // Verificación visible: quién lo comprobó y cuándo
@@ -177,17 +180,6 @@ fun ActivityScreen(state: AppState, activityId: String) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                    }
-                    Row(
-                        Modifier.padding(top = 12.dp).clip(RoundedCornerShape(50)).background(x.chip)
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(Icons.Filled.Groups, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(if (a.spotsLeft == 1) "Queda 1 plaza" else "Quedan ${a.spotsLeft} plazas",
-                            style = MaterialTheme.typography.labelLarge)
                     }
                     if (a.howToArrive.isNotBlank()) {
                         IconLine(Icons.Filled.Directions, a.howToArrive)

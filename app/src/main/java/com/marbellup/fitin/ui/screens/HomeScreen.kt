@@ -1,9 +1,8 @@
 package com.marbellup.fitin.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -17,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.marbellup.fitin.AppState
@@ -27,7 +28,6 @@ import com.marbellup.fitin.Step
 import com.marbellup.fitin.Tab
 import com.marbellup.fitin.data.Sport
 import com.marbellup.fitin.ui.ActivityPhotoCard
-import com.marbellup.fitin.ui.CategoryTile
 import com.marbellup.fitin.ui.ExampleNote
 import com.marbellup.fitin.ui.GlassCard
 import com.marbellup.fitin.ui.GradientBackground
@@ -37,101 +37,98 @@ import com.marbellup.fitin.ui.icon
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
 
-/** Pantalla 2 de la referencia: saludo, buscador con IA, categorías y actividades cerca. */
+/**
+ * Inicio, calcado de la referencia: saludo y campana, buscador, cuatro accesos rápidos,
+ * «Actividades cerca de ti» (ordenadas por la IA) y la tarjeta de ayuda con la mascota.
+ */
 @Composable
 fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     val x = LocalExtra.current
-    // Todo lo ordena el modelo de IA del móvil.
     val ranked = state.ranked()
-    val recs = ranked.filter { it.activity.id !in state.joined }
-    val nearby = ranked.filter { state.sport == null || it.activity.sport == state.sport }
+    val list = ranked.filter { state.sport == null || it.activity.sport == state.sport }
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
-            Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
-                // Saludo + campana
-                Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 16.dp)) {
+                // Hola, Lucía 👋 + campana
+                Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text("Hola, ${state.userName} 👋", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.semantics { heading() })
                         Text("¿Qué te apetece hacer hoy?", style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    RoundIconButton(Icons.Outlined.Notifications, "Notificaciones", badge = state.unread) {
-                        state.open(Step.Notifications)
-                    }
+                    RoundIconButton(Icons.Outlined.Notifications, "Avisos", badge = state.unread) { state.open(Step.Notifications) }
                 }
 
-                // Buscador: abre la búsqueda en lenguaje natural
+                // Buscador en píldora
                 Surface(
-                    onClick = { state.open(Step.AiSearch) },
+                    onClick = { state.tab = Tab.ParaTi },
                     shape = RoundedCornerShape(50),
                     color = x.card,
                     shadowElevation = 2.dp,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp).fillMaxWidth().heightIn(min = 56.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp).fillMaxWidth().heightIn(min = 54.dp),
                 ) {
                     Row(Modifier.padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(10.dp))
                         Text("Buscar actividades…", style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                        Icon(Icons.Filled.AutoAwesome, contentDescription = "Recomendaciones con IA", tint = MaterialTheme.colorScheme.primary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
-                // Categorías
-                LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    item {
-                        CategoryTile("Cerca", Icons.Filled.NearMe, MaterialTheme.colorScheme.primary, x.lilac, state.sport == null) {
-                            state.sport = null
-                        }
+                // Cuatro accesos rápidos en mosaicos blancos, como en la referencia
+                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickTile("Cerca", Icons.Filled.NearMe, MaterialTheme.colorScheme.primary, state.sport == null, Modifier.weight(1f)) {
+                        state.sport = null
                     }
-                    val pastel = listOf(x.sky, x.peach, x.mint, x.pink, x.lilac)
-                    items(Sport.entries.toList()) { s ->
-                        CategoryTile(s.label, s.icon, s.tint, pastel[s.ordinal % pastel.size], state.sport == s) {
-                            state.sport = if (state.sport == s) null else s
-                        }
+                    QuickTile("Piscina", Sport.Natacion.icon, Sport.Natacion.tint, state.sport == Sport.Natacion, Modifier.weight(1f)) {
+                        state.sport = if (state.sport == Sport.Natacion) null else Sport.Natacion
                     }
-                    item {
-                        CategoryTile("Más", Icons.Filled.MoreHoriz, MaterialTheme.colorScheme.primary, x.card, false) {
-                            state.open(Step.AiSearch)
-                        }
+                    QuickTile("Baloncesto", Sport.Baloncesto.icon, Sport.Baloncesto.tint, state.sport == Sport.Baloncesto, Modifier.weight(1f)) {
+                        state.sport = if (state.sport == Sport.Baloncesto) null else Sport.Baloncesto
+                    }
+                    QuickTile("Más", Icons.Filled.MoreHoriz, MaterialTheme.colorScheme.onSurfaceVariant, false, Modifier.weight(1f)) {
+                        state.tab = Tab.ParaTi
                     }
                 }
 
-                // Recomendado por la IA
-                if (recs.isNotEmpty()) {
-                    SectionTitle("Elegido para ti", "Ver todas") { state.open(Step.AiSearch) }
-                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(recs.take(4)) { rec ->
-                            ActivityPhotoCard(rec.activity, state, rec, Modifier.width(300.dp), showReason = true)
-                        }
+                // ⭐ Actividades cerca de ti · Ver todas →
+                Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 20.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.StarOutline, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(if (state.sport == null) "Actividades cerca de ti" else state.sport!!.label,
+                        style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
+                    TextButton(onClick = { state.tab = Tab.ParaTi }, modifier = Modifier.heightIn(min = 48.dp)) {
+                        Text("Ver todas", style = MaterialTheme.typography.labelLarge)
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
+                            modifier = Modifier.size(16.dp).padding(start = 2.dp))
                     }
                 }
-
-                SectionTitle(if (state.sport == null) "Actividades cerca de ti" else state.sport!!.label, null) {}
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (nearby.isEmpty()) {
-                        Text("No hay actividades de este deporte. Pídeselo a la IA y crea un grupo.",
-                            style = MaterialTheme.typography.bodyLarge)
+                    if (list.isEmpty()) {
+                        Text("No hay actividades con plazas de este deporte ahora mismo.", style = MaterialTheme.typography.bodyLarge)
                     }
-                    for (m in nearby.take(8)) {
-                        ActivityPhotoCard(m.activity, state, m, showReason = false)
-                    }
+                    for (r in list.take(6)) ActivityPhotoCard(r.activity, state, r, showReason = false)
                 }
 
-                // ¿Necesitas ayuda? Pregúntale a Fit-In
-                GlassCard(Modifier.padding(16.dp), color = x.lilac, onClick = { state.tab = Tab.Chat }) {
-                    Row(Modifier.padding(16.dp).semantics(mergeDescendants = true) { role = Role.Button },
+                // ¿Necesitas ayuda? → recomendaciones de la IA
+                GlassCard(Modifier.padding(16.dp), color = x.lilac, onClick = { state.tab = Tab.ParaTi }) {
+                    Row(Modifier.padding(start = 18.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)
+                        .semantics(mergeDescendants = true) { role = Role.Button },
                         verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text("¿Necesitas ayuda?", style = MaterialTheme.typography.titleMedium)
-                            Text("Pregúntale a Fit-In", style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("Pregúntale a Fit-In", style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp).padding(start = 4.dp))
+                            }
                         }
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.width(8.dp))
-                        Mascot(60.dp)
+                        Mascot(64.dp)
                     }
                 }
                 ExampleNote("Actividades de ejemplo para la demo · Fotos: Unsplash")
@@ -140,17 +137,36 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     }
 }
 
+/** Acceso rápido: mosaico blanco con icono y texto debajo (dentro del mosaico), como en la referencia. */
+@Composable
+private fun QuickTile(label: String, icon: ImageVector, tint: Color, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected) LocalExtra.current.lilac else LocalExtra.current.card,
+        shadowElevation = 2.dp,
+        modifier = modifier.heightIn(min = 76.dp).semantics { role = Role.Tab; this.selected = selected },
+    ) {
+        Column(Modifier.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(28.dp))
+            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.padding(top = 4.dp))
+        }
+    }
+}
+
+/** Cabecera de sección reutilizada por otras pantallas. */
 @Composable
 internal fun SectionTitle(title: String, action: String?, onAction: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 22.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Filled.Star, contentDescription = null, tint = LocalExtra.current.flame, modifier = Modifier.size(22.dp))
+        Icon(Icons.Outlined.StarOutline, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(6.dp))
-        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f).semantics { heading() })
+        Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
         if (action != null) {
             TextButton(onClick = onAction, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(action, style = MaterialTheme.typography.titleSmall)
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp).padding(start = 4.dp))
+                Text(action, style = MaterialTheme.typography.labelLarge)
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp).padding(start = 2.dp))
             }
         }
     }

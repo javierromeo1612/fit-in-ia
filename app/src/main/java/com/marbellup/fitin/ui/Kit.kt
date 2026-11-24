@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -55,10 +56,19 @@ import com.marbellup.fitin.ui.theme.LocalExtra
 @Composable
 fun GradientBackground(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val x = LocalExtra.current
+    val blobA = x.hero.copy(alpha = 0.18f)
+    val blobB = Color(0xFF8EC5FF).copy(alpha = 0.22f)
     Box(
         modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(x.gradientTop, x.gradientBottom, MaterialTheme.colorScheme.background))),
+            .background(Brush.verticalGradient(listOf(x.gradientTop, x.gradientBottom, MaterialTheme.colorScheme.background)))
+            // Manchas de luz lila y azul, como el fondo de la referencia.
+            .drawBehind {
+                drawCircle(Brush.radialGradient(listOf(blobA, Color.Transparent), center = Offset(size.width * 0.1f, size.height * 0.05f),
+                    radius = size.width * 0.8f), radius = size.width * 0.8f, center = Offset(size.width * 0.1f, size.height * 0.05f))
+                drawCircle(Brush.radialGradient(listOf(blobB, Color.Transparent), center = Offset(size.width * 0.95f, size.height * 0.35f),
+                    radius = size.width * 0.7f), radius = size.width * 0.7f, center = Offset(size.width * 0.95f, size.height * 0.35f))
+            },
         content = content,
     )
 }
@@ -352,7 +362,7 @@ fun FitInBottomBar(state: AppState) {
                     }
                 }
             }
-            TabItem(state, Tab.Chat, Icons.Filled.ChatBubble, Icons.Outlined.ChatBubbleOutline)
+            TabItem(state, Tab.ParaTi, Icons.Filled.AutoAwesome, Icons.Outlined.AutoAwesome)
             TabItem(state, Tab.Perfil, Icons.Filled.Person, Icons.Outlined.Person)
         }
     }

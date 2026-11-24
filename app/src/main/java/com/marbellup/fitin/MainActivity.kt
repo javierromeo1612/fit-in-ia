@@ -36,10 +36,10 @@ import com.marbellup.fitin.ui.screens.ActivityScreen
 import com.marbellup.fitin.ui.screens.AiSearchScreen
 import com.marbellup.fitin.ui.screens.CalendarScreen
 import com.marbellup.fitin.ui.screens.CelebrationScreen
-import com.marbellup.fitin.ui.screens.ChatScreen
 import com.marbellup.fitin.ui.screens.CompanyScreen
 import com.marbellup.fitin.ui.screens.CouncilScreen
 import com.marbellup.fitin.ui.screens.CreateScreen
+import com.marbellup.fitin.ui.screens.ForYouScreen
 import com.marbellup.fitin.ui.screens.HomeScreen
 import com.marbellup.fitin.ui.screens.ModelScreen
 import com.marbellup.fitin.ui.screens.NotificationsScreen
@@ -124,7 +124,7 @@ private fun App(state: AppState) {
             step is Step.Model -> ModelScreen(state)
             state.tab == Tab.Inicio -> HomeScreen(state, tabs)
             state.tab == Tab.Calendario -> CalendarScreen(state, tabs)
-            state.tab == Tab.Chat -> ChatScreen(state, tabs)
+            state.tab == Tab.ParaTi -> ForYouScreen(state, tabs)
             else -> ProfileScreen(state, tabs)
         }
 

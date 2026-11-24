@@ -139,25 +139,6 @@ fun CreateScreen(state: AppState) {
                     }
                 }
 
-                Text("¿Cuándo?", style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 20.dp, top = 18.dp, bottom = 8.dp).semantics { heading() })
-                FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (w in whenOptions) {
-                        FilterChip(selected = whenText == w, onClick = { whenText = w }, label = { Text(w) },
-                            shape = RoundedCornerShape(50), modifier = Modifier.heightIn(min = 48.dp))
-                    }
-                }
-
-                Text("Nivel", style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 20.dp, top = 18.dp, bottom = 8.dp).semantics { heading() })
-                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for ((code, label) in levelOptions) {
-                        FilterChip(selected = level == code, onClick = { level = code }, label = { Text(label) },
-                            shape = RoundedCornerShape(50), modifier = Modifier.heightIn(min = 48.dp))
-                    }
-                }
-
                 GradientButton(
                     "Siguiente",
                     Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
@@ -188,6 +169,25 @@ fun CreateScreen(state: AppState) {
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(20.dp),
                 )
+                Text("¿Cuándo?", style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(start = 20.dp, top = 18.dp, bottom = 8.dp).semantics { heading() })
+                FlowRow(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (w in whenOptions) {
+                        FilterChip(selected = whenText == w, onClick = { whenText = w }, label = { Text(w) },
+                            shape = RoundedCornerShape(50), modifier = Modifier.heightIn(min = 48.dp))
+                    }
+                }
+
+                Text("Nivel", style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(start = 20.dp, top = 18.dp, bottom = 8.dp).semantics { heading() })
+                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for ((code, label) in levelOptions) {
+                        FilterChip(selected = level == code, onClick = { level = code }, label = { Text(label) },
+                            shape = RoundedCornerShape(50), modifier = Modifier.heightIn(min = 48.dp))
+                    }
+                }
+
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (places.isEmpty()) {
                         AiReason("No hay instalaciones de ${s.label.lowercase()} en los datos de ejemplo.")

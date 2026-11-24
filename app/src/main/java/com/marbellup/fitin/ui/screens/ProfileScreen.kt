@@ -43,7 +43,9 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(Modifier.height(20.dp))
+                Row(Modifier.fillMaxWidth().padding(top = 12.dp, end = 16.dp), horizontalArrangement = Arrangement.End) {
+                    com.marbellup.fitin.ui.RoundIconButton(Icons.Filled.Settings, "Mis preferencias") { state.open(Step.AiSearch) }
+                }
                 Box {
                     Avatar("${state.userName} García", size = 104.dp)
                     Box(

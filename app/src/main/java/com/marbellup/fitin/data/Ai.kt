@@ -1,7 +1,7 @@
 package com.marbellup.fitin.data
 
 /*
- * Tipos auxiliares de la IA del móvil: avisos y mensajes del asistente.
+ * Tipos auxiliares de la IA del móvil: avisos.
  * La IA no interpreta texto libre: todo se elige con opciones, para que el modelo reciba datos limpios.
  */
 
@@ -17,10 +17,4 @@ data class AppNotification(
     val status: String,
     /** Probabilidad de encaje que calculó el modelo. */
     val compat: Double?,
-)
-
-data class ChatMessage(
-    val fromUser: Boolean,
-    val text: String,
-    val recommendations: List<Scored> = emptyList(),
 )

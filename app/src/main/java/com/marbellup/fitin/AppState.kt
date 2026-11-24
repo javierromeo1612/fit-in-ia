@@ -11,7 +11,6 @@ import com.marbellup.fitin.data.Activity
 import com.marbellup.fitin.data.AppNotification
 import com.marbellup.fitin.data.Barrier
 import com.marbellup.fitin.data.BarrierStatus
-import com.marbellup.fitin.data.ChatMessage
 import com.marbellup.fitin.data.Dates
 import com.marbellup.fitin.data.GroupMember
 import com.marbellup.fitin.data.Interaction
@@ -30,7 +29,7 @@ import com.marbellup.fitin.notify.Alerts
 enum class Tab(val label: String) {
     Inicio("Inicio"),
     Calendario("Calendario"),
-    Chat("Chat"),
+    ParaTi("Para ti"),
     Perfil("Perfil"),
 }
 
@@ -48,16 +47,6 @@ sealed interface Step {
 }
 
 data class Booking(val activityId: String, val companion: String)
-
-/** Preguntas del asistente: se eligen tocando, no se escriben. */
-enum class ChatOption(val question: String) {
-    ParaMi("¿Qué me recomiendas?"),
-    Cerca("¿Qué actividades hay cerca de mí?"),
-    SillaRuedas("¿Qué hay para silla de ruedas?"),
-    Hoy("¿Qué puedo hacer hoy?"),
-    FinDeSemana("¿Y el fin de semana?"),
-    Deporte("Quiero un deporte concreto"),
-}
 
 /**
  * Estado de la app. Toda la IA corre en el móvil (ver data/Recommender.kt):
@@ -99,11 +88,6 @@ class AppState(app: Application) : AndroidViewModel(app) {
     val joined = mutableStateListOf<String>().apply { addAll(store.loadSet("joined")) }
     val favorites = mutableStateListOf<String>().apply { addAll(store.loadSet("favorites")) }
     val reported = mutableStateListOf<Barrier>()
-
-    // ---- Asistente
-    val chat = mutableStateListOf(
-        ChatMessage(false, "¡Hola, $userName! ¿En qué puedo ayudarte hoy? Elige una opción y te recomiendo según tus características."),
-    )
 
     // ---- Avisos
     val notifications = mutableStateListOf<AppNotification>().apply { addAll(store.loadInbox()) }
@@ -252,39 +236,6 @@ class AppState(app: Application) : AndroidViewModel(app) {
     fun reportBarrier(activityId: String, what: String) {
         val place = SampleData.activity(activityId).place
         reported.add(0, Barrier(place, what, 1, BarrierStatus.SinResolver))
-    }
-
-    // ================================================================ asistente (por opciones)
-
-    /**
-     * El asistente no interpreta texto: la persona toca una opción y el modelo responde con
-     * sus recomendaciones. Así los datos que llegan al modelo son siempre limpios.
-     */
-    fun ask(option: ChatOption, sport: Sport? = null) {
-        val question = if (option == ChatOption.Deporte && sport != null) "Quiero hacer ${sport.label.lowercase()}" else option.question
-        chat.add(ChatMessage(true, question))
-        val p = when (option) {
-            ChatOption.SillaRuedas -> profile.copy(needs = profile.needs + Need.SinEscalones + Need.Vestuario)
-            else -> profile
-        }
-        val all = Recommender.rank(p, SampleData.all, model, history.toList(), known = SampleData.allKnown)
-        val list = when (option) {
-            ChatOption.Cerca -> all.filter { profile.zone == null || it.activity.zone == profile.zone }.ifEmpty { all }
-            ChatOption.SillaRuedas -> all.filter { Need.SinEscalones in it.activity.features && Need.Vestuario in it.activity.features }
-            ChatOption.Hoy -> all.filter { it.activity.startDate == Dates.today }
-            ChatOption.FinDeSemana -> all.filter { (it.activity.startDate?.dayOfWeek?.value ?: 1) >= 6 }
-            ChatOption.Deporte -> all.filter { it.activity.sport == sport }
-            ChatOption.ParaMi -> all
-        }.take(3)
-        val reply = when {
-            list.isEmpty() -> "Ahora mismo no hay plazas en nada así. Activa los avisos y te escribo en cuanto salga algo que encaje contigo."
-            option == ChatOption.SillaRuedas ->
-                "Estas tienen acceso sin escalones y vestuario adaptado comprobados. La que mejor encaja contigo: " +
-                    "${list[0].activity.title.lowercase()} (${list[0].match} %)."
-            else -> "Te propongo ${list[0].activity.title.lowercase()} (${list[0].activity.shortDate.lowercase()}), " +
-                "con un ${list[0].match} % de encaje. ${list[0].explanation}"
-        }
-        chat.add(ChatMessage(false, reply, list))
     }
 
     // ================================================================ crear actividad

@@ -43,7 +43,7 @@ Se pregunta **qué necesita, nunca qué tiene**: no se recoge ningún diagnósti
 
 **De cada actividad e instalación:** lo que cubre el sitio (comprobado: sin escalones, grúa, cubierta…) y la actividad (monitor, material adaptado, intérprete…), día y hora, nivel, zona, sello de verificación, confirmaciones de otras personas, voluntariado y plazas.
 
-**Por qué opciones y no texto libre:** con texto, el modelo dependería de cómo escribe cada persona («accesible», «voy en silla», «sin barreras»…) y podría malinterpretarlo. Con opciones cerradas, cada característica es una variable exacta del modelo. El asistente del chat también funciona con preguntas para tocar («¿Qué hay cerca de mí?», «¿Qué hay para silla de ruedas?», «Quiero un deporte concreto»…).
+**Por qué opciones y no texto libre:** con texto, el modelo dependería de cómo escribe cada persona («accesible», «voy en silla», «sin barreras»…) y podría malinterpretarlo. Con opciones cerradas, cada característica es una variable exacta del modelo.
 
 ---
 
@@ -101,7 +101,7 @@ Los pesos y el historial se guardan en el móvil (`Store.kt`) y sobreviven al ce
 ### 3.3 Instalaciones
 
 El mismo modelo puntúa las **instalaciones** de un deporte con los factores del sitio: cobertura de las necesidades físicas, lo que falta, proximidad y sello. Se usa en:
-- «Mis preferencias › Ver mis recomendaciones» (sitios para tu deporte).
+- La pestaña «Para ti» y «Mis preferencias › Ver mis recomendaciones» (sitios para tu deporte).
 - «+ Crear actividad»: la IA ordena dónde organizarla y marca la mejor opción.
 
 ### 3.4 Explicabilidad
