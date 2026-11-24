@@ -55,11 +55,15 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     var monthShift by rememberSaveable { mutableIntStateOf(0) }
     val selected = LocalDate.ofEpochDay(selectedEpoch)
 
-    val all = SampleData.all.filter { it.startDate != null }
+    // Para que no se vea saturado: solo tus reservas y las actividades que más te encajan,
+    // como mucho 2 por día (primero las que tienes reservadas).
+    val picks = state.ranked().take(10).map { it.activity }.toSet()
+    val all = SampleData.all.filter { it.startDate != null && (it.id in state.joined || it in picks) }
     val byDay = all.groupBy { it.startDate!! }
+        .mapValues { (_, list) -> list.sortedByDescending { it.id in state.joined }.take(2) }
     val dayItems = (byDay[selected] ?: emptyList()).sortedBy { timeOf(it) }
     val monday = Dates.today.minusDays((Dates.today.dayOfWeek.value - 1).toLong())
-    val week = all.count { !it.startDate!!.isBefore(monday) && it.startDate.isBefore(monday.plusDays(7)) }
+    val week = byDay.filterKeys { !it.isBefore(monday) && it.isBefore(monday.plusDays(7)) }.values.sumOf { it.size }
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
@@ -68,7 +72,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text("Mi calendario", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
-                        Text("$week actividades esta semana · ${state.joined.size} reservadas",
+                        Text("$week planes para ti esta semana · ${state.joined.size} reservadas",
                             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     // Semana / Mes
