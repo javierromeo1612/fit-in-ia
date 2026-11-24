@@ -2,7 +2,6 @@ package com.marbellup.fitin.ui.screens
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,7 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -28,22 +26,17 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.marbellup.fitin.AppState
 import com.marbellup.fitin.Step
 import com.marbellup.fitin.data.Activity
 import com.marbellup.fitin.data.Dates
 import com.marbellup.fitin.data.SampleData
+import com.marbellup.fitin.ui.ActivityCover
 import com.marbellup.fitin.ui.FloatingMascot
 import com.marbellup.fitin.ui.GlassCard
 import com.marbellup.fitin.ui.GradientBackground
 import com.marbellup.fitin.ui.GradientButton
-import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.ui.theme.LocalExtra
-import com.marbellup.fitin.ui.tint
-import com.marbellup.fitin.ui.pastel
-import com.marbellup.fitin.ui.deeper
-import com.marbellup.fitin.ui.primaryBrush
 import java.time.LocalDate
 
 private val dayLetters = listOf("L", "M", "X", "J", "V", "S", "D")
@@ -51,8 +44,8 @@ private val monthNames = listOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "J
     "Septiembre", "Octubre", "Noviembre", "Diciembre")
 
 /**
- * Calendario grande: vista de semana (como la referencia) que se amplía a mes completo.
- * Cada día muestra puntos de colores por actividad; tus reservas llevan aro naranja.
+ * Calendario limpio: una tarjeta blanca con la semana (o el mes) y, debajo, la agenda del día
+ * en filas claras con la hora a la izquierda. Un punto violeta = hay actividades; naranja = tienes plaza.
  */
 @Composable
 fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
@@ -64,29 +57,30 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
     val all = SampleData.all.filter { it.startDate != null }
     val byDay = all.groupBy { it.startDate!! }
-    val dayItems = (byDay[selected] ?: emptyList()).sortedWith(compareByDescending<Activity> { it.id in state.joined }.thenBy { it.shortDate })
+    val dayItems = (byDay[selected] ?: emptyList()).sortedBy { timeOf(it) }
+    val monday = Dates.today.minusDays((Dates.today.dayOfWeek.value - 1).toLong())
+    val week = all.count { !it.startDate!!.isBefore(monday) && it.startDate.isBefore(monday.plusDays(7)) }
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-                Row(Modifier.padding(start = 20.dp, end = 12.dp, top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(primaryBrush()),
-                        contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                // Título + resumen de la semana en una línea, sin tarjetas extra
+                Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Mi calendario", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+                        Text("$week actividades esta semana · ${state.joined.size} reservadas",
+                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Spacer(Modifier.width(10.dp))
-                    Text("Mi calendario", style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(1f).semantics { heading() })
                     // Semana / Mes
-                    Row(Modifier.clip(RoundedCornerShape(50)).background(x.card).padding(4.dp)) {
+                    Row(Modifier.clip(RoundedCornerShape(50)).background(x.card).padding(3.dp)) {
                         for ((label, isMonth) in listOf("Semana" to false, "Mes" to true)) {
                             val on = monthView == isMonth
                             Text(
                                 label,
                                 style = MaterialTheme.typography.labelLarge,
-                                color = if (on) Color.White else MaterialTheme.colorScheme.onSurface,
+                                color = if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.clip(RoundedCornerShape(50))
-                                    .then(if (on) Modifier.background(primaryBrush()) else Modifier)
+                                    .background(if (on) x.lilac else Color.Transparent)
                                     .clickable { monthView = isMonth; monthShift = 0 }
                                     .semantics { role = Role.Tab; this.selected = on }
                                     .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -95,40 +89,40 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     }
                 }
 
-                GlassCard(Modifier.padding(16.dp).animateContentSize(), color = if (monthView) x.card else Color.White.copy(alpha = 0.55f)) {
-                    Column(Modifier.padding(horizontal = 8.dp, vertical = 12.dp)) {
+                GlassCard(Modifier.padding(16.dp).animateContentSize()) {
+                    Column(Modifier.padding(horizontal = 8.dp, vertical = 10.dp)) {
                         val days: List<LocalDate?>
-                        if (monthView) {
-                            val first = Dates.today.withDayOfMonth(1).plusMonths(monthShift.toLong())
-                            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { monthShift-- }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Mes anterior") }
-                                Text("${monthNames[first.monthValue - 1]} ${first.year}", style = MaterialTheme.typography.titleLarge,
-                                    modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                                IconButton(onClick = { monthShift++ }) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Mes siguiente") }
+                        val first = Dates.today.withDayOfMonth(1).plusMonths(monthShift.toLong())
+                        val weekStart = selected.minusDays((selected.dayOfWeek.value - 1).toLong())
+                        val shown = if (monthView) first else weekStart
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { if (monthView) monthShift-- else selectedEpoch -= 7 }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = if (monthView) "Mes anterior" else "Semana anterior",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            val lead = first.dayOfWeek.value - 1
-                            days = List(lead) { null } + (0 until first.lengthOfMonth()).map { first.plusDays(it.toLong()) }
+                            Text("${monthNames[shown.monthValue - 1]} ${shown.year}", style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            IconButton(onClick = { if (monthView) monthShift++ else selectedEpoch += 7 }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = if (monthView) "Mes siguiente" else "Semana siguiente",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        days = if (monthView) {
+                            List(first.dayOfWeek.value - 1) { null } + (0 until first.lengthOfMonth()).map { first.plusDays(it.toLong()) }
                         } else {
-                            val monday = selected.minusDays((selected.dayOfWeek.value - 1).toLong())
-                            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(onClick = { selectedEpoch -= 7 }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Semana anterior") }
-                                Text("${monthNames[monday.monthValue - 1]} ${monday.year}", style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.weight(1f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                                IconButton(onClick = { selectedEpoch += 7 }) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Semana siguiente") }
-                            }
-                            days = (0..6).map { monday.plusDays(it.toLong()) }
+                            (0..6).map { weekStart.plusDays(it.toLong()) }
                         }
                         Row(Modifier.fillMaxWidth()) {
                             for (l in dayLetters) {
-                                Text(l, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                Text(l, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.weight(1f))
                             }
                         }
-                        Spacer(Modifier.height(6.dp))
-                        for (week in days.chunked(7)) {
+                        Spacer(Modifier.height(4.dp))
+                        for (row in days.chunked(7)) {
                             Row(Modifier.fillMaxWidth()) {
                                 for (i in 0 until 7) {
-                                    val d = week.getOrNull(i)
+                                    val d = row.getOrNull(i)
                                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                                         if (d != null) {
                                             DayCell(d, d == selected, d == Dates.today, byDay[d].orEmpty(), state.joined) {
@@ -139,52 +133,54 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                 }
                             }
                         }
-                        // Leyenda
-                        Row(Modifier.padding(start = 12.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(12.dp).clip(CircleShape).border(2.dp, x.flame, CircleShape))
-                            Text(" Tus reservas   ", style = MaterialTheme.typography.bodySmall)
-                            Box(Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-                            Text(" Actividades", style = MaterialTheme.typography.bodySmall)
+                        // Leyenda sencilla
+                        Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(7.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+                            Text("  Hay actividades", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.width(16.dp))
+                            Box(Modifier.size(7.dp).clip(CircleShape).background(x.flame))
+                            Text("  Tienes plaza", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
 
+                // Agenda del día elegido
                 val title = when (selected) {
                     Dates.today -> "Hoy"
                     Dates.today.plusDays(1) -> "Mañana"
-                    else -> "${selected.dayOfMonth} de ${monthNames[selected.monthValue - 1].lowercase()}"
+                    else -> dayNames[selected.dayOfWeek.value - 1]
                 }
-                Text(title, style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 20.dp, bottom = 8.dp).semantics { heading() })
+                Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 10.dp), verticalAlignment = Alignment.Bottom) {
+                    Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                    Text("  ${selected.dayOfMonth} de ${monthNames[selected.monthValue - 1].lowercase()}",
+                        style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f))
+                    if (dayItems.isNotEmpty()) {
+                        Text(if (dayItems.size == 1) "1 actividad" else "${dayItems.size} actividades",
+                            style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
 
-                Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.padding(horizontal = 16.dp)) {
                     if (dayItems.isEmpty()) {
                         GlassCard {
                             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                FloatingMascot(56.dp)
+                                FloatingMascot(52.dp)
                                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                                    Text("Nada este día", style = MaterialTheme.typography.titleMedium)
-                                    Text("Toca un día con puntos o mira lo que te recomiendo.", style = MaterialTheme.typography.bodyMedium)
+                                    Text("Este día está libre", style = MaterialTheme.typography.titleMedium)
+                                    Text("Elige un día con punto o mira lo que te recomiendo.", style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
-                            GradientButton("Ver recomendaciones", Modifier.padding(16.dp)) { state.tab = com.marbellup.fitin.Tab.ParaTi }
-                        }
-                    }
-                    dayItems.forEach { a -> DayActivity(state, a, a.sport.pastel) }
-
-                    // Resumen semanal como en la referencia
-                    val monday = Dates.today.minusDays((Dates.today.dayOfWeek.value - 1).toLong())
-                    val week = all.count { !it.startDate!!.isBefore(monday) && it.startDate.isBefore(monday.plusDays(7)) }
-                    Surface(shape = RoundedCornerShape(24.dp), color = Color.Transparent, shadowElevation = 4.dp,
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                        Row(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFFFFB347), Color(0xFFFF7A59))))
-                            .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(50.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
-                                Text("⭐", fontSize = 26.sp)
+                            GradientButton("Ver recomendaciones", Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                                state.tab = com.marbellup.fitin.Tab.ParaTi
                             }
-                            Column(Modifier.padding(start = 12.dp).weight(1f)) {
-                                Text("$week actividades esta semana", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A1600))
-                                Text("${state.joined.size} con tu plaza reservada", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A1600))
+                        }
+                    } else {
+                        GlassCard {
+                            dayItems.forEachIndexed { i, a ->
+                                if (i > 0) HorizontalDivider(Modifier.padding(start = 84.dp, end = 16.dp), color = x.lilac)
+                                AgendaRow(state, a)
                             }
                         }
                     }
@@ -193,6 +189,11 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
         }
     }
 }
+
+private val dayNames = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+
+/** Hora de la actividad («10:00»), sacada del horario «Sábado, 10:00». */
+private fun timeOf(a: Activity): String = a.schedule.substringAfterLast(", ", "")
 
 @Composable
 private fun DayCell(d: LocalDate, isSelected: Boolean, isToday: Boolean, items: List<Activity>, joined: List<String>, onClick: () -> Unit) {
@@ -200,68 +201,67 @@ private fun DayCell(d: LocalDate, isSelected: Boolean, isToday: Boolean, items: 
     val mine = items.any { it.id in joined }
     Column(
         Modifier
-            .padding(vertical = 3.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .padding(vertical = 2.dp)
+            .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .semantics { contentDescription = "Día ${d.dayOfMonth}, ${items.size} actividades" + if (mine) ", tienes reserva" else "" }
-            .padding(vertical = 4.dp, horizontal = 2.dp),
+            .semantics { contentDescription = "Día ${d.dayOfMonth}, ${items.size} actividades" + if (mine) ", tienes plaza" else "" }
+            .padding(vertical = 3.dp, horizontal = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
             Modifier.size(38.dp).clip(CircleShape)
-                .then(if (isSelected) Modifier.background(primaryBrush()) else Modifier.background(if (isToday) x.lilac else Color.Transparent))
-                .then(if (mine) Modifier.border(2.5.dp, x.flame, CircleShape) else Modifier),
+                .background(if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) x.lilac else Color.Transparent),
             contentAlignment = Alignment.Center,
         ) {
             Text("${d.dayOfMonth}", style = MaterialTheme.typography.titleMedium,
-                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface)
+                color = when {
+                    isSelected -> Color.White
+                    isToday -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.onSurface
+                })
         }
-        Row(Modifier.height(10.dp).padding(top = 3.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-            for (a in items.take(3)) Box(Modifier.size(6.dp).clip(CircleShape).background(a.sport.tint))
-        }
+        // Un solo punto por día: naranja si tienes plaza, violeta si hay actividades
+        Box(
+            Modifier.padding(top = 3.dp).size(6.dp).clip(CircleShape)
+                .background(if (mine) x.flame else if (items.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Transparent),
+        )
     }
 }
 
+/** Fila de la agenda: hora · foto · título y lugar · flecha. */
 @Composable
-private fun DayActivity(state: AppState, a: Activity, bg: Color) {
+private fun AgendaRow(state: AppState, a: Activity) {
     val x = LocalExtra.current
     val booked = a.id in state.joined
-    Surface(
-        onClick = { state.open(Step.Detail(a.id)) },
-        shape = RoundedCornerShape(24.dp),
-        color = bg,
-        shadowElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(14.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(54.dp).clip(RoundedCornerShape(18.dp)).background(Color.White), contentAlignment = Alignment.Center) {
-                    Text(a.sport.emoji, fontSize = 30.sp)
-                }
-                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                    Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 2)
-                    Text(a.shortDate, style = MaterialTheme.typography.labelLarge, color = a.sport.tint.deeper())
-                    Text(a.place, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Box(Modifier.size(34.dp).clip(CircleShape).background(a.sport.tint), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+    Column(Modifier.fillMaxWidth().clickable { state.open(Step.Detail(a.id)) }.padding(horizontal = 14.dp, vertical = 12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(timeOf(a), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.width(56.dp))
+            ActivityCover(a, Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)), small = true)
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                Text(a.place, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                if (booked) {
+                    Text("✓ Tienes plaza", style = MaterialTheme.typography.labelMedium, color = x.ok, modifier = Modifier.padding(top = 2.dp))
                 }
             }
-            if (booked) {
-                // Valorar enseña al modelo qué le gusta de verdad (la señal más fuerte).
-                val rating = state.ratingOf(a.id)
-                Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("✓ Apuntada", style = MaterialTheme.typography.labelLarge, color = x.ok, modifier = Modifier.weight(1f))
-                    Text(when (rating) { true -> "Te gustó"; false -> "No te gustó"; null -> "¿Te ha gustado?" },
-                        style = MaterialTheme.typography.bodySmall)
-                    IconButton(onClick = { state.rate(a.id, true) }) {
-                        Icon(Icons.Filled.ThumbUp, contentDescription = "Me ha gustado",
-                            tint = if (rating == true) x.ok else MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    IconButton(onClick = { state.rate(a.id, false) }) {
-                        Icon(Icons.Filled.ThumbDown, contentDescription = "No me ha gustado",
-                            tint = if (rating == false) x.barrier else MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+            Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (booked) {
+            // Valorar enseña al modelo qué le gusta de verdad (la señal más fuerte).
+            val rating = state.ratingOf(a.id)
+            Row(Modifier.padding(start = 56.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(when (rating) { true -> "Te gustó"; false -> "No te gustó"; null -> "¿Te ha gustado?" },
+                    style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                IconButton(onClick = { state.rate(a.id, true) }) {
+                    Icon(Icons.Filled.ThumbUp, contentDescription = "Me ha gustado",
+                        tint = if (rating == true) x.ok else MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                IconButton(onClick = { state.rate(a.id, false) }) {
+                    Icon(Icons.Filled.ThumbDown, contentDescription = "No me ha gustado",
+                        tint = if (rating == false) x.barrier else MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

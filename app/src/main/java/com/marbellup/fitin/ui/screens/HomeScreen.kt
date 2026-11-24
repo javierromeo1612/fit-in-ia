@@ -67,10 +67,10 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 16.dp)) {
-                // Hola, Lucía 👋 + campana
+                // Hola, Lucía + campana
                 Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("Hola, ${state.userName} 👋", style = MaterialTheme.typography.headlineSmall,
+                        Text("Hola, ${state.userName}", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.semantics { heading() })
                         Text("¿Qué te apetece hacer hoy?", style = MaterialTheme.typography.bodyLarge)
                     }

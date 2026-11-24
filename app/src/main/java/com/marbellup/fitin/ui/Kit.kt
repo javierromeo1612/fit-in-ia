@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -750,10 +751,14 @@ private fun coverColors(sport: com.marbellup.fitin.data.Sport, variant: Int): Li
  */
 @Composable
 fun ActivityCover(a: Activity, modifier: Modifier = Modifier, small: Boolean = false) {
-    val photo = when {
-        a.photoKey == "playa" -> com.marbellup.fitin.R.drawable.foto_playa
-        a.cover == 0 -> a.sport.photo
-        else -> null
+    // Siempre foto real: la concreta de la actividad (photoKey) o la de su deporte.
+    // Se busca por nombre (foto_<deporte>.jpg en res/drawable-nodpi), así basta con añadir
+    // el archivo para que un deporte nuevo tenga foto. Si no hay ninguna, se dibuja la portada.
+    val context = LocalContext.current
+    val photo = remember(a.id) {
+        fun find(name: String): Int? =
+            context.resources.getIdentifier("foto_$name", "drawable", context.packageName).takeIf { it != 0 }
+        a.photoKey?.let { find(it) } ?: find(a.sport.name.lowercase()) ?: a.sport.photo
     }
     if (photo != null) {
         Image(painterResource(photo), contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier)
