@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -40,6 +41,9 @@ import com.marbellup.fitin.ui.GradientButton
 import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
+import com.marbellup.fitin.ui.pastel
+import com.marbellup.fitin.ui.deeper
+import com.marbellup.fitin.ui.primaryBrush
 import java.time.LocalDate
 
 private val dayLetters = listOf("L", "M", "X", "J", "V", "S", "D")
@@ -61,13 +65,12 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     val all = SampleData.all.filter { it.startDate != null }
     val byDay = all.groupBy { it.startDate!! }
     val dayItems = (byDay[selected] ?: emptyList()).sortedWith(compareByDescending<Activity> { it.id in state.joined }.thenBy { it.shortDate })
-    val pastel = listOf(x.lilac, x.mint, x.pink, x.peach, x.sky)
 
     Scaffold(containerColor = Color.Transparent, contentWindowInsets = WindowInsets(0, 0, 0, 0), bottomBar = bottomBar) { padding ->
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
                 Row(Modifier.padding(start = 20.dp, end = 12.dp, top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.primary),
+                    Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(primaryBrush()),
                         contentAlignment = Alignment.Center) {
                         Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                     }
@@ -83,7 +86,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                 style = MaterialTheme.typography.labelLarge,
                                 color = if (on) Color.White else MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clip(RoundedCornerShape(50))
-                                    .background(if (on) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                    .then(if (on) Modifier.background(primaryBrush()) else Modifier)
                                     .clickable { monthView = isMonth; monthShift = 0 }
                                     .semantics { role = Role.Tab; this.selected = on }
                                     .padding(horizontal = 12.dp, vertical = 7.dp),
@@ -167,17 +170,21 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             GradientButton("Ver recomendaciones", Modifier.padding(16.dp)) { state.tab = com.marbellup.fitin.Tab.ParaTi }
                         }
                     }
-                    dayItems.forEachIndexed { i, a -> DayActivity(state, a, pastel[i % pastel.size]) }
+                    dayItems.forEach { a -> DayActivity(state, a, a.sport.pastel) }
 
                     // Resumen semanal como en la referencia
                     val monday = Dates.today.minusDays((Dates.today.dayOfWeek.value - 1).toLong())
                     val week = all.count { !it.startDate!!.isBefore(monday) && it.startDate.isBefore(monday.plusDays(7)) }
-                    Surface(shape = RoundedCornerShape(22.dp), color = x.sky, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text("⭐", fontSize = 30.sp)
+                    Surface(shape = RoundedCornerShape(24.dp), color = Color.Transparent, shadowElevation = 4.dp,
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                        Row(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFFFFB347), Color(0xFFFF7A59))))
+                            .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(50.dp).clip(CircleShape).background(Color.White), contentAlignment = Alignment.Center) {
+                                Text("⭐", fontSize = 26.sp)
+                            }
                             Column(Modifier.padding(start = 12.dp).weight(1f)) {
-                                Text("$week actividades esta semana", style = MaterialTheme.typography.titleMedium)
-                                Text("${state.joined.size} con tu plaza reservada", style = MaterialTheme.typography.bodyMedium)
+                                Text("$week actividades esta semana", style = MaterialTheme.typography.titleMedium, color = Color(0xFF3A1600))
+                                Text("${state.joined.size} con tu plaza reservada", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A1600))
                             }
                         }
                     }
@@ -202,7 +209,7 @@ private fun DayCell(d: LocalDate, isSelected: Boolean, isToday: Boolean, items: 
     ) {
         Box(
             Modifier.size(38.dp).clip(CircleShape)
-                .background(if (isSelected) MaterialTheme.colorScheme.primary else if (isToday) x.lilac else Color.Transparent)
+                .then(if (isSelected) Modifier.background(primaryBrush()) else Modifier.background(if (isToday) x.lilac else Color.Transparent))
                 .then(if (mine) Modifier.border(2.5.dp, x.flame, CircleShape) else Modifier),
             contentAlignment = Alignment.Center,
         ) {
@@ -228,15 +235,15 @@ private fun DayActivity(state: AppState, a: Activity, bg: Color) {
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(52.dp), contentAlignment = Alignment.Center) {
-                    Text(a.sport.emoji, fontSize = 36.sp)
+                Box(Modifier.size(54.dp).clip(RoundedCornerShape(18.dp)).background(Color.White), contentAlignment = Alignment.Center) {
+                    Text(a.sport.emoji, fontSize = 30.sp)
                 }
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 2)
-                    Text(a.shortDate, style = MaterialTheme.typography.bodyMedium)
+                    Text(a.shortDate, style = MaterialTheme.typography.labelLarge, color = a.sport.tint.deeper())
                     Text(a.place, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Box(Modifier.size(30.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(34.dp).clip(CircleShape).background(a.sport.tint), contentAlignment = Alignment.Center) {
                     Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }

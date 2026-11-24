@@ -68,10 +68,10 @@ data class ExtraColors(
     val userBubble: Color,
 )
 
-/* Paleta tomada de la nueva referencia visual del equipo (lilas y violetas). */
+/* Paleta tomada de la nueva referencia visual del equipo: lilas y violetas saturados, pasteles vivos. */
 private val LightExtra = ExtraColors(
     card = Color(0xFFFFFFFF),
-    chip = Color(0xFFEDE8FF),
+    chip = Color(0xFFE6DDFF),
     onChip = Color(0xFF231B4D),
     ok = Color(0xFF17704A),
     okContainer = Color(0xFFE2F5EC),
@@ -82,19 +82,19 @@ private val LightExtra = ExtraColors(
     barrier = Color(0xFFC93A3A),
     scrim = Color(0x99231B4D),
     notification = Color(0xFFC8361C),
-    tile = Color(0xFFF2EEFF),
+    tile = Color(0xFFEDE6FF),
     tileSelected = Color(0xFF6C4CF0),
-    hero = Color(0xFF6C4CF0),
-    flame = Color(0xFFF2852B),
-    gradientTop = Color(0xFFD6C8FF),
-    gradientBottom = Color(0xFFF6F3FF),
-    lilac = Color(0xFFEDE5FF),
-    sky = Color(0xFFE1EEFF),
-    mint = Color(0xFFDFF5EA),
-    peach = Color(0xFFFFE9D9),
-    pink = Color(0xFFFFE3F0),
-    aiBubble = Color(0xFFF1ECFF),
-    userBubble = Color(0xFFE3F4D9),
+    hero = Color(0xFF7C4DFF),
+    flame = Color(0xFFFF7A2F),
+    gradientTop = Color(0xFFB9A2FF),
+    gradientBottom = Color(0xFFEDE6FF),
+    lilac = Color(0xFFE3D7FF),
+    sky = Color(0xFFD3E6FF),
+    mint = Color(0xFFCFF3DF),
+    peach = Color(0xFFFFDDC4),
+    pink = Color(0xFFFFD6E8),
+    aiBubble = Color(0xFFECE4FF),
+    userBubble = Color(0xFFDDF3CF),
 )
 
 private val DarkExtra = ExtraColors(
@@ -142,9 +142,9 @@ private val LightColors = lightColorScheme(
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFFDE4E1),
     onErrorContainer = Color(0xFF5F0A0A),
-    background = Color(0xFFF4F1FF),
+    background = Color(0xFFF1EBFF),
     onBackground = Color(0xFF241D5C),
-    surface = Color(0xFFF4F1FF),
+    surface = Color(0xFFF1EBFF),
     onSurface = Color(0xFF241D5C),
     surfaceVariant = Color(0xFFF2EEFF),
     onSurfaceVariant = Color(0xFF575079),

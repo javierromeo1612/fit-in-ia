@@ -375,50 +375,51 @@ fun AppScreen(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { if (snackbar != null) SnackbarHost(snackbar) },
         bottomBar = bottomBar,
     ) { padding ->
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 32.dp),
-        ) {
-            if (onBack != null) {
-                Surface(
-                    onClick = onBack,
-                    shape = CircleShape,
-                    color = LocalExtra.current.card,
-                    shadowElevation = 2.dp,
-                    modifier = Modifier.padding(start = 16.dp, top = 12.dp).size(52.dp),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+        GradientBackground(Modifier.padding(padding)) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 32.dp),
+            ) {
+                if (onBack != null) {
+                    Surface(
+                        onClick = onBack,
+                        shape = CircleShape,
+                        color = LocalExtra.current.card,
+                        shadowElevation = 2.dp,
+                        modifier = Modifier.padding(start = 16.dp, top = 12.dp).size(52.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        }
                     }
+                } else {
+                    Spacer(Modifier.height(16.dp))
                 }
-            } else {
-                Spacer(Modifier.height(16.dp))
-            }
-            Text(
-                title,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp, top = 16.dp)
-                    .semantics { heading() },
-            )
-            if (subtitle != null) {
                 Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp),
+                    title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier
+                        .padding(start = 20.dp, end = 20.dp, top = 16.dp)
+                        .semantics { heading() },
                 )
+                if (subtitle != null) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp),
+                    )
+                }
+                content()
             }
-            content()
         }
     }
 }

@@ -34,6 +34,10 @@ import com.marbellup.fitin.ui.emoji
 import com.marbellup.fitin.ui.shortLabel
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
+import com.marbellup.fitin.ui.funColor
+import com.marbellup.fitin.ui.heroBrush
+import com.marbellup.fitin.ui.pastel
+import com.marbellup.fitin.ui.primaryBrush
 
 /**
  * «Para ti»: el corazón de la IA. Actividades e instalaciones ordenadas por el modelo según tus
@@ -51,18 +55,21 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
         GradientBackground(Modifier.padding(padding)) {
             Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 16.dp)) {
                 Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(8.dp))
+                    Box(Modifier.size(36.dp).clip(RoundedCornerShape(12.dp)).background(primaryBrush()), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(Modifier.width(10.dp))
                     Text("Para ti", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f).semantics { heading() })
                     RoundIconButton(Icons.Filled.Tune, "Mis preferencias") { state.open(Step.AiSearch) }
                 }
 
-                GlassCard(Modifier.padding(16.dp), color = x.lilac) {
-                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        com.marbellup.fitin.ui.FloatingMascot(60.dp)
+                GlassCard(Modifier.padding(16.dp), color = x.hero) {
+                    Row(Modifier.fillMaxWidth().background(heroBrush()).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        com.marbellup.fitin.ui.FloatingMascot(64.dp)
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                            Text("Elegido por la IA para ti", style = MaterialTheme.typography.titleMedium)
-                            Text("Según lo que necesitas, tus gustos y lo que vas eligiendo.", style = MaterialTheme.typography.bodySmall)
+                            Text("Elegido por la IA para ti", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                            Text("Según lo que necesitas, tus gustos y lo que vas eligiendo.", style = MaterialTheme.typography.bodySmall,
+                                color = Color.White)
                             Spacer(Modifier.height(6.dp))
                             AiTag(state)
                         }
@@ -74,10 +81,10 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    item { SelectTile("Todo", Icons.Filled.Apps, sport == null, Modifier.width(84.dp), emoji = "✨") { sport = null } }
+                    item { SelectTile("Todo", Icons.Filled.Apps, sport == null, Modifier.width(84.dp), tint = funColor(0), emoji = "✨") { sport = null } }
                     items(Sport.entries.size) { i ->
                         val s = Sport.entries[i]
-                        SelectTile(s.label, s.icon, sport == s, Modifier.width(84.dp), tint = s.tint, emoji = s.emoji) {
+                        SelectTile(s.label, s.icon, sport == s, Modifier.width(84.dp), tint = s.tint, bg = s.pastel, emoji = s.emoji) {
                             sport = if (sport == s) null else s
                         }
                     }
@@ -94,8 +101,8 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     for (f in state.facilitiesFor(placesSport).take(3)) {
                         GlassCard {
                             Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Box(Modifier.size(54.dp).clip(CircleShape).background(x.lilac), contentAlignment = Alignment.Center) {
-                                    Text("${f.match}%", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                                Box(Modifier.size(54.dp).clip(CircleShape).background(primaryBrush()), contentAlignment = Alignment.Center) {
+                                    Text("${f.match}%", style = MaterialTheme.typography.titleSmall, color = Color.White)
                                 }
                                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                                     Text(f.facility.name, style = MaterialTheme.typography.titleMedium)

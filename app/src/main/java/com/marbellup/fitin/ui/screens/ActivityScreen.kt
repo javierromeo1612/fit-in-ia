@@ -33,6 +33,12 @@ import com.marbellup.fitin.ui.GradientBackground
 import com.marbellup.fitin.ui.GradientButton
 import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.shortLabel
+import com.marbellup.fitin.ui.IconBadge
+import com.marbellup.fitin.ui.deeper
+import com.marbellup.fitin.ui.funColor
+import com.marbellup.fitin.ui.pastel
+import com.marbellup.fitin.ui.emoji
+import com.marbellup.fitin.ui.tint
 import com.marbellup.fitin.ui.theme.LocalExtra
 
 /**
@@ -82,21 +88,25 @@ fun ActivityScreen(state: AppState, activityId: String) {
                                 modifier = Modifier.clip(RoundedCornerShape(50)).background(x.warnContainer).padding(horizontal = 10.dp, vertical = 4.dp))
                             Spacer(Modifier.height(8.dp))
                         }
+                        // Etiqueta del deporte en su color
+                        Text("${a.sport.emoji}  ${a.sport.label}", style = MaterialTheme.typography.labelLarge, color = a.sport.tint.deeper(),
+                            modifier = Modifier.padding(bottom = 6.dp).clip(RoundedCornerShape(50)).background(a.sport.pastel)
+                                .padding(horizontal = 12.dp, vertical = 5.dp))
                         Text(a.title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
                         Text(a.description, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 6.dp))
                         Spacer(Modifier.height(14.dp))
-                        Line(Icons.Outlined.CalendarMonth, a.nextSession.replaceFirstChar { it.uppercase() })
-                        Line(Icons.Filled.Place, a.place)
-                        Line(Icons.AutoMirrored.Filled.Accessible, "Accesibilidad")
+                        Line(Icons.Outlined.CalendarMonth, a.nextSession.replaceFirstChar { it.uppercase() }, color = funColor(0))
+                        Line(Icons.Filled.Place, a.place, color = funColor(2))
+                        Line(Icons.AutoMirrored.Filled.Accessible, "Accesibilidad", color = funColor(1))
                         FlowRow(
-                            Modifier.padding(start = 34.dp, top = 2.dp, bottom = 4.dp),
+                            Modifier.padding(start = 46.dp, top = 2.dp, bottom = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            for (n in a.features.sortedBy { it.ordinal }) Chip(n.shortLabel, n in state.needs)
+                            a.features.sortedBy { it.ordinal }.forEachIndexed { i, n -> Chip(n.shortLabel, n in state.needs, funColor(i + 1)) }
                         }
                         Spacer(Modifier.height(6.dp))
-                        Line(Icons.Filled.Groups, if (a.spotsLeft == 1) "Queda 1 plaza" else "Quedan ${a.spotsLeft} plazas", bold = true)
+                        Line(Icons.Filled.Groups, if (a.spotsLeft == 1) "Queda 1 plaza" else "Quedan ${a.spotsLeft} plazas", bold = true, color = funColor(3))
 
                         if (rec != null) {
                             AiReason("${rec.match} % de encaje contigo. ${rec.explanation}", Modifier.padding(top = 10.dp))
@@ -141,9 +151,10 @@ fun ActivityScreen(state: AppState, activityId: String) {
                 Line(
                     if (a.seal == Seal.Ninguno) Icons.Outlined.Info else Icons.Filled.Verified,
                     a.seal.label + if (a.verifiedOn.isNotBlank()) " · comprobado en ${a.verifiedOn}" else "",
+                    color = funColor(3),
                 )
-                if (a.confirmations > 0) Line(Icons.Filled.ThumbUp, "${a.confirmations} personas confirman que es accesible")
-                if (a.howToArrive.isNotBlank()) Line(Icons.Filled.Directions, a.howToArrive)
+                if (a.confirmations > 0) Line(Icons.Filled.ThumbUp, "${a.confirmations} personas confirman que es accesible", color = funColor(1))
+                if (a.howToArrive.isNotBlank()) Line(Icons.Filled.Directions, a.howToArrive, color = funColor(5))
                 Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     a.group.take(4).forEach { Avatar(it.name, size = 32.dp, modifier = Modifier.padding(end = 4.dp)) }
                     Text("  Ya van ${a.group.size}", style = MaterialTheme.typography.bodyMedium)
@@ -155,23 +166,23 @@ fun ActivityScreen(state: AppState, activityId: String) {
 }
 
 @Composable
-private fun Line(icon: ImageVector, text: String, bold: Boolean = false) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(14.dp))
+private fun Line(icon: ImageVector, text: String, bold: Boolean = false, color: Color = MaterialTheme.colorScheme.primary) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        IconBadge(icon, color, size = 34.dp)
+        Spacer(Modifier.width(12.dp))
         Text(text, style = if (bold) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium)
     }
 }
 
-/** Píldora lila pequeña con texto violeta, como «Silla de ruedas» / «Aseo adaptado» en la referencia. */
+/** Píldora de color, como «Silla de ruedas» / «Aseo adaptado» en la referencia. Las tuyas llevan ✓. */
 @Composable
-private fun Chip(text: String, mine: Boolean) {
+private fun Chip(text: String, mine: Boolean, color: Color) {
     Text(
         (if (mine) "✓ " else "") + text,
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
+        color = color.deeper(),
         modifier = Modifier.clip(RoundedCornerShape(50))
-            .background(if (mine) Color(0xFFDCD2FF) else LocalExtra.current.chip)
+            .background(color.pastel(if (mine) 0.32f else 0.18f))
             .padding(horizontal = 12.dp, vertical = 6.dp),
     )
 }

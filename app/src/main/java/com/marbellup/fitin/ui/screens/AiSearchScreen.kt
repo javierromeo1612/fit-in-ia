@@ -41,6 +41,8 @@ import com.marbellup.fitin.ui.say
 import com.marbellup.fitin.ui.shortLabel
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
+import com.marbellup.fitin.ui.funColor
+import com.marbellup.fitin.ui.pastel
 
 private val zones = listOf("Zona centro", "Zona oeste", "Zona este", "Zona norte")
 private val levels = listOf(
@@ -62,7 +64,6 @@ fun AiSearchScreen(state: AppState) {
     var showResults by rememberSaveable { mutableStateOf(false) }
     val scroll = rememberScrollState()
     LaunchedEffect(showResults) { if (showResults) scroll.animateScrollTo(scroll.maxValue) }
-    val pastel = listOf(x.peach, x.sky, x.pink, x.mint, x.lilac)
 
     GradientBackground {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(scroll).padding(bottom = 32.dp)) {
@@ -90,28 +91,28 @@ fun AiSearchScreen(state: AppState) {
                 Text(g.label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 20.dp, top = 8.dp, bottom = 6.dp))
                 TileGrid(Need.entries.filter { it.group == g }) { n, m ->
-                    SelectTile(n.shortLabel, n.icon, n in p.needs, m, emoji = n.emoji) { state.toggle(n) }
+                    SelectTile(n.shortLabel, n.icon, n in p.needs, m, tint = funColor(n.ordinal), emoji = n.emoji) { state.toggle(n) }
                 }
             }
 
             Title("¿Qué deportes te gustan?")
             TileGrid(Sport.entries.toList()) { s, m ->
-                SelectTile(s.label, s.icon, s in p.sports, m, tint = s.tint, bg = pastel[s.ordinal % pastel.size], emoji = s.emoji) { state.toggleSport(s) }
+                SelectTile(s.label, s.icon, s in p.sports, m, tint = s.tint, bg = s.pastel, emoji = s.emoji) { state.toggleSport(s) }
             }
 
             Title("¿Cuándo te viene bien?")
             TileGrid(Slot.entries.toList(), perRow = 4) { s, m ->
-                SelectTile(s.label, s.icon, s in p.slots, m, emoji = s.emoji) { state.toggleSlot(s) }
+                SelectTile(s.label, s.icon, s in p.slots, m, tint = funColor(s.ordinal + 2), emoji = s.emoji) { state.toggleSlot(s) }
             }
 
             Title("¿Qué nivel tienes?")
             TileGrid(levels, perRow = 4) { (code, label, e), m ->
-                SelectTile(label, Icons.Filled.Star, p.level == code, m, emoji = e) { state.setLevel(code) }
+                SelectTile(label, Icons.Filled.Star, p.level == code, m, tint = funColor(levels.indexOfFirst { it.second == label } + 3), emoji = e) { state.setLevel(code) }
             }
 
             Title("¿Por dónde te mueves?")
             TileGrid(zones, perRow = 4) { z, m ->
-                SelectTile(z.removePrefix("Zona ").replaceFirstChar { it.uppercase() }, Icons.Filled.Place, p.zone == z, m, emoji = "📍") {
+                SelectTile(z.removePrefix("Zona ").replaceFirstChar { it.uppercase() }, Icons.Filled.Place, p.zone == z, m, tint = funColor(zones.indexOf(z) + 1), emoji = "📍") {
                     state.setZone(if (p.zone == z) null else z)
                 }
             }

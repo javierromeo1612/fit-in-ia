@@ -22,7 +22,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -44,6 +47,10 @@ import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.icon
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
+import com.marbellup.fitin.ui.funColor
+import com.marbellup.fitin.ui.heroBrush
+import com.marbellup.fitin.ui.pastel
+import com.marbellup.fitin.ui.primaryBrush
 
 /**
  * Inicio, calcado de la referencia: saludo y campana, buscador, cuatro accesos rápidos,
@@ -88,30 +95,20 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 // Cuatro accesos rápidos en una fila, como en la referencia («Más» abre todos los deportes)
                 Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickTile("Cerca", "📍", state.sport == null, Modifier.weight(1f)) { state.sport = null }
-                    QuickTile("Piscina", Sport.Natacion.emoji, state.sport == Sport.Natacion, Modifier.weight(1f)) {
+                    QuickTile("Cerca", "📍", funColor(0), state.sport == null, Modifier.weight(1f)) { state.sport = null }
+                    QuickTile("Piscina", Sport.Natacion.emoji, Sport.Natacion.tint, state.sport == Sport.Natacion, Modifier.weight(1f)) {
                         state.sport = if (state.sport == Sport.Natacion) null else Sport.Natacion
                     }
-                    QuickTile("Baloncesto", Sport.Baloncesto.emoji, state.sport == Sport.Baloncesto, Modifier.weight(1f)) {
+                    QuickTile("Baloncesto", Sport.Baloncesto.emoji, Sport.Baloncesto.tint, state.sport == Sport.Baloncesto, Modifier.weight(1f)) {
                         state.sport = if (state.sport == Sport.Baloncesto) null else Sport.Baloncesto
                     }
                     val other = state.sport?.takeIf { it != Sport.Natacion && it != Sport.Baloncesto }
-                    QuickTile(other?.label ?: "Más", other?.emoji ?: "⋯", other != null, Modifier.weight(1f)) { showSports = true }
+                    QuickTile(other?.label ?: "Más", other?.emoji ?: "➕", other?.tint ?: funColor(4), other != null, Modifier.weight(1f)) { showSports = true }
                 }
 
                 // ⭐ Actividades cerca de ti · Ver todas →
-                Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 20.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.StarOutline, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(if (state.sport == null) "Actividades cerca de ti" else state.sport!!.label,
-                        style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
-                    TextButton(onClick = { state.tab = Tab.ParaTi }, modifier = Modifier.heightIn(min = 48.dp)) {
-                        Text("Ver todas", style = MaterialTheme.typography.labelLarge)
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
-                            modifier = Modifier.size(16.dp).padding(start = 2.dp))
-                    }
+                SectionTitle(if (state.sport == null) "Actividades cerca de ti" else state.sport!!.label, "Ver todas") {
+                    state.tab = Tab.ParaTi
                 }
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     if (list.isEmpty()) {
@@ -120,21 +117,21 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     for (r in list.take(6)) ActivityPhotoCard(r.activity, state, r, showReason = false)
                 }
 
-                // ¿Necesitas ayuda? → recomendaciones de la IA
-                GlassCard(Modifier.padding(16.dp), color = x.lilac, onClick = { state.tab = Tab.ParaTi }) {
-                    Row(Modifier.padding(start = 18.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)
+                // ¿Necesitas ayuda? → recomendaciones de la IA (tarjeta en degradado violeta → azul)
+                GlassCard(Modifier.padding(16.dp), color = x.hero, onClick = { state.tab = Tab.ParaTi }) {
+                    Row(Modifier.fillMaxWidth().background(heroBrush()).padding(start = 18.dp, end = 12.dp, top = 14.dp, bottom = 14.dp)
                         .semantics(mergeDescendants = true) { role = Role.Button },
                         verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("¿Necesitas ayuda?", style = MaterialTheme.typography.titleMedium)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("Pregúntale a Fit-In", style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("¿Necesitas ayuda?", style = MaterialTheme.typography.titleLarge, color = Color.White)
+                            Row(Modifier.padding(top = 6.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.22f))
+                                .padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text("Pregúntale a Fit-In", style = MaterialTheme.typography.labelLarge, color = Color.White)
                                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp).padding(start = 4.dp))
+                                    tint = Color.White, modifier = Modifier.size(18.dp).padding(start = 4.dp))
                             }
                         }
-                        FloatingMascot(70.dp)
+                        FloatingMascot(74.dp)
                     }
                 }
                 ExampleNote("Actividades de ejemplo para la demo · Fotos: Unsplash")
@@ -150,7 +147,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 for (row in Sport.entries.chunked(4)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         for (sp in row) {
-                            QuickTile(sp.label, sp.emoji, state.sport == sp, Modifier.weight(1f)) { state.sport = sp; showSports = false }
+                            QuickTile(sp.label, sp.emoji, sp.tint, state.sport == sp, Modifier.weight(1f)) { state.sport = sp; showSports = false }
                         }
                         repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
                     }
@@ -160,41 +157,65 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
     }
 }
 
-/** Acceso rápido: mosaico blanco con icono de color y texto debajo, como en la referencia. */
+/**
+ * Acceso rápido: mosaico de color pastel con el emoji en un círculo blanco y el texto debajo.
+ * Seleccionado: se rellena con el color vivo del deporte y el texto pasa a blanco.
+ */
 @Composable
-private fun QuickTile(label: String, emoji: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun QuickTile(label: String, emoji: String, color: Color, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.9f else if (selected) 1.06f else 1f, label = "acceso")
+    val shape = RoundedCornerShape(20.dp)
     Surface(
         onClick = onClick,
         interactionSource = source,
-        shape = RoundedCornerShape(18.dp),
-        color = if (selected) LocalExtra.current.lilac else LocalExtra.current.card,
-        shadowElevation = if (selected) 6.dp else 2.dp,
-        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale }.heightIn(min = 70.dp)
+        shape = shape,
+        color = Color.Transparent,
+        modifier = modifier.graphicsLayer { scaleX = scale; scaleY = scale }.heightIn(min = 84.dp)
+            .shadow(if (selected) 10.dp else 3.dp, shape, ambientColor = color, spotColor = color)
             .semantics { role = Role.Tab; this.selected = selected },
     ) {
-        Column(Modifier.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-            Text(emoji, fontSize = 24.sp)
-            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.padding(top = 3.dp))
+        Column(
+            Modifier
+                .background(
+                    if (selected) Brush.linearGradient(listOf(color.pastel(0.75f), color))
+                    else Brush.linearGradient(listOf(Color.White, color.pastel(0.3f))),
+                    shape,
+                )
+                .padding(vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Box(Modifier.size(42.dp).clip(CircleShape).background(Color.White.copy(alpha = if (selected) 0.9f else 1f)),
+                contentAlignment = Alignment.Center) {
+                Text(emoji, fontSize = 22.sp)
+            }
+            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1,
+                color = if (selected) Color.White else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(top = 5.dp))
         }
     }
 }
 
-/** Cabecera de sección reutilizada por otras pantallas. */
+/** Cabecera de sección: estrella en círculo de degradado, título y acción en píldora. */
 @Composable
 internal fun SectionTitle(title: String, action: String?, onAction: () -> Unit) {
-    Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 22.dp, bottom = 10.dp),
+    Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 12.dp, top = 22.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Outlined.StarOutline, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(6.dp))
-        Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
+        Box(Modifier.size(30.dp).clip(CircleShape).background(primaryBrush()), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.Star, contentDescription = null, tint = Color(0xFFFFE27A), modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f).semantics { heading() })
         if (action != null) {
-            TextButton(onClick = onAction, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text(action, style = MaterialTheme.typography.labelLarge)
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp).padding(start = 2.dp))
+            Surface(onClick = onAction, shape = RoundedCornerShape(50), color = LocalExtra.current.card,
+                shadowElevation = 2.dp, modifier = Modifier.heightIn(min = 40.dp)) {
+                Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(action, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp).padding(start = 2.dp))
+                }
             }
         }
     }

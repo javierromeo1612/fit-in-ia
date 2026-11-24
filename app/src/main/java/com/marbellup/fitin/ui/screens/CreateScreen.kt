@@ -38,6 +38,9 @@ import com.marbellup.fitin.ui.RoundIconButton
 import com.marbellup.fitin.ui.icon
 import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
+import com.marbellup.fitin.ui.deeper
+import com.marbellup.fitin.ui.funColor
+import com.marbellup.fitin.ui.pastel
 
 private data class NeedOption(val label: String, val icon: ImageVector, val needs: Set<Need>)
 
@@ -67,7 +70,6 @@ fun CreateScreen(state: AppState) {
     var level by remember { mutableStateOf<String?>(null) }
     // Paso 2: instalaciones ordenadas por el modelo para lo que has marcado.
     var showPlaces by remember { mutableStateOf(false) }
-    val pastel = listOf(x.peach, x.sky, x.pink, x.mint, x.lilac, x.peach, x.sky)
 
     GradientBackground {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
@@ -81,7 +83,9 @@ fun CreateScreen(state: AppState) {
                 Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
                     com.marbellup.fitin.ui.FloatingMascot(60.dp)
                     Text("¡Hola, ${state.userName}! Te busco el sitio que mejor encaja.", style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 10.dp).clip(RoundedCornerShape(18.dp)).background(x.card).padding(12.dp))
+                        modifier = Modifier.padding(start = 10.dp)
+                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 22.dp, bottomEnd = 22.dp, bottomStart = 22.dp))
+                            .background(x.card).padding(12.dp))
                 }
                 Text("¿Qué actividad quieres organizar?", style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 12.dp).semantics { heading() })
@@ -92,22 +96,26 @@ fun CreateScreen(state: AppState) {
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     maxItemsInEachRow = 3,
                 ) {
-                    Sport.entries.forEachIndexed { i, s ->
+                    Sport.entries.forEach { s ->
                         val sel = sport == s
                         Surface(
                             onClick = { sport = s },
                             shape = RoundedCornerShape(22.dp),
-                            color = pastel[i % pastel.size],
+                            color = if (sel) s.tint.pastel(0.4f) else s.pastel,
+                            shadowElevation = if (sel) 6.dp else 1.dp,
                             modifier = Modifier
                                 .weight(1f)
                                 .heightIn(min = 96.dp)
-                                .then(if (sel) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(22.dp)) else Modifier)
+                                .then(if (sel) Modifier.border(3.dp, s.tint, RoundedCornerShape(22.dp)) else Modifier)
                                 .semantics { role = Role.RadioButton; selected = sel },
                         ) {
                             Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center) {
-                                Text(s.emoji, fontSize = 34.sp)
-                                Text(s.label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 6.dp))
+                                Box(Modifier.size(50.dp).clip(RoundedCornerShape(16.dp)).background(Color.White), contentAlignment = Alignment.Center) {
+                                    Text(s.emoji, fontSize = 28.sp)
+                                }
+                                Text(s.label, style = MaterialTheme.typography.labelLarge, color = s.tint.deeper(0.45f),
+                                    modifier = Modifier.padding(top = 6.dp))
                             }
                         }
                     }
@@ -133,7 +141,7 @@ fun CreateScreen(state: AppState) {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             for (o in row) {
                                 val sel = o.label in chosen
-                                com.marbellup.fitin.ui.SelectTile(o.label, o.icon, sel, Modifier.weight(1f), emoji = o.needs.first().emoji) {
+                                com.marbellup.fitin.ui.SelectTile(o.label, o.icon, sel, Modifier.weight(1f), tint = funColor(needOptions.indexOf(o)), emoji = o.needs.first().emoji) {
                                     chosen = if (sel) chosen - o.label else chosen + o.label
                                 }
                             }

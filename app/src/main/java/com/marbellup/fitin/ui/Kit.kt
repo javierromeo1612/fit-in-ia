@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -57,42 +59,86 @@ import com.marbellup.fitin.data.AppNotification
 import com.marbellup.fitin.data.Need
 import com.marbellup.fitin.data.Scored
 import com.marbellup.fitin.data.Slot
+import com.marbellup.fitin.data.Sport
 import com.marbellup.fitin.ui.theme.LocalExtra
 
 /*
  * Piezas del rediseño 2026 (lila, cristal, mascota). Las piezas antiguas siguen en Components.kt.
  */
 
-/** Fondo en degradado lila suave, común a todas las pantallas nuevas. */
+/** Versión pastel de un color: fondo de mosaicos, chips y tarjetas de cada deporte. */
+fun Color.pastel(amount: Float = 0.22f): Color = lerp(Color.White, this, amount)
+
+/** Versión oscura de un color, para textos sobre su pastel (mantiene el contraste AA). */
+fun Color.deeper(amount: Float = 0.35f): Color = lerp(this, Color(0xFF1A1040), amount)
+
+/** Fondo pastel propio de cada deporte (naranja para baloncesto, azul para natación…). */
+val Sport.pastel: Color get() = tint.pastel()
+
+/**
+ * Fondo de todas las pantallas: degradado lila intenso arriba que se aclara hacia abajo,
+ * con manchas de luz violeta, azul y rosa y destellos blancos, como en la referencia.
+ */
 @Composable
 fun GradientBackground(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val x = LocalExtra.current
-    val blobA = x.hero.copy(alpha = 0.18f)
-    val blobB = Color(0xFF8EC5FF).copy(alpha = 0.22f)
+    val bg = MaterialTheme.colorScheme.background
+    val blobs = listOf(
+        x.hero.copy(alpha = 0.34f) to Triple(0.05f, 0.04f, 0.85f),
+        Color(0xFF6FB6FF).copy(alpha = 0.34f) to Triple(1.0f, 0.22f, 0.75f),
+        Color(0xFFFF8CC6).copy(alpha = 0.24f) to Triple(0.0f, 0.62f, 0.7f),
+        Color(0xFF8FE3C8).copy(alpha = 0.20f) to Triple(1.0f, 0.9f, 0.7f),
+    )
+    val sparkles = listOf(0.12f to 0.10f, 0.86f to 0.07f, 0.70f to 0.30f, 0.08f to 0.42f, 0.92f to 0.55f, 0.20f to 0.80f)
     Box(
         modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(x.gradientTop, x.gradientBottom, MaterialTheme.colorScheme.background)))
-            // Manchas de luz lila y azul, como el fondo de la referencia.
+            .background(Brush.verticalGradient(0f to x.gradientTop, 0.42f to x.gradientBottom, 1f to bg))
             .drawBehind {
-                drawCircle(Brush.radialGradient(listOf(blobA, Color.Transparent), center = Offset(size.width * 0.1f, size.height * 0.05f),
-                    radius = size.width * 0.8f), radius = size.width * 0.8f, center = Offset(size.width * 0.1f, size.height * 0.05f))
-                drawCircle(Brush.radialGradient(listOf(blobB, Color.Transparent), center = Offset(size.width * 0.95f, size.height * 0.35f),
-                    radius = size.width * 0.7f), radius = size.width * 0.7f, center = Offset(size.width * 0.95f, size.height * 0.35f))
-                // Nubes blancas suaves arriba, como en la referencia
-                val cloud = Color.White.copy(alpha = 0.55f)
+                for ((color, pos) in blobs) {
+                    val c = Offset(size.width * pos.first, size.height * pos.second)
+                    val r = size.width * pos.third
+                    drawCircle(Brush.radialGradient(listOf(color, Color.Transparent), center = c, radius = r), radius = r, center = c)
+                }
+                // Nubes blancas suaves arriba
+                val cloud = Color.White.copy(alpha = 0.6f)
                 for ((cx, cy, r) in listOf(Triple(0.12f, 0.02f, 0.16f), Triple(0.3f, 0.0f, 0.14f), Triple(0.78f, 0.03f, 0.18f), Triple(0.95f, 0.0f, 0.12f))) {
-                    drawCircle(Brush.radialGradient(listOf(cloud, Color.Transparent), center = Offset(size.width * cx, size.height * cy),
-                        radius = size.width * r * 1.6f), radius = size.width * r * 1.6f, center = Offset(size.width * cx, size.height * cy))
+                    val c = Offset(size.width * cx, size.height * cy)
+                    drawCircle(Brush.radialGradient(listOf(cloud, Color.Transparent), center = c, radius = size.width * r * 1.6f),
+                        radius = size.width * r * 1.6f, center = c)
+                }
+                // Destellos
+                for ((fx, fy) in sparkles) {
+                    drawCircle(Color.White.copy(alpha = 0.7f), radius = 3.dp.toPx(), center = Offset(size.width * fx, size.height * fy))
                 }
             },
         content = content,
     )
 }
 
-/** Degradado violeta de los botones principales y la mascota. */
+/** Degradado violeta vivo de los botones principales, el «+» y las insignias. */
 @Composable
-fun primaryBrush(): Brush = Brush.linearGradient(listOf(LocalExtra.current.hero, MaterialTheme.colorScheme.primary))
+fun primaryBrush(): Brush = Brush.linearGradient(listOf(Color(0xFFA77BFF), LocalExtra.current.hero, MaterialTheme.colorScheme.primary))
+
+/** Degradado de color para tarjetas destacadas (violeta → azul). */
+@Composable
+fun heroBrush(): Brush = Brush.linearGradient(listOf(LocalExtra.current.hero, Color(0xFF5B8CFF)))
+
+/** Colores vivos que se van turnando en mosaicos y menús (violeta, azul, naranja, verde, rosa, turquesa). */
+private val funColors = listOf(
+    Color(0xFF7C4DFF), Color(0xFF1C8FE0), Color(0xFFF0742A), Color(0xFF2E9D4F), Color(0xFFE0458B), Color(0xFF14A0A0),
+)
+
+fun funColor(i: Int): Color = funColors[((i % funColors.size) + funColors.size) % funColors.size]
+
+/** Icono dentro de un cuadrado redondeado de color pastel, como los iconos de la referencia. */
+@Composable
+fun IconBadge(icon: ImageVector, color: Color, size: Dp = 36.dp, filled: Boolean = false) {
+    Box(
+        Modifier.size(size).clip(RoundedCornerShape(size * 0.34f)).background(if (filled) color else color.pastel(0.2f)),
+        contentAlignment = Alignment.Center,
+    ) { Icon(icon, contentDescription = null, tint = if (filled) Color.White else color, modifier = Modifier.size(size * 0.58f)) }
+}
 
 /**
  * Mascota de Fit-In: un robot amable dibujado en vectores (sin imágenes externas).
@@ -146,12 +192,16 @@ fun GradientButton(
     onClick: () -> Unit,
 ) {
     val shape = RoundedCornerShape(50)
+    val glow = LocalExtra.current.hero
     Surface(
         onClick = onClick,
         enabled = enabled && !loading,
         shape = shape,
         color = Color.Transparent,
-        modifier = modifier.fillMaxWidth().heightIn(min = 58.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 58.dp)
+            .then(if (enabled) Modifier.shadow(12.dp, shape, ambientColor = glow, spotColor = glow) else Modifier),
     ) {
         Row(
             Modifier
@@ -175,7 +225,7 @@ fun GradientButton(
     }
 }
 
-/** Tarjeta blanca tipo cristal, muy redondeada. Al pulsarla se encoge un poco (sensación dinámica). */
+/** Tarjeta blanca tipo cristal, muy redondeada, con brillo violeta. Al pulsarla se encoge un poco. */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -183,19 +233,24 @@ fun GlassCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val shape = RoundedCornerShape(22.dp)
+    val shape = RoundedCornerShape(24.dp)
+    val glow = LocalExtra.current.hero
+    val border = androidx.compose.foundation.BorderStroke(1.5.dp, Color.White.copy(alpha = 0.9f))
     if (onClick != null) {
         val source = remember { MutableInteractionSource() }
         val pressed by source.collectIsPressedAsState()
         val scale by animateFloatAsState(if (pressed) 0.97f else 1f, label = "pulsar")
         Surface(
-            onClick = onClick, modifier = modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale },
-            shape = shape, color = color, shadowElevation = 3.dp, interactionSource = source,
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f)),
+            onClick = onClick,
+            modifier = modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale }
+                .shadow(10.dp, shape, ambientColor = glow.copy(alpha = 0.35f), spotColor = glow.copy(alpha = 0.45f)),
+            shape = shape, color = color, interactionSource = source, border = border,
         ) { Column(content = content) }
     } else {
-        Surface(modifier = modifier.fillMaxWidth(), shape = shape, color = color, shadowElevation = 3.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f))) { Column(content = content) }
+        Surface(
+            modifier = modifier.fillMaxWidth().shadow(10.dp, shape, ambientColor = glow.copy(alpha = 0.35f), spotColor = glow.copy(alpha = 0.45f)),
+            shape = shape, color = color, border = border,
+        ) { Column(content = content) }
     }
 }
 
@@ -275,50 +330,56 @@ fun ActivityPhotoCard(
 ) {
     val x = LocalExtra.current
     GlassCard(modifier, onClick = { state.open(Step.Detail(a.id)) }) {
-        // Como en la referencia: foto grande y un panel blanco encima, abajo, con los datos y la flecha.
-        Box(Modifier.fillMaxWidth().height(206.dp).padding(6.dp)) {
+        // Como en la referencia: foto grande con la fecha y el corazón encima, y un panel blanco abajo.
+        Box(Modifier.fillMaxWidth().height(224.dp).padding(6.dp)) {
             ActivityCover(a, Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp)))
+            // Velo de color del deporte para que la foto «combine» con la tarjeta
+            Box(Modifier.fillMaxSize().clip(RoundedCornerShape(22.dp))
+                .background(Brush.verticalGradient(listOf(a.sport.tint.copy(alpha = 0.28f), Color.Transparent, Color.Transparent))))
             Row(Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                // Insignia de gente que va, como «+10» en la referencia
+                // Chip de fecha, como «Sáb 24 nov» en la referencia
                 Row(
-                    Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.92f)).padding(start = 4.dp, end = 10.dp, top = 3.dp, bottom = 3.dp),
+                    Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.94f)).padding(start = 8.dp, end = 12.dp, top = 5.dp, bottom = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.size(22.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Groups, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    Text("+${a.group.size}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    Icon(Icons.Outlined.CalendarMonth, contentDescription = null, tint = a.sport.tint, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(5.dp))
+                    Text(a.shortDate, style = MaterialTheme.typography.labelMedium, color = Color(0xFF231B4D), maxLines = 1)
                 }
                 if (a.status == "propuesta") {
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "Grupo nuevo",
-                        color = x.onWarnContainer,
+                        color = Color.White,
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.clip(RoundedCornerShape(50)).background(x.warnContainer).padding(horizontal = 10.dp, vertical = 5.dp),
+                        modifier = Modifier.clip(RoundedCornerShape(50)).background(x.flame).padding(horizontal = 10.dp, vertical = 5.dp),
                     )
                 }
                 Spacer(Modifier.weight(1f))
                 val fav = a.id in state.favorites
-                Surface(onClick = { state.toggleFavorite(a.id) }, shape = CircleShape, color = Color.White, modifier = Modifier.size(36.dp)) {
+                Surface(onClick = { state.toggleFavorite(a.id) }, shape = CircleShape, color = Color.White, shadowElevation = 3.dp,
+                    modifier = Modifier.size(38.dp)) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             if (fav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = if (fav) "Quitar de favoritos" else "Guardar en favoritos",
-                            tint = if (fav) Color(0xFFE0447A) else Color(0xFF231B4D),
+                            tint = if (fav) Color(0xFFE0447A) else MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
             }
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = x.card.copy(alpha = 0.96f),
-                shadowElevation = 2.dp,
+                color = x.card.copy(alpha = 0.97f),
+                shadowElevation = 3.dp,
                 modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(8.dp),
             ) {
-                Row(Modifier.padding(start = 12.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
+                Row(Modifier.padding(start = 10.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // Icono del deporte en su color
+                    Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(a.sport.pastel), contentAlignment = Alignment.Center) {
+                        Text(a.sport.emoji, fontSize = 22.sp)
+                    }
+                    Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f, fill = false))
@@ -331,18 +392,21 @@ fun ActivityPhotoCard(
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
-                            Icon(Icons.Outlined.CalendarMonth, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.width(4.dp))
-                            Text(a.shortDate, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Outlined.Place, contentDescription = null, modifier = Modifier.size(15.dp), tint = a.sport.tint)
                             Spacer(Modifier.width(4.dp))
                             Text(a.place, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
+                            Icon(Icons.Filled.Groups, contentDescription = null, modifier = Modifier.size(15.dp), tint = MaterialTheme.colorScheme.primary)
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                "Van ${a.group.size} · " + if (a.spotsLeft == 1) "queda 1 plaza" else "quedan ${a.spotsLeft} plazas",
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
+                            )
+                        }
                     }
-                    Box(Modifier.size(38.dp).clip(CircleShape).background(Color(0xFFD8F27E)), contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(40.dp).clip(CircleShape).background(Color(0xFFC8F26A)), contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color(0xFF24411A))
                     }
                 }
@@ -364,17 +428,18 @@ fun ActivityPhotoCard(
     }
 }
 
-/** Barra inferior de la referencia: cuatro pestañas y el «+» central para crear actividad. */
+/** Barra inferior de la referencia: cuatro pestañas y el «+» central, grande y en degradado. */
 @Composable
 fun FitInBottomBar(state: AppState) {
     val x = LocalExtra.current
+    val glow = x.hero
     Surface(
         color = x.card,
-        shadowElevation = 12.dp,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shadowElevation = 16.dp,
+        shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
     ) {
         Row(
-            Modifier.navigationBarsPadding().fillMaxWidth().height(64.dp).padding(horizontal = 6.dp),
+            Modifier.navigationBarsPadding().fillMaxWidth().height(70.dp).padding(horizontal = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TabItem(state, Tab.Inicio, Icons.Filled.Home, Icons.Outlined.Home)
@@ -384,11 +449,13 @@ fun FitInBottomBar(state: AppState) {
                     onClick = { state.open(Step.Create) },
                     shape = CircleShape,
                     color = Color.Transparent,
-                    shadowElevation = 6.dp,
-                    modifier = Modifier.size(50.dp),
+                    modifier = Modifier.size(56.dp).shadow(12.dp, CircleShape, ambientColor = glow, spotColor = glow),
                 ) {
-                    Box(Modifier.background(primaryBrush(), CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Add, contentDescription = "Crear actividad", tint = Color.White, modifier = Modifier.size(28.dp))
+                    Box(
+                        Modifier.background(primaryBrush(), CircleShape).border(3.dp, Color.White.copy(alpha = 0.7f), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(Icons.Filled.Add, contentDescription = "Crear actividad", tint = Color.White, modifier = Modifier.size(30.dp))
                     }
                 }
             }
@@ -408,11 +475,20 @@ private fun RowScope.TabItem(state: AppState, tab: Tab, selectedIcon: ImageVecto
             .clip(RoundedCornerShape(18.dp))
             .clickable { state.steps.clear(); state.tab = tab }
             .semantics { role = Role.Tab; this.selected = selected }
-            .padding(vertical = 8.dp),
+            .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(if (selected) selectedIcon else icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+        // La pestaña activa lleva una píldora lila detrás del icono
+        Box(
+            Modifier.clip(RoundedCornerShape(50))
+                .background(if (selected) LocalExtra.current.lilac else Color.Transparent)
+                .padding(horizontal = 14.dp, vertical = 3.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(if (selected) selectedIcon else icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+        }
         Text(tab.label, style = MaterialTheme.typography.labelSmall, color = color, maxLines = 1,
+            modifier = Modifier.padding(top = 2.dp),
             fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold)
     }
 }
@@ -480,17 +556,24 @@ fun ActivityMiniRow(a: Activity, subtitle: String? = null, onClick: () -> Unit) 
 
 /** Fila de menú del perfil, como en la referencia: icono violeta, texto y «>». */
 @Composable
-fun MenuRow(icon: ImageVector, title: String, detail: String? = null, badge: Int = 0, onClick: () -> Unit) {
+fun MenuRow(
+    icon: ImageVector,
+    title: String,
+    detail: String? = null,
+    badge: Int = 0,
+    color: Color = MaterialTheme.colorScheme.primary,
+    onClick: () -> Unit,
+) {
     Row(
         Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .heightIn(min = 50.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .heightIn(min = 54.dp)
+            .padding(horizontal = 14.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+        IconBadge(icon, color, size = 38.dp)
+        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             if (detail != null) {
                 Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -503,7 +586,7 @@ fun MenuRow(icon: ImageVector, title: String, detail: String? = null, badge: Int
             )
             Spacer(Modifier.width(6.dp))
         }
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
+        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
     }
 }
 
@@ -575,7 +658,7 @@ fun SelectTile(
     selected: Boolean,
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary,
-    bg: Color = LocalExtra.current.card,
+    bg: Color = tint.pastel(0.14f),
     emoji: String? = null,
     onClick: () -> Unit,
 ) {
@@ -587,12 +670,12 @@ fun SelectTile(
         onClick = onClick,
         interactionSource = source,
         shape = shape,
-        color = if (selected) LocalExtra.current.lilac else bg,
-        shadowElevation = if (selected) 0.dp else 1.dp,
+        color = if (selected) tint.pastel(0.34f) else bg,
+        shadowElevation = if (selected) 4.dp else 1.dp,
         modifier = modifier
             .graphicsLayer { scaleX = scale; scaleY = scale }
             .heightIn(min = 80.dp)
-            .then(if (selected) Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, shape) else Modifier)
+            .then(if (selected) Modifier.border(2.5.dp, tint, shape) else Modifier)
             .semantics { role = Role.Checkbox; this.selected = selected },
     ) {
         Box {
@@ -613,7 +696,7 @@ fun SelectTile(
             if (selected) {
                 Box(
                     Modifier.align(Alignment.TopEnd).padding(6.dp).size(20.dp).clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(tint),
                     contentAlignment = Alignment.Center,
                 ) { Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp)) }
             }

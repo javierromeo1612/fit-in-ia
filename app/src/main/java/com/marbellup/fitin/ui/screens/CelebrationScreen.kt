@@ -19,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -33,6 +35,8 @@ import com.marbellup.fitin.ui.GradientBackground
 import com.marbellup.fitin.ui.GradientButton
 import com.marbellup.fitin.ui.Mascot
 import com.marbellup.fitin.ui.theme.LocalExtra
+import com.marbellup.fitin.ui.deeper
+import com.marbellup.fitin.ui.funColor
 import kotlin.random.Random
 
 /** Pantalla 8 de la referencia: celebración tras apuntarse («¡Gracias por hacer deporte!»). */
@@ -72,9 +76,9 @@ fun CelebrationScreen(state: AppState, activityId: String) {
             com.marbellup.fitin.ui.FloatingMascot(180.dp, Modifier.padding(vertical = 20.dp), happy = true)
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Stat("+${(a?.group?.size ?: 0) + 1}", "personas", x.lilac, Modifier.weight(1f))
-                Stat("+${if ((a?.sport?.name ?: "") == "Senderismo") 4 else 1}h", "de deporte", x.mint, Modifier.weight(1f))
-                Stat("100%", "inclusión", x.peach, Modifier.weight(1f))
+                Stat("+${(a?.group?.size ?: 0) + 1}", "personas", funColor(0), Modifier.weight(1f))
+                Stat("+${if ((a?.sport?.name ?: "") == "Senderismo") 4 else 1}h", "de deporte", funColor(3), Modifier.weight(1f))
+                Stat("100%", "inclusión", funColor(2), Modifier.weight(1f))
             }
 
             if (a != null) {
@@ -91,13 +95,17 @@ fun CelebrationScreen(state: AppState, activityId: String) {
     }
 }
 
+/** Cifra de la celebración en un mosaico de color vivo con texto blanco. */
 @Composable
-private fun Stat(value: String, label: String, bg: Color, modifier: Modifier) {
-    Surface(shape = RoundedCornerShape(22.dp), color = bg, modifier = modifier) {
-        Column(Modifier.padding(vertical = 16.dp).semantics(mergeDescendants = true) { },
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(value, style = MaterialTheme.typography.headlineSmall)
-            Text(label, style = MaterialTheme.typography.bodyMedium)
+private fun Stat(value: String, label: String, color: Color, modifier: Modifier) {
+    Surface(shape = RoundedCornerShape(22.dp), color = color, shadowElevation = 4.dp, modifier = modifier) {
+        Column(
+            Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(color.deeper(0.15f), color.deeper(0.4f))))
+                .padding(vertical = 16.dp).semantics(mergeDescendants = true) { },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(value, style = MaterialTheme.typography.headlineSmall, color = Color.White)
+            Text(label, style = MaterialTheme.typography.bodyMedium, color = Color.White)
         }
     }
 }

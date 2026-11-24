@@ -31,6 +31,7 @@ import com.marbellup.fitin.ui.GlassCard
 import com.marbellup.fitin.ui.GradientBackground
 import com.marbellup.fitin.ui.Mascot
 import com.marbellup.fitin.ui.MenuRow
+import com.marbellup.fitin.ui.funColor
 import com.marbellup.fitin.ui.theme.LocalExtra
 
 /** Pantalla 7 de la referencia: perfil, progreso, preferencias, necesidades y ajustes de accesibilidad. */
@@ -48,8 +49,11 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     com.marbellup.fitin.ui.RoundIconButton(Icons.Filled.Settings, "Mis preferencias") { state.open(Step.AiSearch) }
                 }
                 Box {
-                    Box(Modifier.size(96.dp).clip(CircleShape).background(Color.White).padding(4.dp)) {
-                        Avatar("${state.userName} García", size = 88.dp)
+                    // Aro de colores alrededor de la foto, como en la referencia
+                    Box(Modifier.size(104.dp).clip(CircleShape)
+                        .background(Brush.sweepGradient(listOf(Color(0xFF7C4DFF), Color(0xFFFF6FA5), Color(0xFFFFB347), Color(0xFF4FC3F7), Color(0xFF7C4DFF))))
+                        .padding(4.dp).clip(CircleShape).background(Color.White).padding(3.dp)) {
+                        Avatar("${state.userName} García", size = 90.dp)
                     }
                     Box(
                         Modifier.align(Alignment.BottomEnd).size(26.dp).clip(CircleShape).background(Color(0xFFF2A93B)),
@@ -58,11 +62,13 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 }
                 Text("${state.userName} García", style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(top = 8.dp).semantics { heading() })
-                Text("Deportista · Fit-In 💜", style = MaterialTheme.typography.bodyMedium)
+                Text("Deportista · Fit-In 💜", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp).clip(RoundedCornerShape(50)).background(x.card).padding(horizontal = 12.dp, vertical = 5.dp))
 
                 // Progreso
-                GlassCard(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), color = Color(0xFFE6F6CF)) {
-                    Row(Modifier.background(Brush.horizontalGradient(listOf(Color(0xFFE2F6C4), Color(0xFFEDE8FF)))).padding(horizontal = 16.dp, vertical = 12.dp),
+                GlassCard(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), color = Color(0xFFD6F5B0)) {
+                    Row(Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFFD3F7A8), Color(0xFFB8F0E0), Color(0xFFDCCBFF))))
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text("💜 Tu progreso", style = MaterialTheme.typography.labelLarge)
@@ -83,9 +89,9 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 // Menú como en la referencia: icono, texto y «>»
                 GlassCard(Modifier.padding(horizontal = 16.dp)) {
                     Spacer(Modifier.height(4.dp))
-                    MenuRow(Icons.Outlined.EventNote, "Mis actividades") { state.tab = Tab.Calendario }
-                    MenuRow(Icons.Outlined.Settings, "Mis preferencias") { state.open(Step.AiSearch) }
-                    MenuRow(Icons.Outlined.Accessibility, "Mis necesidades") { showNeeds = !showNeeds }
+                    MenuRow(Icons.Outlined.EventNote, "Mis actividades", color = funColor(0)) { state.tab = Tab.Calendario }
+                    MenuRow(Icons.Outlined.Settings, "Mis preferencias", color = funColor(1)) { state.open(Step.AiSearch) }
+                    MenuRow(Icons.Outlined.Accessibility, "Mis necesidades", color = funColor(3)) { showNeeds = !showNeeds }
                     if (showNeeds) {
                         Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                             for (g in NeedGroup.entries) {
@@ -104,15 +110,15 @@ fun ProfileScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                             }
                         }
                     }
-                    MenuRow(Icons.Outlined.EmojiEvents, "Mis logros") { state.open(Step.Achievements) }
+                    MenuRow(Icons.Outlined.EmojiEvents, "Mis logros", color = funColor(2)) { state.open(Step.Achievements) }
                     Spacer(Modifier.height(4.dp))
                 }
 
                 GlassCard(Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
                     Spacer(Modifier.height(4.dp))
-                    MenuRow(Icons.Outlined.Psychology, "Cómo aprende tu IA") { state.open(Step.Model) }
-                    MenuRow(Icons.Outlined.Notifications, "Avisos de la IA", badge = state.unread) { state.open(Step.Notifications) }
-                    MenuRow(Icons.Outlined.AccountBalance, "Panel del Ayuntamiento") { state.open(Step.Council) }
+                    MenuRow(Icons.Outlined.Psychology, "Cómo aprende tu IA", color = funColor(4)) { state.open(Step.Model) }
+                    MenuRow(Icons.Outlined.Notifications, "Avisos de la IA", badge = state.unread, color = funColor(2)) { state.open(Step.Notifications) }
+                    MenuRow(Icons.Outlined.AccountBalance, "Panel del Ayuntamiento", color = funColor(5)) { state.open(Step.Council) }
                     Spacer(Modifier.height(4.dp))
                 }
 
