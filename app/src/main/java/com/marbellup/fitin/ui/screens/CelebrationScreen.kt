@@ -49,7 +49,7 @@ fun CelebrationScreen(state: AppState, activityId: String) {
         val r = Random(7)
         List(46) { Triple(r.nextFloat(), r.nextFloat(), r.nextInt(4)) }
     }
-    val colors = listOf(Color(0xFFFFC83D), Color(0xFF7C5CFF), Color(0xFFFF6FA5), Color(0xFF3CC7A0))
+    val colors = listOf(Color(0xFFFFC83D), Color(0xFF2A7FE7), Color(0xFFFF6FA5), Color(0xFF3CC7A0))
     // Confeti que cae sin parar
     val t = rememberInfiniteTransition(label = "confeti")
     val fall by t.animateFloat(0f, 1f, infiniteRepeatable(tween(6000, easing = LinearEasing)), label = "caída")
@@ -71,26 +71,30 @@ fun CelebrationScreen(state: AppState, activityId: String) {
             Spacer(Modifier.height(24.dp))
             Text("¡Gracias por hacer deporte!", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary, modifier = Modifier.semantics { heading() })
-            Text("Juntos construimos una comunidad más inclusiva", style = MaterialTheme.typography.bodyLarge,
+            Text("Te esperan.", style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
             com.marbellup.fitin.ui.FloatingMascot(180.dp, Modifier.padding(vertical = 20.dp), happy = true)
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Stat("+${(a?.group?.size ?: 0) + 1}", "personas", funColor(0), Modifier.weight(1f))
-                Stat("+${if ((a?.sport?.name ?: "") == "Senderismo") 4 else 1}h", "de deporte", funColor(3), Modifier.weight(1f))
-                Stat("100%", "inclusión", funColor(2), Modifier.weight(1f))
+                // Datos de la reserva, no cifras inventadas: quién va, cuándo y cuánto encaja contigo.
+                val van = a?.group?.size ?: 0
+                val total = state.needs.size
+                val cubre = a?.let { act -> state.needs.count { it in act.features } } ?: 0
+                Stat("$van", if (van == 1) "te espera" else "te esperan", funColor(0), Modifier.weight(1f))
+                Stat(a?.shortDate?.substringAfter("· ", "")?.ifBlank { null } ?: "—", "la hora", funColor(3), Modifier.weight(1f))
+                Stat(if (total > 0) "$cubre/$total" else "${a?.spotsLeft ?: 0}", if (total > 0) "de lo que necesitas" else "plazas libres", funColor(2), Modifier.weight(1f))
             }
 
             if (a != null) {
                 Text("Plaza reservada · ${companion.lowercase()}", style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(top = 20.dp, bottom = 8.dp).fillMaxWidth())
                 ActivityMiniRow(a, "${a.nextSession} · ${a.place}") { }
-                Text("Te lo recordaremos el día antes. ${a.meetingNote}", style = MaterialTheme.typography.bodyMedium,
+                Text(a.meetingNote, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp).fillMaxWidth())
             }
             Spacer(Modifier.height(24.dp))
             GradientButton("Seguir sumando  ♥", icon = null) { state.closeFlow() }
-            ExampleNote("Reserva de demostración: no se ha enviado a ninguna instalación real")
+            ExampleNote("Reserva de ejemplo")
         }
     }
 }

@@ -49,7 +49,7 @@ fun CouncilScreen(state: AppState, bottomBar: @Composable () -> Unit = {}, onBac
     val x = LocalExtra.current
     AppScreen(
         title = "Panel del Ayuntamiento",
-        subtitle = "Deporte inclusivo en la ciudad este mes.",
+        subtitle = "Este mes en la ciudad.",
         onBack = onBack,
         bottomBar = bottomBar,
     ) {
@@ -73,7 +73,7 @@ fun CouncilScreen(state: AppState, bottomBar: @Composable () -> Unit = {}, onBac
         AppCard(Modifier.padding(horizontal = 16.dp)) {
             Column(Modifier.padding(18.dp)) {
                 Text(
-                    "Las horas vacías de la mañana se están llenando.",
+                    "Las mañanas se llenan.",
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Row(Modifier.padding(top = 10.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -119,7 +119,7 @@ fun CouncilScreen(state: AppState, bottomBar: @Composable () -> Unit = {}, onBac
                 }
             }
         }
-        ExampleNote("Todas las cifras son simuladas para la demo")
+        ExampleNote("Cifras simuladas")
     }
 }
 

@@ -75,7 +75,7 @@ fun CompanyScreen(state: AppState, activityId: String) {
             BottomAction {
                 BigButton("Reservar mi plaza", Icons.Filled.Check) { state.book(a.id, choice) }
                 Text(
-                    "Gratis. Puedes cancelar hasta dos horas antes.",
+                    "Gratis · cancela hasta 2 h antes",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -88,8 +88,8 @@ fun CompanyScreen(state: AppState, activityId: String) {
         AppCard(Modifier.padding(horizontal = 16.dp)) {
             Text(
                 say(
-                    "Personas con y sin discapacidad, en el mismo grupo.",
-                    "Va gente con discapacidad y gente sin discapacidad. Todos juntos.",
+                    "Grupo mixto, con y sin discapacidad.",
+                    "Todos juntos.",
                 ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -120,10 +120,10 @@ fun CompanyScreen(state: AppState, activityId: String) {
         SectionHeader("Tú eliges")
         AppCard(Modifier.padding(horizontal = 16.dp)) {
             Column(Modifier.selectableGroup()) {
-                Option(Icons.Filled.Groups, WITH_GROUP, "Voy por mi cuenta y me uno a quienes ya van.",
+                Option(Icons.Filled.Groups, WITH_GROUP, "Me uno a quienes ya van.",
                     choice == WITH_GROUP) { choice = WITH_GROUP }
                 Divider()
-                Option(Icons.Filled.PersonAdd, WITH_MINE, "Viene conmigo un familiar o un amigo. Su plaza también es gratis.",
+                Option(Icons.Filled.PersonAdd, WITH_MINE, "Su plaza también es gratis.",
                     choice == WITH_MINE) { choice = WITH_MINE }
                 for (v in a.volunteers) {
                     val key = "Con ${v.name}, voluntariado"
@@ -131,7 +131,7 @@ fun CompanyScreen(state: AppState, activityId: String) {
                     Option(
                         Icons.Filled.VolunteerActivism,
                         "Con ${v.name}",
-                        "Voluntariado avalado por ${v.backedBy}. ${v.training}. Ha acompañado ${v.sessions} veces.",
+                        "Avalado por ${v.backedBy}",
                         choice == key,
                     ) { choice = key }
                 }
@@ -139,13 +139,13 @@ fun CompanyScreen(state: AppState, activityId: String) {
         }
         if (a.volunteers.isEmpty()) {
             Text(
-                "Esta actividad aún no tiene voluntariado avalado. Se lo hemos apuntado al Ayuntamiento.",
+                "Aún sin voluntariado avalado.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
             )
         }
-        ExampleNote("Personas de ejemplo para la demo")
+        ExampleNote("Personas de ejemplo")
     }
 }
 
@@ -221,7 +221,7 @@ fun ConfirmedScreen(state: AppState, activityId: String) {
                 IconLine(Icons.Filled.NotificationsActive, "Te lo recordaremos el día antes.")
             }
         }
-        ExampleNote("Reserva de demostración: no se ha enviado a ninguna instalación real")
+        ExampleNote("Reserva de ejemplo")
         Spacer(Modifier.width(1.dp))
     }
 }

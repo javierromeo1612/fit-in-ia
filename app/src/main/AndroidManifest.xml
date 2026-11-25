@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Solo para el chat con Cuac (Botpress), que habla con el bot por Internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Para avisar en el chat de Cuac si no hay conexión. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- «Cuéntanoslo» y «¿Qué tal fue?»: dictado por voz con el reconocimiento del sistema. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 

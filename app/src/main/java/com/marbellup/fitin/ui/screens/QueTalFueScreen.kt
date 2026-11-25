@@ -104,7 +104,7 @@ fun QueTalFueScreen(state: AppState, activityId: String) {
     ) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             if (guardado) {
-                CuacDice(say("¡Gracias! Lo tendré en cuenta para proponerte planes.", "¡Gracias! Lo tendré en cuenta."), pose = Cuac.Feliz)
+                CuacDice(say("¡Gracias! Lo tendré en cuenta.", "¡Gracias! Lo tendré en cuenta."), pose = Cuac.Feliz)
                 if (nuevas.isNotEmpty()) {
                     GlassCard {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -195,7 +195,7 @@ fun QueTalFueScreen(state: AppState, activityId: String) {
                 modifier = Modifier.heightIn(min = 48.dp),
             ) { Text("Usar el ejemplo de Lucía") }
             Text(
-                "Solo sirve para proponerte mejores planes. Se queda en tu móvil.",
+                "Se queda en tu móvil.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

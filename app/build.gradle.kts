@@ -36,6 +36,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests.all {
+            // Entrenamiento del modelo propio de «Cuéntanoslo» (no se ejecuta en los tests normales):
+            // ./gradlew testDebugUnitTest -Pentrenar=1 -Ppeso=2 --tests "*EntrenarModelo*"
+            it.systemProperty("entrenar", project.findProperty("entrenar")?.toString() ?: "")
+            it.systemProperty("peso", project.findProperty("peso")?.toString() ?: "")
+            it.maxHeapSize = "2g"
+        }
+    }
 }
 
 dependencies {

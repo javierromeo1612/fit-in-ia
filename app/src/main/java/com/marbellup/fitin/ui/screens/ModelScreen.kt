@@ -51,9 +51,7 @@ fun ModelScreen(state: AppState) {
                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
                         Text("Funciono dentro de tu móvil", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Soy un modelo de regresión logística que aprende en línea. Cruzo tus características con las de cada " +
-                                "actividad e instalación (${Feature.entries.size - 1} factores) y aprendo de cada cosa que haces. " +
-                                "No uso Internet ni envío tus datos a nadie.",
+                            "Aprendo de cada cosa que haces.",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -69,7 +67,7 @@ fun ModelScreen(state: AppState) {
             Text("Lo que más pesa para ti", style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 20.dp, top = 8.dp).semantics { heading() })
             Text(
-                "Barra = importancia actual. La raya marca el valor inicial: si se ha movido, es que ha aprendido de ti.",
+                "La raya marca el valor inicial.",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )
@@ -110,7 +108,7 @@ fun ModelScreen(state: AppState) {
                                 val pf = ((f.prior / maxW).coerceIn(-1.0, 1.0) / 2 + 0.5).toFloat()
                                 Row(Modifier.fillMaxSize()) {
                                     Spacer(Modifier.weight(pf + 0.0001f))
-                                    Box(Modifier.width(2.dp).fillMaxHeight().background(Color(0xFF231B4D)))
+                                    Box(Modifier.width(2.dp).fillMaxHeight().background(Color(0xFF022569)))
                                     Spacer(Modifier.weight(1f - pf + 0.0001f))
                                 }
                             }
@@ -124,7 +122,7 @@ fun ModelScreen(state: AppState) {
             GlassCard(Modifier.padding(16.dp)) {
                 Column(Modifier.padding(16.dp)) {
                     if (state.history.isEmpty()) {
-                        Text("Todavía nada. Dale a «me gusta», apúntate o valora actividades y verás cómo cambio.",
+                        Text("Aún nada. Apúntate o dale a me gusta.",
                             style = MaterialTheme.typography.bodyMedium)
                     }
                     for (e in state.history.takeLast(10).reversed()) {
@@ -142,9 +140,7 @@ fun ModelScreen(state: AppState) {
                 Column(Modifier.padding(16.dp)) {
                     Text("¿Funciona? Lo hemos medido", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "En una simulación con 300 personas con gustos ocultos, la actividad que mejor les iba estaba entre " +
-                            "las 3 primeras recomendadas el 64 % de las veces la primera semana y el 80 % a las 12 semanas. " +
-                            "Sin aprender se queda en torno al 63 %, y al azar en el 12 %. Código: SimulacionAprendizajeTest.",
+                        "Acierta del 64 % al 80 % en 12 semanas (al azar, 12 %).",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -161,7 +157,7 @@ fun ModelScreen(state: AppState) {
         AlertDialog(
             onDismissRequest = { confirmReset = false },
             title = { Text("¿Reiniciar lo aprendido?") },
-            text = { Text("La IA olvidará tus acciones, avisos, favoritos y reservas de prueba, y volverá a los pesos iniciales. Tus características se mantienen.") },
+            text = { Text("Olvidará lo aprendido. Tu perfil se queda.") },
             confirmButton = { TextButton(onClick = { state.resetLearning(); confirmReset = false }) { Text("Reiniciar") } },
             dismissButton = { TextButton(onClick = { confirmReset = false }) { Text("Cancelar") } },
         )

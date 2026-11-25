@@ -1,7 +1,12 @@
 package com.marbellup.fitin.ui.screens
 
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Box
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import com.marbellup.fitin.ui.latido
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -62,8 +67,10 @@ fun ActivityScreen(state: AppState, activityId: String) {
     val booked = a.id in state.joined
     val fav = a.id in state.favorites
 
+    val scroll = rememberScrollState()
     GradientBackground {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).navigationBarsPadding().padding(bottom = 20.dp)) {
+      Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().verticalScroll(scroll).navigationBarsPadding().padding(bottom = 20.dp)) {
             // Foto con botones redondos encima
             Box(Modifier.fillMaxWidth().height(270.dp)) {
                 ActivityCover(a, Modifier.fillMaxSize().clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)))
@@ -155,7 +162,7 @@ fun ActivityScreen(state: AppState, activityId: String) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(if (fav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = if (fav) "Quitar de favoritos" else "Guardar en favoritos",
-                            tint = if (fav) Color(0xFFE0447A) else MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
+                            tint = if (fav) Color(0xFFE0447A) else MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp).then(Modifier.latido(fav)))
                     }
                 }
             }
@@ -169,7 +176,7 @@ fun ActivityScreen(state: AppState, activityId: String) {
                     a.seal.label + if (a.verifiedOn.isNotBlank()) " · comprobado en ${a.verifiedOn}" else "",
                     color = funColor(3),
                 )
-                if (a.confirmations > 0) Line(Icons.Filled.ThumbUp, "${a.confirmations} personas confirman que es accesible", color = funColor(1))
+                if (a.confirmations > 0) Line(Icons.Filled.ThumbUp, if (a.confirmations == 1) "1 persona confirma que es accesible" else "${a.confirmations} personas confirman que es accesible", color = funColor(1))
                 if (a.howToArrive.isNotBlank()) Line(Icons.Filled.Directions, a.howToArrive, color = funColor(5))
                 Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     a.group.take(4).forEach { Avatar(it.name, size = 32.dp, modifier = Modifier.padding(end = 4.dp)) }
@@ -178,6 +185,14 @@ fun ActivityScreen(state: AppState, activityId: String) {
                 ExampleNote()
             }
         }
+        // Cuando la foto ya no se ve, una franja tapa lo que pasa bajo la hora y la batería.
+        if (scroll.value > 600) {
+            Box(
+                Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background.copy(alpha = 0.96f))
+                    .windowInsetsTopHeight(WindowInsets.statusBars),
+            )
+        }
+      }
     }
 }
 

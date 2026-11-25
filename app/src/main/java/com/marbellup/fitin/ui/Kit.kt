@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -33,6 +34,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -71,63 +74,102 @@ import com.marbellup.fitin.ui.theme.LocalExtra
 fun Color.pastel(amount: Float = 0.22f): Color = lerp(Color.White, this, amount)
 
 /** Versión oscura de un color, para textos sobre su pastel (mantiene el contraste AA). */
-fun Color.deeper(amount: Float = 0.35f): Color = lerp(this, Color(0xFF1A1040), amount)
+fun Color.deeper(amount: Float = 0.35f): Color = lerp(this, Color(0xFF07173F), amount)
 
 /** Fondo pastel propio de cada deporte (naranja para baloncesto, azul para natación…). */
 val Sport.pastel: Color get() = tint.pastel()
 
+/** ¿Ha quitado la persona las animaciones en los ajustes del sistema? Entonces todo queda quieto. */
+@Composable
+fun rememberReducedMotion(): Boolean {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    return remember(ctx) {
+        android.provider.Settings.Global.getFloat(ctx.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+    }
+}
+
+/** Una nube esponjosa: varias bolas blancas con la base en lila suave, como las de la bienvenida. */
+private fun androidx.compose.ui.graphics.drawscope.DrawScope.nube(cx: Float, cy: Float, r: Float, alpha: Float) {
+    val base = Color(0xFFE3DCFB).copy(alpha = alpha)
+    val blanco = Color.White.copy(alpha = alpha)
+    val bolas = listOf(Triple(-1.1f, 0.25f, 0.62f), Triple(-0.45f, -0.15f, 0.82f), Triple(0.35f, -0.3f, 0.95f), Triple(1.1f, 0.15f, 0.7f))
+    // Sombra lila debajo y, encima, el cuerpo blanco un poco más arriba: da volumen.
+    for ((dx, dy, k) in bolas) drawCircle(base, radius = r * k, center = Offset(cx + dx * r, cy + dy * r + r * 0.12f))
+    for ((dx, dy, k) in bolas) drawCircle(blanco, radius = r * k * 0.94f, center = Offset(cx + dx * r, cy + dy * r))
+}
+
 /**
- * Fondo de todas las pantallas: degradado lila intenso arriba que se aclara hacia abajo,
- * con manchas de luz violeta, azul y rosa y destellos blancos, como en la referencia.
+ * Fondo de todas las pantallas: un cielo como el de la bienvenida. Degradado azul cielo que se
+ * aclara hacia abajo, brillo de sol que respira, nubes esponjosas que se desplazan despacio y
+ * destellos que parpadean. Todo se dibuja (no son imágenes) y las animaciones se leen en la
+ * fase de dibujo, así que no recomponen la pantalla.
  */
 @Composable
 fun GradientBackground(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     val x = LocalExtra.current
     val bg = MaterialTheme.colorScheme.background
-    val blobs = listOf(
-        x.hero.copy(alpha = 0.34f) to Triple(0.05f, 0.04f, 0.85f),
-        Color(0xFF6FB6FF).copy(alpha = 0.34f) to Triple(1.0f, 0.22f, 0.75f),
-        Color(0xFFFF8CC6).copy(alpha = 0.24f) to Triple(0.0f, 0.62f, 0.7f),
-        Color(0xFF8FE3C8).copy(alpha = 0.20f) to Triple(1.0f, 0.9f, 0.7f),
+    val quieto = rememberReducedMotion()
+    val t = androidx.compose.animation.core.rememberInfiniteTransition(label = "cielo")
+    val deriva = t.animateFloat(
+        0f, if (quieto) 0f else 1f,
+        androidx.compose.animation.core.infiniteRepeatable(androidx.compose.animation.core.tween(90_000, easing = androidx.compose.animation.core.LinearEasing)),
+        label = "nubes",
     )
-    val sparkles = listOf(0.12f to 0.10f, 0.86f to 0.07f, 0.70f to 0.30f, 0.08f to 0.42f, 0.92f to 0.55f, 0.20f to 0.80f)
+    val pulso = t.animateFloat(
+        0f, if (quieto) 0f else 1f,
+        androidx.compose.animation.core.infiniteRepeatable(
+            androidx.compose.animation.core.tween(3_200, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            androidx.compose.animation.core.RepeatMode.Reverse,
+        ),
+        label = "sol",
+    )
+    // Nubes: (x inicial 0..1, y 0..1, tamaño respecto al ancho, velocidad relativa, opacidad).
+    val nubes = listOf(
+        floatArrayOf(0.12f, 0.06f, 0.11f, 1.0f, 0.95f),
+        floatArrayOf(0.78f, 0.12f, 0.13f, 0.7f, 0.9f),
+        floatArrayOf(0.45f, 0.30f, 0.08f, 1.3f, 0.75f),
+        floatArrayOf(0.92f, 0.46f, 0.09f, 0.9f, 0.6f),
+        floatArrayOf(0.05f, 0.62f, 0.10f, 0.8f, 0.5f),
+    )
+    val destellos = listOf(0.18f to 0.16f, 0.86f to 0.24f, 0.62f to 0.40f, 0.10f to 0.48f, 0.90f to 0.70f)
     Box(
         modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(0f to x.gradientTop, 0.42f to x.gradientBottom, 1f to bg))
+            .background(Brush.verticalGradient(0f to x.gradientTop, 0.45f to x.gradientBottom, 1f to bg))
             .drawBehind {
-                for ((color, pos) in blobs) {
-                    val c = Offset(size.width * pos.first, size.height * pos.second)
-                    val r = size.width * pos.third
-                    drawCircle(Brush.radialGradient(listOf(color, Color.Transparent), center = c, radius = r), radius = r, center = c)
+                val w = size.width; val h = size.height
+                // Brillo de sol arriba, al centro.
+                val sol = Offset(w * 0.5f, h * 0.02f)
+                val rs = w * (0.55f + 0.05f * pulso.value)
+                drawCircle(Brush.radialGradient(listOf(Color.White.copy(alpha = 0.55f), Color.Transparent), center = sol, radius = rs), radius = rs, center = sol)
+                // Nubes que cruzan el cielo y vuelven a entrar por la izquierda.
+                for (n in nubes) {
+                    val r = w * n[2]
+                    val recorrido = w + r * 5f
+                    val px = ((n[0] * w + deriva.value * recorrido * n[3]) % recorrido) - r * 2.5f
+                    nube(px, h * n[1], r, n[4])
                 }
-                // Nubes blancas suaves arriba
-                val cloud = Color.White.copy(alpha = 0.6f)
-                for ((cx, cy, r) in listOf(Triple(0.12f, 0.02f, 0.16f), Triple(0.3f, 0.0f, 0.14f), Triple(0.78f, 0.03f, 0.18f), Triple(0.95f, 0.0f, 0.12f))) {
-                    val c = Offset(size.width * cx, size.height * cy)
-                    drawCircle(Brush.radialGradient(listOf(cloud, Color.Transparent), center = c, radius = size.width * r * 1.6f),
-                        radius = size.width * r * 1.6f, center = c)
-                }
-                // Destellos
-                for ((fx, fy) in sparkles) {
-                    drawCircle(Color.White.copy(alpha = 0.7f), radius = 3.dp.toPx(), center = Offset(size.width * fx, size.height * fy))
+                // Destellos que parpadean, cada uno a su ritmo.
+                destellos.forEachIndexed { i, (fx, fy) ->
+                    val a = 0.35f + 0.55f * kotlin.math.abs(kotlin.math.sin((pulso.value + i * 0.37f) * Math.PI.toFloat()))
+                    drawCircle(Color.White.copy(alpha = a), radius = 2.5.dp.toPx(), center = Offset(w * fx, h * fy))
                 }
             },
         content = content,
     )
 }
 
-/** Degradado violeta vivo de los botones principales, el «+» y las insignias. */
+/** Degradado azul del logo de los botones principales, el «+» y las insignias. */
 @Composable
-fun primaryBrush(): Brush = Brush.linearGradient(listOf(Color(0xFFA77BFF), LocalExtra.current.hero, MaterialTheme.colorScheme.primary))
+fun primaryBrush(): Brush = Brush.linearGradient(listOf(Color(0xFF2A7FE7), LocalExtra.current.hero, MaterialTheme.colorScheme.primary))
 
-/** Degradado de color para tarjetas destacadas (violeta → azul). */
+/** Degradado de color para tarjetas destacadas (azul → azul medio). */
 @Composable
-fun heroBrush(): Brush = Brush.linearGradient(listOf(LocalExtra.current.hero, Color(0xFF5B8CFF)))
+fun heroBrush(): Brush = Brush.linearGradient(listOf(LocalExtra.current.hero, Color(0xFF2A7FE7)))
 
 /** Colores vivos que se van turnando en mosaicos y menús (violeta, azul, naranja, verde, rosa, turquesa). */
 private val funColors = listOf(
-    Color(0xFF7C4DFF), Color(0xFF1C8FE0), Color(0xFFF0742A), Color(0xFF2E9D4F), Color(0xFFE0458B), Color(0xFF14A0A0),
+    Color(0xFF145BCC), Color(0xFF1C8FE0), Color(0xFFF0742A), Color(0xFF2E9D4F), Color(0xFFE0458B), Color(0xFF14A0A0),
 )
 
 fun funColor(i: Int): Color = funColors[((i % funColors.size) + funColors.size) % funColors.size]
@@ -153,19 +195,77 @@ enum class Cuac(val image: Int) {
 /**
  * Mascota de Fit-In: Cuac, un patito amarillo. [happy] lo pone saltando de alegría;
  * [pose] elige cualquier otra postura.
+ *
+ * Está vivo: se contonea apoyado en las patas, respira (se estira y se aplasta un poco),
+ * y cada pocos segundos da un saltito de alegría (con las alas abiertas si no tiene una
+ * postura fija) y aterriza aplastándose. Una sombra suave en el suelo, que se encoge al
+ * saltar, le da volumen. Cada pato lleva su propio ritmo para que no se muevan todos a la
+ * vez. Con «Quitar animaciones» del sistema se queda quieto.
  */
 @Composable
-fun Mascot(size: Dp = 64.dp, modifier: Modifier = Modifier, happy: Boolean = false, pose: Cuac? = null) {
-    val p = pose ?: if (happy) Cuac.Feliz else Cuac.Saluda
-    Image(
-        painterResource(p.image),
-        contentDescription = "Cuac, la mascota de Fit-In",
-        contentScale = ContentScale.Fit,
-        modifier = modifier.size(size),
+fun Mascot(size: Dp = 64.dp, modifier: Modifier = Modifier, happy: Boolean = false, pose: Cuac? = null, decorativo: Boolean = false) {
+    val quieto = rememberReducedMotion()
+    // Ritmo propio de cada pato (estable mientras esté en pantalla).
+    val semilla = remember { kotlin.random.Random.nextInt(1000) }
+    val t = rememberInfiniteTransition(label = "cuac")
+    val vaiven by t.animateFloat(
+        0f, if (quieto) 0f else 1f,
+        infiniteRepeatable(tween(1700 + semilla % 400, easing = androidx.compose.animation.core.LinearEasing)),
+        label = "contoneo",
     )
+    val salto = remember { androidx.compose.animation.core.Animatable(0f) }
+    val aterriza = remember { androidx.compose.animation.core.Animatable(0f) }
+    var alegre by remember { mutableStateOf(false) }
+    LaunchedEffect(quieto) {
+        if (quieto) return@LaunchedEffect
+        kotlinx.coroutines.delay(900L + semilla * 3L)
+        while (true) {
+            alegre = true
+            salto.animateTo(1f, tween(260, easing = androidx.compose.animation.core.FastOutSlowInEasing))
+            salto.animateTo(0f, tween(240, easing = androidx.compose.animation.core.LinearOutSlowInEasing))
+            alegre = false
+            aterriza.snapTo(1f)
+            aterriza.animateTo(0f, androidx.compose.animation.core.spring(dampingRatio = 0.3f, stiffness = 500f))
+            kotlinx.coroutines.delay(4200L + (semilla % 7) * 450L)
+        }
+    }
+    val p = pose ?: if (happy || alegre) Cuac.Feliz else Cuac.Saluda
+    Box(
+        modifier
+            .size(size)
+            .drawBehind {
+                // Sombra en el suelo: más pequeña y clara cuanto más alto salta.
+                val k = 1f - 0.45f * salto.value
+                val ancho = this.size.width * 0.55f * k
+                drawOval(
+                    Color(0xFF022569).copy(alpha = 0.16f * k),
+                    topLeft = Offset((this.size.width - ancho) / 2, this.size.height * 0.93f),
+                    size = androidx.compose.ui.geometry.Size(ancho, this.size.height * 0.06f),
+                )
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            painterResource(p.image),
+            contentDescription = if (decorativo) null else "Cuac, la mascota de Fit-In",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize().graphicsLayer {
+                val fase = vaiven * 2f * Math.PI.toFloat()
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.95f)
+                // Contoneo y respiración.
+                rotationZ = kotlin.math.sin(fase) * 5f
+                val respira = kotlin.math.sin(fase * 2f) * 0.025f
+                // Al aterrizar se aplasta y vuelve con un rebote.
+                val aplasta = aterriza.value * 0.12f
+                scaleX = 1f + respira + aplasta
+                scaleY = 1f - respira - aplasta + salto.value * 0.06f
+                translationY = -salto.value * this.size.height * 0.16f
+            },
+        )
+    }
 }
 
-/** Botón principal en degradado violeta, en píldora y a todo lo ancho. */
+/** Botón principal en degradado azul, en píldora y a todo lo ancho. */
 @Composable
 fun GradientButton(
     text: String,
@@ -191,7 +291,7 @@ fun GradientButton(
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = 58.dp)
-                .background(if (enabled) primaryBrush() else Brush.linearGradient(listOf(Color(0xFFB9B2D6), Color(0xFFB9B2D6))), shape)
+                .background(if (enabled) primaryBrush() else Brush.linearGradient(listOf(Color(0xFFADBFDC), Color(0xFFADBFDC))), shape)
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -209,7 +309,7 @@ fun GradientButton(
     }
 }
 
-/** Tarjeta blanca tipo cristal, muy redondeada, con brillo violeta. Al pulsarla se encoge un poco. */
+/** Tarjeta blanca tipo cristal, muy redondeada, con brillo azul. Al pulsarla se encoge un poco. */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -269,8 +369,8 @@ fun AiReason(text: String, modifier: Modifier = Modifier, title: String = "Por q
             .semantics(mergeDescendants = true) { },
         verticalAlignment = Alignment.Top,
     ) {
-        Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(10.dp))
+        Mascot(40.dp, pose = Cuac.Piensa, decorativo = true)
+        Spacer(Modifier.width(8.dp))
         Column {
             Text(title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text(text, style = MaterialTheme.typography.bodyMedium)
@@ -328,7 +428,7 @@ fun ActivityPhotoCard(
                 ) {
                     Icon(Icons.Outlined.CalendarMonth, contentDescription = null, tint = a.sport.tint, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(5.dp))
-                    Text(a.shortDate, style = MaterialTheme.typography.labelMedium, color = Color(0xFF231B4D), maxLines = 1)
+                    Text(a.shortDate, style = MaterialTheme.typography.labelMedium, color = Color(0xFF022569), maxLines = 1)
                 }
                 if (a.status == "propuesta") {
                     Spacer(Modifier.width(6.dp))
@@ -348,6 +448,7 @@ fun ActivityPhotoCard(
                             if (fav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = if (fav) "Quitar de favoritos" else "Guardar en favoritos",
                             tint = if (fav) Color(0xFFE0447A) else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.latido(fav),
                         )
                     }
                 }
@@ -417,6 +518,7 @@ fun ActivityPhotoCard(
 fun FitInBottomBar(state: AppState) {
     val x = LocalExtra.current
     val glow = x.hero
+  Box {
     Surface(
         color = x.card,
         shadowElevation = 16.dp,
@@ -447,12 +549,24 @@ fun FitInBottomBar(state: AppState) {
             TabItem(state, Tab.Perfil, Icons.Filled.Person, Icons.Outlined.Person)
         }
     }
+    // Cuac de pie sobre la barra, siempre a la vista.
+    Mascot(46.dp, Modifier.align(Alignment.TopStart).offset(x = 18.dp, y = (-38).dp), decorativo = true)
+  }
 }
 
 @Composable
 private fun RowScope.TabItem(state: AppState, tab: Tab, selectedIcon: ImageVector, icon: ImageVector) {
     val selected = state.tab == tab
-    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+    val color by androidx.compose.animation.animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, label = "colorPestaña",
+    )
+    val pildora by androidx.compose.animation.animateColorAsState(
+        if (selected) LocalExtra.current.lilac else Color.Transparent, label = "píldora",
+    )
+    val salto by animateFloatAsState(
+        if (selected) 1.18f else 1f,
+        androidx.compose.animation.core.spring(dampingRatio = 0.35f, stiffness = 420f), label = "saltoPestaña",
+    )
     Column(
         Modifier
             .weight(1f)
@@ -465,11 +579,12 @@ private fun RowScope.TabItem(state: AppState, tab: Tab, selectedIcon: ImageVecto
         // La pestaña activa lleva una píldora lila detrás del icono
         Box(
             Modifier.clip(RoundedCornerShape(50))
-                .background(if (selected) LocalExtra.current.lilac else Color.Transparent)
+                .background(pildora)
                 .padding(horizontal = 14.dp, vertical = 3.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(if (selected) selectedIcon else icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+            Icon(if (selected) selectedIcon else icon, contentDescription = null, tint = color,
+                modifier = Modifier.size(22.dp).graphicsLayer { scaleX = salto; scaleY = salto })
         }
         Text(tab.label, style = MaterialTheme.typography.labelSmall, color = color, maxLines = 1,
             modifier = Modifier.padding(top = 2.dp),
@@ -579,7 +694,7 @@ fun MenuRow(
 fun AiTag(state: AppState) {
     state.modelVersion
     Text(
-        "IA en tu móvil · ${state.history.size} acciones aprendidas",
+        "IA en tu móvil · ${state.history.size} ${if (state.history.size == 1) "acción aprendida" else "acciones aprendidas"}",
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.clip(RoundedCornerShape(50)).background(LocalExtra.current.chip).padding(horizontal = 10.dp, vertical = 4.dp),
@@ -653,7 +768,7 @@ val Need.icon: ImageVector
         Need.Signos -> Icons.Filled.SignLanguage
         Need.Bucle -> Icons.Filled.Hearing
         Need.Guia -> Icons.Filled.VisibilityOff
-        Need.Tranquilo -> Icons.Filled.VolumeOff
+        Need.Tranquilo -> Icons.AutoMirrored.Filled.VolumeOff
         Need.LecturaFacil -> Icons.AutoMirrored.Filled.MenuBook
         Need.Pictogramas -> Icons.Filled.Image
         Need.GrupoReducido -> Icons.Filled.Groups
@@ -829,10 +944,10 @@ val Slot.emoji: String
 private fun coverColors(sport: com.marbellup.fitin.data.Sport, variant: Int): List<Color> {
     val base = sport.tint
     val palettes = listOf(
-        listOf(Color(0xFF8B6CFF), base),
+        listOf(Color(0xFF2A7FE7), base),
         listOf(base, Color(0xFFFFB86B)),
         listOf(Color(0xFF5ED3C4), base),
-        listOf(Color(0xFFFF8FB8), Color(0xFF8B6CFF)),
+        listOf(Color(0xFFFF8FB8), Color(0xFF2A7FE7)),
     )
     return palettes[variant % palettes.size]
 }
@@ -901,4 +1016,45 @@ fun AnimatedBar(progress: Float, color: Color, modifier: Modifier = Modifier) {
     Box(modifier.height(10.dp).clip(RoundedCornerShape(5.dp)).background(LocalExtra.current.tile)) {
         Box(Modifier.fillMaxHeight().fillMaxWidth(p).clip(RoundedCornerShape(5.dp)).background(color))
     }
+}
+
+/* ---------- Movimiento ---------- */
+
+/**
+ * Entrada escalonada: el elemento aparece subiendo un poco con un muelle, [indice] × 55 ms
+ * después del anterior. Se anima en la capa gráfica (no recompone). Sin animaciones del
+ * sistema, aparece directamente.
+ */
+@Composable
+fun Modifier.entrada(indice: Int = 0): Modifier {
+    val quieto = rememberReducedMotion()
+    val progreso = remember { androidx.compose.animation.core.Animatable(if (quieto) 1f else 0f) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        if (!quieto) {
+            kotlinx.coroutines.delay(indice.coerceAtMost(8) * 55L)
+            progreso.animateTo(1f, androidx.compose.animation.core.spring(dampingRatio = 0.72f, stiffness = 260f))
+        }
+    }
+    return graphicsLayer {
+        val v = progreso.value
+        alpha = v.coerceIn(0f, 1f)
+        translationY = (1f - v) * 36.dp.toPx()
+        val e = 0.94f + 0.06f * v
+        scaleX = e; scaleY = e
+    }
+}
+
+/** Latido: al activarse (p. ej. «me gusta»), el elemento crece y vuelve con un rebote. */
+@Composable
+fun Modifier.latido(activo: Boolean): Modifier {
+    val quieto = rememberReducedMotion()
+    val escala = remember { androidx.compose.animation.core.Animatable(1f) }
+    var primera by remember { androidx.compose.runtime.mutableStateOf(true) }
+    androidx.compose.runtime.LaunchedEffect(activo) {
+        if (primera) { primera = false; return@LaunchedEffect }
+        if (quieto) return@LaunchedEffect
+        escala.animateTo(if (activo) 1.45f else 0.8f, androidx.compose.animation.core.tween(110))
+        escala.animateTo(1f, androidx.compose.animation.core.spring(dampingRatio = 0.35f, stiffness = 420f))
+    }
+    return graphicsLayer { scaleX = escala.value; scaleY = escala.value }
 }

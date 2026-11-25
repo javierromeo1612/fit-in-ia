@@ -6,7 +6,7 @@ import org.json.JSONObject
 
 /**
  * Memoria del móvil: perfil, pesos del modelo, historial de acciones y avisos.
- * Todo se guarda en el propio dispositivo (SharedPreferences). Nada sale del móvil.
+ * Todo se guarda en el propio dispositivo (SharedPreferences).
  */
 class Store(context: Context) {
     private val prefs = context.getSharedPreferences("fitin_ia", Context.MODE_PRIVATE)

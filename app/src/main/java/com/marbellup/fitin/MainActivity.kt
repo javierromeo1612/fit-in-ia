@@ -15,6 +15,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
@@ -32,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.marbellup.fitin.ui.FitInBottomBar
 import com.marbellup.fitin.ui.LocalEasyRead
 import com.marbellup.fitin.ui.NotificationBanner
-import com.marbellup.fitin.ui.screens.AchievementsScreen
 import com.marbellup.fitin.ui.screens.ActivityScreen
 import com.marbellup.fitin.ui.screens.SearchScreen
 import com.marbellup.fitin.ui.screens.AiSearchScreen
@@ -116,24 +116,37 @@ private fun App(state: AppState) {
 
     Box(Modifier.fillMaxSize()) {
         val step = state.steps.lastOrNull()
-        when {
-            !state.onboarded && step == null -> WelcomeScreen(state)
-            step is Step.AiSearch -> AiSearchScreen(state)
-            step is Step.Detail -> ActivityScreen(state, step.activityId)
-            step is Step.Company -> CompanyScreen(state, step.activityId)
-            step is Step.Confirmed -> CelebrationScreen(state, step.activityId)
-            step is Step.Create -> CreateScreen(state)
-            step is Step.Notifications -> NotificationsScreen(state)
-            step is Step.Council -> CouncilScreen(state, onBack = { state.back() })
-            step is Step.Model -> ModelScreen(state)
-            step is Step.Search -> SearchScreen(state)
-            step is Step.Achievements -> AchievementsScreen(state)
-            step is Step.Cuentanoslo -> CuentanosloScreen(state)
-            step is Step.QueTalFue -> QueTalFueScreen(state, step.activityId)
-            state.tab == Tab.Inicio -> HomeScreen(state, tabs)
-            state.tab == Tab.Calendario -> CalendarScreen(state, tabs)
-            state.tab == Tab.ParaTi -> ChatScreen(tabs)
-            else -> ProfileScreen(state, tabs)
+        // Qué pantalla toca y a qué «profundidad» está: así se sabe si se avanza, se vuelve o se cambia de pestaña.
+        val destino = when {
+            !state.onboarded && step == null -> Destino(BIENVENIDA, -1, 0)
+            step != null -> Destino(step, state.steps.size, 0)
+            else -> Destino(state.tab, 0, state.tab.ordinal)
+        }
+        val quieto = com.marbellup.fitin.ui.rememberReducedMotion()
+        androidx.compose.animation.AnimatedContent(
+            targetState = destino,
+            transitionSpec = { transicion(initialState, targetState, quieto) },
+            label = "pantallas",
+        ) { d ->
+            // Se pinta siempre a partir del destino de la animación (d), no del estado de fuera.
+            when (val p = d.pantalla) {
+                BIENVENIDA -> WelcomeScreen(state)
+                is Step.AiSearch -> AiSearchScreen(state)
+                is Step.Detail -> ActivityScreen(state, p.activityId)
+                is Step.Company -> CompanyScreen(state, p.activityId)
+                is Step.Confirmed -> CelebrationScreen(state, p.activityId)
+                is Step.Create -> CreateScreen(state)
+                is Step.Notifications -> NotificationsScreen(state)
+                is Step.Council -> CouncilScreen(state, onBack = { state.back() })
+                is Step.Model -> ModelScreen(state)
+                is Step.Search -> SearchScreen(state)
+                is Step.Cuentanoslo -> CuentanosloScreen(state)
+                is Step.QueTalFue -> QueTalFueScreen(state, p.activityId)
+                Tab.Inicio -> HomeScreen(state, tabs)
+                Tab.Calendario -> CalendarScreen(state, tabs)
+                Tab.ParaTi -> ChatScreen(tabs)
+                else -> ProfileScreen(state, tabs)
+            }
         }
 
         AnimatedVisibility(
@@ -151,5 +164,38 @@ private fun App(state: AppState) {
                 )
             }
         }
+    }
+}
+
+private const val BIENVENIDA = "bienvenida"
+
+/** Pantalla que se muestra, con su profundidad en la pila y su orden entre pestañas. */
+private data class Destino(val pantalla: Any, val nivel: Int, val orden: Int)
+
+/**
+ * Cómo se pasa de una pantalla a otra:
+ * - avanzar (abrir ficha, reservar…): la nueva entra desde la derecha con un muelle;
+ * - volver: al revés;
+ * - cambiar de pestaña: fundido rápido (la barra de abajo no se mueve);
+ * - de la bienvenida a la app: zoom suave.
+ */
+private fun androidx.compose.animation.AnimatedContentTransitionScope<Destino>.transicion(
+    desde: Destino, hacia: Destino, quieto: Boolean,
+): androidx.compose.animation.ContentTransform {
+    if (quieto) return androidx.compose.animation.ContentTransform(androidx.compose.animation.EnterTransition.None, androidx.compose.animation.ExitTransition.None)
+    val muelle = androidx.compose.animation.core.spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = 0.82f, stiffness = 380f)
+    val entra = androidx.compose.animation.core.tween<Float>(260)
+    val sale = androidx.compose.animation.core.tween<Float>(160)
+    return when {
+        desde.pantalla == BIENVENIDA ->
+            (fadeIn(androidx.compose.animation.core.tween(420)) + androidx.compose.animation.scaleIn(androidx.compose.animation.core.spring(dampingRatio = 0.7f, stiffness = 300f), initialScale = 0.92f)) togetherWith
+                (fadeOut(androidx.compose.animation.core.tween(300)) + androidx.compose.animation.scaleOut(targetScale = 1.08f))
+        hacia.nivel > desde.nivel ->
+            (androidx.compose.animation.slideInHorizontally(muelle) { it / 3 } + fadeIn(entra)) togetherWith
+                (androidx.compose.animation.slideOutHorizontally(muelle) { -it / 8 } + fadeOut(sale))
+        hacia.nivel < desde.nivel ->
+            (androidx.compose.animation.slideInHorizontally(muelle) { -it / 8 } + fadeIn(entra)) togetherWith
+                (androidx.compose.animation.slideOutHorizontally(muelle) { it / 3 } + fadeOut(sale))
+        else -> fadeIn(androidx.compose.animation.core.tween(220)) togetherWith fadeOut(androidx.compose.animation.core.tween(120))
     }
 }

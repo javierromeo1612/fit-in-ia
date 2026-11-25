@@ -82,7 +82,7 @@ fun CreateScreen(state: AppState) {
             if (!showPlaces) {
                 Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
                     com.marbellup.fitin.ui.FloatingMascot(60.dp)
-                    Text("¡Hola, ${state.userName}! Te busco el sitio que mejor encaja.", style = MaterialTheme.typography.bodyLarge,
+                    Text("Te busco el mejor sitio.", style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(start = 10.dp)
                             .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 22.dp, bottomEnd = 22.dp, bottomStart = 22.dp))
                             .background(x.card).padding(12.dp))
@@ -175,7 +175,7 @@ fun CreateScreen(state: AppState) {
                         modifier = Modifier.padding(start = 12.dp).semantics { heading() })
                 }
                 Text(
-                    "La IA ordena las instalaciones de ${s.label.lowercase()} según lo que necesitas, lo cerca que te pillan y si están verificadas.",
+                    "Ordenadas por lo que necesitas.",
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(20.dp),
                 )

@@ -77,7 +77,7 @@ fun AiSearchScreen(state: AppState) {
             Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
                 com.marbellup.fitin.ui.FloatingMascot(64.dp, pose = com.marbellup.fitin.ui.Cuac.Piensa)
                 Text(
-                    say("¡Hola, ${state.userName}! Marca lo que necesitas y lo que te gusta. Con eso te recomiendo actividades y sitios.",
+                    say("Marca lo que necesitas y lo que te gusta.",
                         "Marca lo que necesitas. Yo te digo qué hacer y dónde."),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(start = 10.dp)
@@ -127,14 +127,14 @@ fun AiSearchScreen(state: AppState) {
 
             if (showResults) {
                 val ranked = state.ranked()
-                Title("Actividades para ti", "Ordenadas por la IA según lo que has marcado y lo que vas eligiendo.")
+                Title("Actividades para ti", "Ordenadas para ti.")
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     for (r in ranked.take(5)) ActivityPhotoCard(r.activity, state, r)
                 }
 
                 val sport = p.sports.firstOrNull() ?: ranked.firstOrNull()?.activity?.sport
                 Title(if (sport != null) "Sitios para ${sport.label.lowercase()}" else "Sitios para ti",
-                    "Lo que cubre cada instalación de lo que necesitas.")
+                    "Lo que cubre cada sitio.")
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     for (f in state.facilitiesFor(sport).take(3)) {
                         GlassCard {
@@ -160,7 +160,7 @@ fun AiSearchScreen(state: AppState) {
                     modifier = Modifier.padding(16.dp).fillMaxWidth().heightIn(min = 48.dp)) {
                     Text("Ir al inicio", style = MaterialTheme.typography.titleMedium)
                 }
-                ExampleNote("Recomendaciones sobre datos de ejemplo")
+                ExampleNote("Datos de ejemplo")
             }
         }
     }

@@ -72,7 +72,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 Row(Modifier.padding(start = 20.dp, end = 16.dp, top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text("Mi calendario", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
-                        Text("$week planes para ti esta semana · ${state.joined.size} reservadas",
+                        Text("$week ${if (week == 1) "plan" else "planes"} para ti esta semana · ${state.joined.size} ${if (state.joined.size == 1) "reservada" else "reservadas"}",
                             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     // Semana / Mes
@@ -173,7 +173,7 @@ fun CalendarScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                                 FloatingMascot(52.dp, pose = com.marbellup.fitin.ui.Cuac.Duerme)
                                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                                     Text("Este día está libre", style = MaterialTheme.typography.titleMedium)
-                                    Text("Elige un día con punto o mira las actividades en Inicio.", style = MaterialTheme.typography.bodyMedium)
+                                    Text("Elige un día con punto.", style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
                             GradientButton("Ver actividades", Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
@@ -208,7 +208,7 @@ private fun DayCell(d: LocalDate, isSelected: Boolean, isToday: Boolean, items: 
             .padding(vertical = 2.dp)
             .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .semantics { contentDescription = "Día ${d.dayOfMonth}, ${items.size} actividades" + if (mine) ", tienes plaza" else "" }
+            .semantics { contentDescription = "Día ${d.dayOfMonth}, ${items.size} ${if (items.size == 1) "actividad" else "actividades"}" + if (mine) ", tienes plaza" else "" }
             .padding(vertical = 3.dp, horizontal = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

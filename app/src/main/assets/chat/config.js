@@ -1,6 +1,6 @@
 // Configuración del chatbot Cuac (Botpress). Es la que exporta Botpress para este bot; solo se añade
 // «embeddedChatId» para que el chat ocupe la pestaña entera en vez de salir como burbuja flotante,
-// y el color violeta de la app.
+// y el azul del logo de Fit-In.
 window.botpress.on("webchat:initialized", function () {
   try { window.botpress.open(); } catch (e) {}
 });
@@ -35,7 +35,7 @@ window.botpress.init({
   "configuration": {
     "version": "v2",
     "embeddedChatId": "bp-embedded-webchat",
-    "color": "#6C4CF0",
+    "color": "#145BCC",
     "themeMode": "light",
     "botName": "Cuac",
     "botAvatar": "https://appassets.androidplatform.net/assets/chat/cuac.png",

@@ -49,7 +49,6 @@ sealed interface Step {
     data object Model : Step
     /** Buscador por palabras clave. */
     data object Search : Step
-    data object Achievements : Step
     /** «Cuéntanoslo»: necesidades contadas con texto o con la voz (modelo propio, sin internet). */
     data object Cuentanoslo : Step
     /** «¿Qué tal fue?» después de una actividad. */
@@ -83,10 +82,10 @@ class AppState(app: Application) : AndroidViewModel(app) {
     var easyRead by mutableStateOf(false)
     var alertsOn by mutableStateOf(store.getBool("alerts", true))
         private set
-    val points: Int get() = 48 + 10 * joined.size + 2 * history.size.coerceAtMost(30) + 5 * stats().medals.count { it.unlocked }
 
     // ---- Navegación
-    var onboarded by mutableStateOf(store.getBool("onboarded", false))
+    /** La bienvenida se ve cada vez que se abre la app (salvo al entrar desde un aviso). */
+    var onboarded by mutableStateOf(false)
         private set
     var tab by mutableStateOf(Tab.Inicio)
     var sport by mutableStateOf<Sport?>(null)
@@ -150,7 +149,6 @@ class AppState(app: Application) : AndroidViewModel(app) {
         java.text.Normalizer.normalize(t.lowercase(), java.text.Normalizer.Form.NFD)
             .replace(Regex("\\p{Mn}+"), "").replace(Regex("[^a-z0-9ñ ]"), " ")
 
-    fun stats() = com.marbellup.fitin.data.Achievements.compute(joined.toList(), history.toList(), favorites.toList())
 
     fun facilitiesFor(sport: Sport?, extra: Set<Need> = emptySet()): List<ScoredFacility> {
         modelVersion

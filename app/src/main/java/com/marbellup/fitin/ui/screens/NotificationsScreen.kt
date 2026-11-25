@@ -41,9 +41,10 @@ fun NotificationsScreen(state: AppState) {
                 RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "Volver") { state.back() }
                 Text("Avisos", style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f).padding(start = 12.dp).semantics { heading() })
+                com.marbellup.fitin.ui.Mascot(52.dp, decorativo = true)
             }
             Text(
-                "Te aviso solo cuando una actividad encaja contigo al menos un ${(Alerts.THRESHOLD * 100).toInt()} %.",
+                "Solo te aviso si algo encaja un ${(Alerts.THRESHOLD * 100).toInt()} % o más.",
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
@@ -54,7 +55,7 @@ fun NotificationsScreen(state: AppState) {
             if (state.notifications.isEmpty()) {
                 Row(Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
                     Mascot(56.dp, pose = com.marbellup.fitin.ui.Cuac.Duerme)
-                    Text("Aún no hay avisos. Cuando salga algo que encaje contigo, aparecerá aquí y en tu móvil.",
+                    Text("Aún no hay avisos.",
                         style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 12.dp))
                 }
             }
@@ -97,7 +98,7 @@ fun NotificationsScreen(state: AppState) {
                                 }
                                 "opened" -> Text("✓ La abriste", style = MaterialTheme.typography.labelLarge, color = x.ok,
                                     modifier = Modifier.padding(top = 10.dp))
-                                "dismissed" -> Text("Descartada: la IA lo tendrá en cuenta", style = MaterialTheme.typography.bodySmall,
+                                "dismissed" -> Text("Descartada", style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 10.dp))
                                 else -> {}
                             }

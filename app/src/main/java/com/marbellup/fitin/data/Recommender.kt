@@ -114,9 +114,11 @@ data class Scored(
             val pos = reasons
                 .filter { it.contribution > 0.15 && it.text != null }
                 .filterNot { it.feature == Feature.Coverage && missing.isNotEmpty() }
+                // «Te gusta», «en tu horario», «cerca»: solo si la persona lo dijo (sin dato, el valor es neutro).
+                .filterNot { it.feature in setOf(Feature.Sport, Feature.Schedule, Feature.Near, Feature.Level) && it.value < 0.99 }
                 .take(3).map { it.text!! }
             val neg = reasons.filter { it.contribution < -0.3 && it.text != null }.take(1).map { it.text!! }
-            val base = if (pos.isEmpty()) "Puede interesarte" else pos.joinToString(", ")
+            val base = if (pos.isEmpty()) "Puede interesarte" else pos.mapIndexed { i, t -> if (i == 0) t else t.replaceFirstChar { it.lowercase() } }.joinToString(", ")
             val miss = if (missing.isNotEmpty()) ". Ojo: falta ${missing.joinToString { it.label.lowercase() }}" else ""
             val extra = if (neg.isNotEmpty() && missing.isEmpty()) ". Pero ${neg[0].lowercase()}" else ""
             return "$base$miss$extra."
@@ -177,7 +179,8 @@ object Recommender {
 
     private fun levelFit(want: String?, have: String): Double {
         val order = listOf("iniciacion", "intermedio", "avanzado")
-        if (want == null || have == "todos" || want == have) return 1.0
+        if (want == null) return 0.5 // sin nivel indicado: neutro (y no se cita en la explicación)
+        if (have == "todos" || want == have) return 1.0
         val d = kotlin.math.abs(order.indexOf(want) - order.indexOf(have))
         return if (d == 1) 0.4 else 0.0
     }

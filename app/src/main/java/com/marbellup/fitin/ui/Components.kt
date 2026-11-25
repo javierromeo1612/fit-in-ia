@@ -40,7 +40,7 @@ import androidx.compose.material.icons.filled.SportsGolf
 import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.SportsSoccer
-import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Sailing
 import androidx.compose.material.icons.filled.SportsBaseball
 import androidx.compose.material.icons.filled.MusicNote
@@ -92,7 +92,7 @@ val Sport.icon: ImageVector
         Sport.Ciclismo -> Icons.Filled.PedalBike
         Sport.Yoga -> Icons.Filled.SelfImprovement
         Sport.Futbol -> Icons.Filled.SportsSoccer
-        Sport.Atletismo -> Icons.Filled.DirectionsRun
+        Sport.Atletismo -> Icons.AutoMirrored.Filled.DirectionsRun
         Sport.Vela -> Icons.Filled.Sailing
         Sport.Boccia -> Icons.Filled.SportsBaseball
         Sport.Danza -> Icons.Filled.MusicNote
@@ -103,7 +103,7 @@ val Sport.tint: Color
     get() = when (this) {
         Sport.Baloncesto -> Color(0xFFE8622C)
         Sport.Natacion -> Color(0xFF1C9AD6)
-        Sport.Tenis -> Color(0xFF5B3FD6)
+        Sport.Tenis -> Color(0xFF145BCC)
         Sport.Padel -> Color(0xFF2F9E6E)
         Sport.Golf -> Color(0xFF5D6B92)
         Sport.Senderismo -> Color(0xFF6AA334)
@@ -264,7 +264,7 @@ fun SectionHeader(
 
 /* Tonos de la referencia: violetas, marino y los acentos naranja y verde. Todos con texto blanco AA. */
 private val AvatarColors = listOf(
-    Color(0xFF5B3FD6), Color(0xFF231B4D), Color(0xFF7A4FD0),
+    Color(0xFF145BCC), Color(0xFF022569), Color(0xFF012F8E),
     Color(0xFFC2501F), Color(0xFF2F7A3A), Color(0xFF8A3FA8),
 )
 
@@ -353,7 +353,7 @@ fun Logo(size: Dp = 44.dp, onDark: Boolean = false) {
             .size(size)
             .clip(shape)
             .background(Color.White)
-            .then(if (onDark) Modifier else Modifier.border(1.dp, Color(0xFFE3DDFB), shape)),
+            .then(if (onDark) Modifier else Modifier.border(1.dp, Color(0xFFD6E6FA), shape)),
         contentAlignment = Alignment.Center,
     ) {
         Image(
@@ -370,6 +370,8 @@ fun AppScreen(
     title: String,
     subtitle: String? = null,
     onBack: (() -> Unit)? = null,
+    /** Cuac arriba a la derecha (se quita donde ya hay un pato grande). */
+    pato: Boolean = true,
     snackbar: SnackbarHostState? = null,
     bottomBar: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
@@ -388,20 +390,24 @@ fun AppScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 32.dp),
             ) {
-                if (onBack != null) {
-                    Surface(
-                        onClick = onBack,
-                        shape = CircleShape,
-                        color = LocalExtra.current.card,
-                        shadowElevation = 2.dp,
-                        modifier = Modifier.padding(start = 16.dp, top = 12.dp).size(52.dp),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                    if (onBack != null) {
+                        Surface(
+                            onClick = onBack,
+                            shape = CircleShape,
+                            color = LocalExtra.current.card,
+                            shadowElevation = 2.dp,
+                            modifier = Modifier.padding(start = 16.dp, top = 12.dp).size(52.dp),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                            }
                         }
+                    } else {
+                        Spacer(Modifier.height(16.dp))
                     }
-                } else {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.weight(1f))
+                    if (pato) Mascot(58.dp, Modifier.padding(end = 18.dp, top = 6.dp), decorativo = true)
                 }
                 Text(
                     title,

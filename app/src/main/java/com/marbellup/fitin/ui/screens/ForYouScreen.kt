@@ -68,7 +68,7 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                         com.marbellup.fitin.ui.FloatingMascot(64.dp)
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                             Text("Elegido por la IA para ti", style = MaterialTheme.typography.titleMedium, color = Color.White)
-                            Text("Según lo que necesitas, tus gustos y lo que vas eligiendo.", style = MaterialTheme.typography.bodySmall,
+                            Text("Ordenadas para ti.", style = MaterialTheme.typography.bodySmall,
                                 color = Color.White)
                             Spacer(Modifier.height(6.dp))
                             AiTag(state)
@@ -117,7 +117,7 @@ fun ForYouScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                         }
                     }
                 }
-                ExampleNote("Recomendaciones sobre datos de ejemplo")
+                ExampleNote("Datos de ejemplo")
             }
         }
     }

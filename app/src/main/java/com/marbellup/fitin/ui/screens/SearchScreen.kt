@@ -89,11 +89,11 @@ fun SearchScreen(state: AppState) {
 
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
                 when {
-                    state.query.isBlank() -> Hint(com.marbellup.fitin.ui.Cuac.Piensa, "Escribe una o varias palabras: deporte, sitio, zona, hora o lo que necesitas (por ejemplo «piscina grúa» o «yoga tarde»).")
+                    state.query.isBlank() -> Hint(com.marbellup.fitin.ui.Cuac.Piensa, "Busca por deporte, sitio, hora o necesidad.")
                     results.isEmpty() -> Hint(com.marbellup.fitin.ui.Cuac.Enfadado, "No hay actividades con «${state.query}». Prueba con otra palabra.")
                     else -> {
                         Text(
-                            "${results.size} ${if (results.size == 1) "actividad" else "actividades"} · ordenadas por la IA para ti",
+                            "${results.size} ${if (results.size == 1) "actividad" else "actividades"}",
                             style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite },
                         )

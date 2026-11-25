@@ -49,12 +49,13 @@ import com.marbellup.fitin.ui.theme.LocalExtra
 import com.marbellup.fitin.ui.tint
 import com.marbellup.fitin.ui.funColor
 import com.marbellup.fitin.ui.heroBrush
+import com.marbellup.fitin.ui.entrada
 import com.marbellup.fitin.ui.pastel
 import com.marbellup.fitin.ui.primaryBrush
 
 /**
  * Inicio, calcado de la referencia: saludo y campana, buscador, cuatro accesos rápidos,
- * «Actividades cerca de ti» (ordenadas por la IA) y la tarjeta de ayuda con la mascota.
+ * y «Actividades cerca de ti» (ordenadas por la IA). El chat está en la barra de abajo.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +73,7 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                     Column(Modifier.weight(1f)) {
                         Text("Hola, ${state.userName}", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.semantics { heading() })
-                        Text("¿Qué te apetece hacer hoy?", style = MaterialTheme.typography.bodyLarge)
+                        Text("¿Qué te apetece hoy?", style = MaterialTheme.typography.bodyLarge)
                     }
                     RoundIconButton(Icons.Outlined.Notifications, "Avisos", badge = state.unread) { state.open(Step.Notifications) }
                 }
@@ -95,15 +96,15 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
 
                 // Cuatro accesos rápidos en una fila, como en la referencia («Más» abre todos los deportes)
                 Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    QuickTile("Cerca", "📍", funColor(0), state.sport == null, Modifier.weight(1f)) { state.sport = null }
-                    QuickTile("Piscina", Sport.Natacion.emoji, Sport.Natacion.tint, state.sport == Sport.Natacion, Modifier.weight(1f)) {
+                    QuickTile("Cerca", "📍", funColor(0), state.sport == null, Modifier.weight(1f).entrada(0)) { state.sport = null }
+                    QuickTile("Piscina", Sport.Natacion.emoji, Sport.Natacion.tint, state.sport == Sport.Natacion, Modifier.weight(1f).entrada(1)) {
                         state.sport = if (state.sport == Sport.Natacion) null else Sport.Natacion
                     }
-                    QuickTile("Baloncesto", Sport.Baloncesto.emoji, Sport.Baloncesto.tint, state.sport == Sport.Baloncesto, Modifier.weight(1f)) {
+                    QuickTile("Baloncesto", Sport.Baloncesto.emoji, Sport.Baloncesto.tint, state.sport == Sport.Baloncesto, Modifier.weight(1f).entrada(2)) {
                         state.sport = if (state.sport == Sport.Baloncesto) null else Sport.Baloncesto
                     }
                     val other = state.sport?.takeIf { it != Sport.Natacion && it != Sport.Baloncesto }
-                    QuickTile(other?.label ?: "Más", other?.emoji ?: "➕", other?.tint ?: funColor(4), other != null, Modifier.weight(1f)) { showSports = true }
+                    QuickTile(other?.label ?: "Más", other?.emoji ?: "➕", other?.tint ?: funColor(4), other != null, Modifier.weight(1f).entrada(3)) { showSports = true }
                 }
 
                 // ⭐ Actividades cerca de ti · Ver todas →
@@ -112,29 +113,17 @@ fun HomeScreen(state: AppState, bottomBar: @Composable () -> Unit) {
                 }
                 Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     if (list.isEmpty()) {
-                        Text("No hay actividades con plazas de este deporte ahora mismo.", style = MaterialTheme.typography.bodyLarge)
+                        Text("Ahora no hay plazas de este deporte.", style = MaterialTheme.typography.bodyLarge)
                     }
-                    for (r in list.take(6)) ActivityPhotoCard(r.activity, state, r, showReason = false)
+                    list.take(6).forEachIndexed { i, r ->
+                        // key: al filtrar por deporte, cada tarjeta nueva entra con su animación.
+                        androidx.compose.runtime.key(r.activity.id) {
+                            Box(Modifier.entrada(i + 3)) { ActivityPhotoCard(r.activity, state, r, showReason = false) }
+                        }
+                    }
                 }
 
-                // ¿Necesitas ayuda? → recomendaciones de la IA (tarjeta en degradado violeta → azul)
-                GlassCard(Modifier.padding(16.dp), color = x.hero, onClick = { state.tab = Tab.ParaTi }) {
-                    Row(Modifier.fillMaxWidth().background(heroBrush()).padding(start = 18.dp, end = 12.dp, top = 14.dp, bottom = 14.dp)
-                        .semantics(mergeDescendants = true) { role = Role.Button },
-                        verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text("¿Necesitas ayuda?", style = MaterialTheme.typography.titleLarge, color = Color.White)
-                            Row(Modifier.padding(top = 6.dp).clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.22f))
-                                .padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("Pregúntale a Cuac", style = MaterialTheme.typography.labelLarge, color = Color.White)
-                                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null,
-                                    tint = Color.White, modifier = Modifier.size(18.dp).padding(start = 4.dp))
-                            }
-                        }
-                        FloatingMascot(74.dp)
-                    }
-                }
-                ExampleNote("Actividades de ejemplo para la demo · Fotos: Unsplash")
+                ExampleNote("Datos de ejemplo · Fotos: Unsplash")
             }
         }
     }

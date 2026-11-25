@@ -107,6 +107,7 @@ fun CuentanosloScreen(state: AppState) {
     AppScreen(
         title = "Cuéntanoslo",
         subtitle = say("Tú lo cuentas, tú decides.", "Habla. Luego revisas."),
+        pato = false,
         onBack = { if (!state.back()) state.tab = Tab.Inicio },
         bottomBar = {
             when (paso) {
@@ -243,7 +244,7 @@ private fun Contar(
     Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         CuacDice(
             if (escuchando) "Te escucho." else say(
-                "Cuéntame qué necesitas y qué te gusta. Puedes hablar o escribir.",
+                "Cuéntame qué necesitas y qué te gusta.",
                 "Cuéntame cómo eres y qué te gusta.",
             ),
             pose = Cuac.Saluda,
@@ -284,7 +285,7 @@ private fun Contar(
             Text("Usar el ejemplo de Lucía")
         }
         Text(
-            "Se analiza en tu móvil, sin internet. No guardamos tu voz ni tu relato: solo lo que confirmes.",
+            "Solo se guarda lo que confirmes.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -302,7 +303,7 @@ private fun Pensando(texto: String) {
     ) {
         FloatingMascot(130.dp, pose = Cuac.Piensa)
         Text(
-            "Ordenando lo que me has contado…",
+            "Ordenando…",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
         )
@@ -330,7 +331,7 @@ private fun Revisar(
         val n = propuestas.size
         CuacDice(
             when {
-                n == 0 -> perfil?.resumen?.ifBlank { null } ?: "No he sacado nada claro. Prueba a contarlo de otra forma."
+                n == 0 -> perfil?.resumen?.ifBlank { null } ?: "No he sacado nada claro. Prueba otra vez."
                 else -> say(
                     if (n == 1) "He marcado 1 cosa. Revísala." else "He marcado $n cosas. Revísalas.",
                     if (n == 1) "He marcado 1 cosa. Quítala si no es." else "He marcado $n cosas. Quita las que no son.",
@@ -412,7 +413,7 @@ private fun Revisar(
         }
 
         Text(
-            "Analizado en tu móvil, sin internet. Solo se guarda lo que confirmes.",
+            "Solo se guarda lo que confirmes.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 4.dp),
@@ -434,7 +435,7 @@ internal fun CuentanosloBanner(modifier: Modifier = Modifier, onClick: () -> Uni
             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                 Text("Cuéntanoslo", style = MaterialTheme.typography.titleMedium, color = Color.White)
                 Text(
-                    say("Dinos con tu voz o escribiendo qué necesitas y lo marco yo.", "Habla y yo lo marco."),
+                    say("Dilo con tu voz o escríbelo.", "Habla y yo lo marco."),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White,
                 )
